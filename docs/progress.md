@@ -7,12 +7,12 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
 | macOS Apple Silicon | Locally built and exercised | Production build, native desktop suite, and unpacked app launch passed on 2026-09-22 |
-| Windows | Implementation and CI configured | Remote run and manual native/installer checks still need evidence; do not infer completion from macOS |
+| Windows | Implemented; full validation pending | Initial hosted run passed build/model checks but not the complete desktop suite; local native/installer checks remain |
 | User data | Local validated JSON and backups | Model/store and native import/export tests passed; no schema migration framework |
 | Editing / launcher | Implemented | Steppers, activation, independent preview, center geometry, and focus regressions covered |
 | Documentation | Knowledge base added | Instructions, guides, ADRs, generation/link/impact checks, and sample-data screenshot workflow |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
-| GitHub | Private repository pushed | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; first CI run exposed test/check-out issues being corrected |
+| GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
 ## Completed milestones
 
@@ -47,12 +47,18 @@ App version and dependency versions are in [generated reference](reference.md). 
 ### 2026-09-22 — First CI feedback
 
 - [Initial CI run](https://github.com/mtom2k/keepad/actions/runs/35793928600) passed documentation validation. Windows stopped at formatting because checkout converted LF to CRLF; macOS built successfully but its native test encountered an empty-MIME clipboard entry.
-- Added repository LF rules and skipped empty clipboard entries when constructing the native test's restoration snapshot. These are checkout/test portability fixes; application behavior is unchanged. Follow-up CI will establish cross-platform evidence.
+- Added repository LF rules and skipped empty clipboard entries when constructing the native test's restoration snapshot. These are checkout/test portability fixes; application behavior is unchanged.
 - [Second CI run](https://github.com/mtom2k/keepad/actions/runs/35794108725) cleared those failures, then both runners reached the keyboard-focus assertion. The test now waits for native document focus and queued animation frames before Tab, with focused-control diagnostics; its previous DOM-only readiness check could succeed while the window was still hidden.
+
+### 2026-09-22 — Private storage, local validation
+
+- The owner clarified that GitHub should house the code without CI/CD. Removed the Actions workflow and canceled the active run. [ADR 0006](adr/0006-private-source-hosting-with-local-checks.md) records this preference and supersedes the earlier hosted-check requirement.
+- Kept local tests, documentation/reference checks, screenshot capture, and same-change documentation responsibilities. Updated contributor, testing, release, and maintenance guidance to match.
+- Latest native desktop suite and production build passed locally after the focus-test synchronization change. Hosted onboarding attempts above are historical; future checks are run locally when relevant.
 
 ## Next work / unresolved decisions
 
-1. Run and inspect Windows CI; then complete manual Windows tray, startup, file/app, permission, and installer checks.
+1. Run local Windows tests and complete manual Windows tray, startup, file/app, permission, and installer checks when preparing that platform for release.
 2. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
 3. Improve platform-specific file-error wording; currently a shared error mentions macOS privacy settings on Windows.
 4. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.

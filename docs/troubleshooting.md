@@ -20,7 +20,7 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 
 ## Known boundaries to preserve in handoffs
 
-- Windows support is implemented and has CI configuration; local development evidence initially comes from macOS Apple Silicon. Check the actual CI run and manual Windows checks before changing that claim.
+- Windows support is implemented; complete validation still requires local Windows testing and manual checks. Hosted automation is not configured. See progress for historical onboarding test results and remaining gaps.
 - The native file-open error currently includes macOS privacy instructions even on Windows. Platform-specific error copy is a follow-up improvement, not a completed fix.
 - Images are resized to square thumbnails; cropping/aspect-ratio controls are not implemented.
 - Multiple monitors, unusual screen sizes, native blur behavior, reserved shortcuts, and non-QWERTY layouts require real device verification.

@@ -19,6 +19,7 @@ These instructions apply to the entire repository, including work performed by c
 
 ## Engineering rules
 
+- GitHub is private source storage. Do not add CI/CD or GitHub Actions unless the owner requests it. Run relevant checks locally.
 - Use the existing Electron / React / TypeScript stack and shared Zod contracts. Validate privileged requests in the main process.
 - Do not add arbitrary commands, keyboard injection, broader permissions, cloud synchronization, telemetry, or remote content without an explicit product request and an ADR.
 - Keep `sandbox`, `contextIsolation`, sender validation, navigation restrictions, and URL/image allowlists intact.

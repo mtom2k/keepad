@@ -1,6 +1,6 @@
 # 0005: Documentation is part of delivery
 
-- Status: Accepted
+- Status: Superseded in part by [ADR 0006](0006-private-source-hosting-with-local-checks.md); documentation ownership and same-change updates remain accepted
 - Recorded: 2026-09-22
 - Supersedes: None
 

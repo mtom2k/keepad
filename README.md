@@ -92,4 +92,4 @@ Start with [the knowledge base](docs/README.md) and [contributor instructions](A
 | Tests and screenshots | [Testing](docs/testing.md) |
 | Keeping documentation current | [Documentation maintenance](docs/maintenance.md) |
 
-Documentation changes belong in the same commit as the code they describe. CI checks links, generated reference freshness, and documentation impact; contributors still review the content for accuracy.
+Documentation changes belong in the same commit as the code they describe. Local checks verify links, generated reference freshness, and documentation impact; contributors still review the content for accuracy. GitHub hosts the private source repository; no CI/CD is configured.

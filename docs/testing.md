@@ -2,6 +2,8 @@
 
 See [generated commands](reference.md), [CONTRIBUTING.md](../CONTRIBUTING.md), and [progress](progress.md) for the latest recorded evidence.
 
+Run validation locally. GitHub hosts the private source repository and does not run CI/CD; historical runner results in progress are evidence from initial onboarding only.
+
 ## Automated checks
 
 | Command | Purpose | Limits |

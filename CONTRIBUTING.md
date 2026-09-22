@@ -31,11 +31,11 @@ The app appears in the menu bar / notification area. A browser preview (`npm run
 
 5. Update the relevant docs and add a dated progress entry in the same commit. Record design changes in an ADR.
 6. Inspect `git diff --check` and the staged diff. Exclude user data, logs, credentials, builds, and generated test artifacts.
-7. Commit and open a pull request. Complete the documentation impact checklist. Wait for CI and review before merging.
+7. Commit and push after the relevant local checks pass. When using a pull request, complete the documentation impact checklist and obtain review before merging. GitHub is private source storage; CI/CD is not configured or required.
 
 ## Documentation checks
 
-`npm run docs:check` checks required files, relative Markdown links, screenshot presence, and generated-reference freshness. With `--base <ref>`, it also compares source changes against [documentation-impact.json](docs/documentation-impact.json). The same rules run on pull requests and pushes with a valid comparison base.
+`npm run docs:check` checks required files, relative Markdown links, screenshot presence, and generated-reference freshness. With `--base <ref>`, it also compares source changes against [documentation-impact.json](docs/documentation-impact.json). Run this locally before pushing or submitting a pull request.
 
 For example:
 

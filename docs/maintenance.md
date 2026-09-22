@@ -19,7 +19,7 @@ Documentation is maintained in the same change as implementation, not in a later
 - `docs:generate` renders [reference.md](reference.md) from `package.json`, `package-lock.json`, and shared model exports. Do not edit generated content manually.
 - `docs:check` checks required knowledge-base files, Markdown-relative file/image links, screenshot PNGs, and generated-reference freshness.
 - `docs:check -- --base <Git ref>` adds source-impact gates from [documentation-impact.json](documentation-impact.json). Relevant source changes must include progress plus the mapped documentation. UI implementation changes must include UX or README updates. This gate intentionally checks participation, not semantic completeness.
-- GitHub CI runs local checks for every push/PR and impact checks when a valid comparison base exists. The initial commit has no base, so only the local checks apply.
+- Run these checks locally before committing/pushing. GitHub is private source storage; there is no CI/CD workflow. Follow [ADR 0006](adr/0006-private-source-hosting-with-local-checks.md) and do not introduce hosted automation without an owner request.
 
 These checks cannot guarantee that prose never becomes stale. They cannot infer design intent, check every statement, or decide whether a screenshot accurately represents a changed workflow. Human/agent review is required. Do not game the gate with date-only changes, irrelevant sentences, or rule removal.
 

@@ -14,14 +14,14 @@ Use Node.js 24, `npm ci`, and the checks in [testing](testing.md).
 
 The host architecture is the default. Validate every architecture you intend to distribute; a successful Apple Silicon build is not Intel Mac or Windows verification. Packaging configuration is in [package.json](../package.json). The canonical bundle identity is included in [generated reference](reference.md).
 
-The GitHub workflow builds unpacked apps as verification artifacts. Those artifacts are not signed release installers; downloaded raw app directories may also lose executable/symlink metadata. Produce the proper DMG/ZIP/NSIS output for distribution.
+`package:dir` builds an unpacked app locally for verification. It is not a signed release installer; copied raw app directories may also lose executable/symlink metadata. Produce the proper DMG/ZIP/NSIS output for distribution. GitHub has no build or deployment workflow.
 
 ## Release checklist
 
 1. Confirm completed work and open issues in progress; select a version in `package.json` and update the lockfile. Data schema version is separate from app version.
 2. Run build, model, desktop, formatting, and documentation checks on each target platform. Complete the manual release checks.
 3. Update README availability, progress, relevant ADRs, generated reference, and screenshots to match the release. Keep signing/OS limitations visible until actually resolved.
-4. Configure macOS Developer ID signing and notarization, and Windows code signing, through private environment/CI secrets. Never commit credentials or certificates.
+4. Configure macOS Developer ID signing and notarization, and Windows code signing, through private local environment settings. Never commit credentials or certificates.
 5. Build installers, validate them on a clean machine, check signatures, verify startup behavior and uninstall, and test a backup restore.
 6. Decide licensing and public/private distribution with the owner. No license has been selected automatically.
 7. Tag the reviewed commit, attach verified installers/checksums to a GitHub release, and describe known limitations. Do not publish from an unreviewed working tree.
