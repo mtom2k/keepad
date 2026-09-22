@@ -15,12 +15,14 @@ try {
   await app.evaluate(async ({ clipboard, ClipboardItem }) => {
     const items = await clipboard.read();
     globalThis.keepadClipboard = await Promise.all(
-      items.map(async (item) => {
-        const entries = await Promise.all(
-          item.types.map(async (type) => [type, await item.getType(type)]),
-        );
-        return new ClipboardItem(Object.fromEntries(entries));
-      }),
+      items
+        .filter((item) => item.types.length > 0)
+        .map(async (item) => {
+          const entries = await Promise.all(
+            item.types.map(async (type) => [type, await item.getType(type)]),
+          );
+          return new ClipboardItem(Object.fromEntries(entries));
+        }),
     );
   });
   originalClipboard = true;

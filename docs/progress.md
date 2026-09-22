@@ -12,7 +12,7 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Editing / launcher | Implemented | Steppers, activation, independent preview, center geometry, and focus regressions covered |
 | Documentation | Knowledge base added | Instructions, guides, ADRs, generation/link/impact checks, and sample-data screenshot workflow |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
-| GitHub | Private repository created | [mtom2k/keepad](https://github.com/mtom2k/keepad); initial push and remote CI pending |
+| GitHub | Private repository pushed | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; first CI run exposed test/check-out issues being corrected |
 
 ## Completed milestones
 
@@ -42,7 +42,12 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Added generated reference, relative-link/screenshot checks, and source-to-documentation impact rules for CI. Added reproducible native screenshots using temporary sample data.
 - Rewrote the GitHub README with emojis, plain-language instructions, and embedded screenshots.
 - Validation: production build, all seven model/store tests, native desktop suite, formatting, and documentation checks passed locally on macOS. All three sample-data screenshots were captured from Electron and visually reviewed.
-- Initialized Git on `main` and created the private [mtom2k/keepad](https://github.com/mtom2k/keepad) repository. Remote CI evidence will be added after the initial push; no public release or signing is implied.
+- Initialized Git on `main`, created the private [mtom2k/keepad](https://github.com/mtom2k/keepad) repository, and pushed initial commit `781506e`; no public release or signing is implied.
+
+### 2026-09-22 — First CI feedback
+
+- [Initial CI run](https://github.com/mtom2k/keepad/actions/runs/35793928600) passed documentation validation. Windows stopped at formatting because checkout converted LF to CRLF; macOS built successfully but its native test encountered an empty-MIME clipboard entry.
+- Added repository LF rules and skipped empty clipboard entries when constructing the native test's restoration snapshot. These are checkout/test portability fixes; application behavior is unchanged. Follow-up CI will establish cross-platform evidence.
 
 ## Next work / unresolved decisions
 

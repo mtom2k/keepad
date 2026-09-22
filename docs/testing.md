@@ -20,6 +20,8 @@ See [generated commands](reference.md), [CONTRIBUTING.md](../CONTRIBUTING.md), a
 
 It uses a temporary `KEEPAD_TEST_DATA` path, copies supported clipboard formats into new Electron `ClipboardItem` objects for restoration, and stubs file/URL shell handlers to avoid opening unrelated applications. The main process accepts the test profile override only in development, not packaged builds.
 
+Clipboard entries with no MIME types are omitted from the test's saved clipboard snapshot: Electron can return these on a fresh runner, but cannot construct a writable item from them. The repository uses `.gitattributes` to retain LF text on Windows checkouts so Prettier and generated-reference comparisons match macOS/Linux.
+
 The suite does **not** click the native tray menu, verify real shell-launched apps, grant OS permissions, log in/out, certify multi-monitor arrangements, or validate signatures/notarization. Blur-hiding is suppressed in the test environment. Clipboard APIs in the pinned Electron version are asynchronous; restoration constructs writable clipboard items rather than reusing read-only items returned by `read()`.
 
 ## Manual checks before release
