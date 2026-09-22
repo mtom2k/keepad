@@ -164,19 +164,29 @@ try {
     await launcher.getByRole('button', { name: control, exact: true }).focus();
     await launcher.keyboard.press('Enter');
     await window.evaluate(() => window.keepad.showLauncher());
-    await launcher.waitForFunction(() => document.activeElement?.classList.contains('launcher'));
+    // A hidden page can retain the root as activeElement before the OS has
+    // focused it. Wait for native focus and the queued reset before sending Tab.
+    await launcher.waitForFunction(
+      () => document.hasFocus() && document.activeElement?.classList.contains('launcher'),
+    );
+    await launcher.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
     assert.equal(
       await launcher.locator('button:focus-visible').count(),
       0,
       'No restored control highlight',
     );
     await launcher.keyboard.press('Tab');
-    assert.equal(
-      await launcher
-        .getByRole('button', { name: 'Manage pads' })
-        .evaluate((el) => el === document.activeElement && el.matches(':focus-visible')),
-      true,
-      'Keyboard focus remains visible',
+    const keyboardFocus = await launcher.evaluate(() => ({
+      label: document.activeElement?.getAttribute('aria-label'),
+      visible: document.activeElement?.matches(':focus-visible'),
+      hasFocus: document.hasFocus(),
+    }));
+    assert.deepEqual(
+      keyboardFocus,
+      { label: 'Manage pads', visible: true, hasFocus: true },
+      `Keyboard focus remains visible after reopening from ${control}`,
     );
   }
   await window.evaluate(() => window.keepad.showEditor());

@@ -22,6 +22,8 @@ It uses a temporary `KEEPAD_TEST_DATA` path, copies supported clipboard formats 
 
 Clipboard entries with no MIME types are omitted from the test's saved clipboard snapshot: Electron can return these on a fresh runner, but cannot construct a writable item from them. The repository uses `.gitattributes` to retain LF text on Windows checkouts so Prettier and generated-reference comparisons match macOS/Linux.
 
+The reopen keyboard test waits for the launcher document to gain native focus and for animation-frame focus resets to settle before sending Tab. An already focused DOM root in a hidden window alone is not proof that the OS has finished showing it. Failure output includes the actual focused control, focus visibility, and document focus.
+
 The suite does **not** click the native tray menu, verify real shell-launched apps, grant OS permissions, log in/out, certify multi-monitor arrangements, or validate signatures/notarization. Blur-hiding is suppressed in the test environment. Clipboard APIs in the pinned Electron version are asynchronous; restoration constructs writable clipboard items rather than reusing read-only items returned by `read()`.
 
 ## Manual checks before release

@@ -48,6 +48,7 @@ App version and dependency versions are in [generated reference](reference.md). 
 
 - [Initial CI run](https://github.com/mtom2k/keepad/actions/runs/35793928600) passed documentation validation. Windows stopped at formatting because checkout converted LF to CRLF; macOS built successfully but its native test encountered an empty-MIME clipboard entry.
 - Added repository LF rules and skipped empty clipboard entries when constructing the native test's restoration snapshot. These are checkout/test portability fixes; application behavior is unchanged. Follow-up CI will establish cross-platform evidence.
+- [Second CI run](https://github.com/mtom2k/keepad/actions/runs/35794108725) cleared those failures, then both runners reached the keyboard-focus assertion. The test now waits for native document focus and queued animation frames before Tab, with focused-control diagnostics; its previous DOM-only readiness check could succeed while the window was still hidden.
 
 ## Next work / unresolved decisions
 
