@@ -1,0 +1,13 @@
+# Architecture decision records
+
+Accepted records describe the current implementation. Initial records were written retrospectively on 2026-09-22 to preserve rationale and constraints for handoff; they do not imply a formal comparative benchmark took place.
+
+| ADR | Decision | Status |
+| --- | --- | --- |
+| [0001](0001-electron-and-process-boundaries.md) | Electron, React, and a narrow privileged boundary | Accepted |
+| [0002](0002-local-state-and-backups.md) | Validated local JSON, revisions, and additive backups | Accepted |
+| [0003](0003-traditional-utility-interface.md) | Traditional utility UI with progressive guidance | Accepted |
+| [0004](0004-pad-selection-and-launcher-behavior.md) | Separate selection/activation/preview; shared centering and focus reset | Accepted |
+| [0005](0005-documentation-as-part-of-delivery.md) | Documentation is part of delivery with automated backstops | Accepted |
+
+Use [the template](template.md) for the next consequential decision. Update this index and the affected guides. Supersede an accepted decision with a new record rather than erasing its rationale.

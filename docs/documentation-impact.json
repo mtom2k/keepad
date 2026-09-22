@@ -1,0 +1,57 @@
+{
+  "rules": [
+    {
+      "name": "Renderer behavior",
+      "prefixes": ["src/"],
+      "anyOf": ["docs/ux.md", "README.md"],
+      "allOf": ["docs/progress.md"]
+    },
+    {
+      "name": "Native behavior",
+      "prefixes": ["electron/"],
+      "anyOf": [
+        "docs/architecture.md",
+        "docs/data-model.md",
+        "docs/testing.md",
+        "docs/releasing.md",
+        "docs/troubleshooting.md"
+      ],
+      "allOf": ["docs/progress.md"]
+    },
+    {
+      "name": "Shared data contract",
+      "prefixes": ["shared/"],
+      "anyOf": ["docs/data-model.md"],
+      "allOf": ["docs/progress.md"]
+    },
+    {
+      "name": "Package metadata",
+      "files": ["package.json", "package-lock.json"],
+      "anyOf": ["docs/reference.md"],
+      "allOf": ["docs/progress.md"]
+    },
+    {
+      "name": "Test coverage",
+      "prefixes": ["tests/"],
+      "files": ["scripts/capture-screenshots.mjs"],
+      "anyOf": ["docs/testing.md"],
+      "allOf": ["docs/progress.md"]
+    },
+    {
+      "name": "CI behavior",
+      "prefixes": [".github/workflows/"],
+      "anyOf": ["docs/testing.md", "docs/releasing.md", "docs/maintenance.md"],
+      "allOf": ["docs/progress.md"]
+    },
+    {
+      "name": "Documentation tooling",
+      "files": [
+        "scripts/check-docs.mjs",
+        "scripts/generate-reference.ts",
+        "docs/documentation-impact.json"
+      ],
+      "anyOf": ["docs/maintenance.md"],
+      "allOf": ["docs/progress.md"]
+    }
+  ]
+}
