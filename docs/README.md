@@ -2,11 +2,14 @@
 
 Use this index for onboarding. Documentation describes the current implementation unless explicitly marked planned or unverified.
 
+Documentation and implementation are delivered together. Authors maintain the affected guides throughout development and reconcile them before handoff; a passing link/reference check alone does not establish accuracy.
+
 | Document | Purpose |
 | --- | --- |
 | [Project README](../README.md) | What KeePad does, screenshots, and getting started |
 | [Contributor instructions](../AGENTS.md) | Rules for developers and coding agents |
 | [Contributing](../CONTRIBUTING.md) | Setup, validation, and the change workflow |
+| [Handoff procedure](handoff.md) | Taking over, completing, and transferring unfinished work |
 | [Progress](progress.md) | Current state, completed milestones, evidence, and next work |
 | [Architecture](architecture.md) | Process boundaries, runtime flows, and code map |
 | [Data model](data-model.md) | State, limits, persistence, and backup behavior |
@@ -21,7 +24,7 @@ Use this index for onboarding. Documentation describes the current implementatio
 
 ## Reading order
 
-For a new developer or LLM: instructions → progress → architecture → relevant ADR → current source → relevant tests. For a user: project README → troubleshooting. For a release owner: progress → testing → releasing.
+For a new developer or LLM: instructions → handoff → progress → architecture → relevant ADR → current source → relevant tests. For a user: project README → troubleshooting. For a release owner: progress → testing → releasing.
 
 ## Sources of truth
 
@@ -29,6 +32,6 @@ For a new developer or LLM: instructions → progress → architecture → relev
 - `shared/model.ts`: persisted-state validation and shared API types.
 - `electron/main.ts` / `electron/preload.cts`: privileged behavior and IPC boundaries.
 - `src/main.tsx` / `src/components.tsx` / `src/styles.css`: current UI behavior.
-- Test results and CI runs: evidence, not assertions that every OS behavior has been exercised.
+- Local test results and historical onboarding runs: evidence for the recorded revision/platform, not assertions that every OS behavior has been exercised. No GitHub CI/CD is configured.
 
 If prose and code disagree, investigate and update both as needed. Accepted ADRs record historical rationale; a later superseding ADR explains deliberate changes.

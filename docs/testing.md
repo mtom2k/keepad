@@ -9,7 +9,7 @@ Run validation locally. GitHub hosts the private source repository and does not 
 | Command | Purpose | Limits |
 | --- | --- | --- |
 | `npm run build` | Strict TypeScript checks and production renderer/main builds | Does not prove native behavior |
-| `npm test` | Shared models, allowed destinations, import IDs/settings, atomic reload, corrupt-file recovery | Does not exercise OS permissions |
+| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, and immutable button placement | Does not exercise OS permissions |
 | `npm run test:desktop` | Playwright driving actual Electron with temporary data | Requires a graphical macOS/Windows session |
 | `npm run format:check` | Source/test formatting | Not a semantic test |
 | `npm run docs:check` | Local docs, links, generated reference, screenshots | Does not prove prose correctness |
@@ -47,6 +47,8 @@ Record the OS, architecture, commands, date, and result in progress/release note
 
 ## Screenshots
 
-Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, launcher, and button editor, and removes the profile. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
+Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, launcher, button editor, and Dark Settings, and removes the profile. App appearance is explicitly Light for the first three views and Dark for Settings; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
 
 Review all generated files in [screenshots](screenshots/README.md) before committing. UI changes require refreshed relevant images; documentation-only changes do not.
+
+For a documentation-only audit, run documentation/reference checks and review assertions against source and prior test evidence. Do not report old native results as a fresh run. For impact comparisons, follow [base-selection and staging guidance](maintenance.md); the current checker excludes untracked files and does not validate heading anchors or external URLs.

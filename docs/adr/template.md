@@ -20,6 +20,8 @@ List realistic alternatives and the relevant tradeoffs. Do not claim measurement
 
 Describe benefits, costs, risks, and follow-up work.
 
+For persisted-data or API changes, describe old-data compatibility, migration/default behavior, recovery, and downgrade limits. Identify any behavior that remains planned or unverified.
+
 ## Evidence and documentation
 
 Link implementation, tests, and guides. State what has and has not been verified. On acceptance, update the ADR index and current docs.

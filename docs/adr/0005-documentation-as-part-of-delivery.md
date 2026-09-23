@@ -23,3 +23,5 @@ Authors and reviewers must update affected docs in the same change. Automated ch
 ## Evidence and documentation
 
 See [maintenance](../maintenance.md), [instructions](../../AGENTS.md), [contributing](../../CONTRIBUTING.md), and [documentation checks](../../scripts/check-docs.mjs). New change categories must update the impact map as needed.
+
+Operational guidance added 2026-09-23: [handoff](../handoff.md) defines takeover, completion evidence, and interrupted-work transfer. Hosted checks remain superseded by ADR 0006; same-change documentation ownership still applies to every direct commit and PR.

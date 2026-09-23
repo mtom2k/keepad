@@ -2,11 +2,14 @@
 
 These instructions apply to the entire repository, including work performed by coding agents.
 
+**Guiding principle: documentation is part of the feature. Work is not complete until the code, current guides, validation evidence, and handoff agree.** Apply this to every feature, bug fix, refactor, dependency/configuration change, and change in known limitations. Do not leave essential knowledge only in a chat or task summary.
+
 ## Start here
 
 1. Read [the documentation index](docs/README.md), [current progress](docs/progress.md), and [architecture](docs/architecture.md).
 2. Read the relevant [ADRs](docs/adr/README.md) before changing a design decision.
 3. Inspect the current source and tests. Documentation is guidance, not permission to ignore contradictory implementation evidence. Resolve discrepancies in the same change.
+4. Follow [the handoff procedure](docs/handoff.md) when taking over or leaving work. Use current owner instructions for intent, code for implemented behavior, and recorded results for what was verified; flag discrepancies instead of silently choosing one.
 
 ## Product rules
 
@@ -15,6 +18,8 @@ These instructions apply to the entire repository, including work performed by c
 - Single-click selects a pad for editing. Double-click or Make Active activates it. Creating, duplicating, and previewing pads do not activate them.
 - All launcher entry points center on the pointer's display work area. Preview selection is temporary.
 - Preserve saved actions when resizing; do not silently truncate buttons. Keep keyboard focus visible, but do not restore stale launcher-button focus on reopen.
+- Editor drag/drop and the mini position picker move or swap without losing actions. Launcher buttons do not rearrange. Pad icons may be None; action buttons retain their icon/image representation.
+- Keep Settings Theme (Light/Dark/System) independent from Pad Theme. Preserve the default for legacy files and document compatibility before extending stored data.
 - Respect existing user data. Use temporary profiles for tests and documentation screenshots. Do not modify another installed KeePad copy just because its name matches; verify its bundle identity and path.
 
 ## Engineering rules
@@ -36,7 +41,8 @@ Before calling a task complete:
 3. Add an ADR for a consequential decision. Supersede accepted decisions with a new ADR rather than rewriting their history.
 4. Regenerate [reference](docs/reference.md) with `npm run docs:generate` when package commands, defaults, or shared public choices change.
 5. Regenerate screenshots with `npm run docs:screenshots` when their visible UI changes; review them before committing. Screenshots must contain sample data only.
-6. Run `npm run docs:check`. Before a PR, also run `npm run docs:check -- --base origin/main` with an up-to-date base.
+6. Run `npm run docs:check` and the applicable base comparison before committing/pushing, including direct commits without a PR. Stage new files before the comparison; the current checker uses Git diff and does not see untracked files. See [maintenance](docs/maintenance.md) for choosing a meaningful base.
+7. Complete the handoff checklist: identify the code revision, actual checks/platforms, remaining limitations, and any unfinished work. Update progress's current-status table as well as its history when the state changes.
 
 Do not satisfy documentation checks by changing only dates, adding empty prose, or suppressing a relevant rule. If a source change has no user-facing effect, explain its impact in the appropriate architecture, testing, or progress document.
 

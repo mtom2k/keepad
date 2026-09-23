@@ -24,7 +24,7 @@ flowchart LR
 | Store | [electron/store.ts](../electron/store.ts) | Validation, temporary-file replacement, corruption recovery |
 | Shared contract | [shared/model.ts](../shared/model.ts) | Zod schemas, types, starter state, import merge |
 | Renderer | [src/main.tsx](../src/main.tsx) | Editor, launcher, dialogs, settings, local edit selection |
-| UI primitives | [src/components.tsx](../src/components.tsx) | Icons, tooltips, modal dialogs, macro keys, number steppers |
+| UI primitives | [src/components.tsx](../src/components.tsx) | Optional pad glyphs, tooltips, modal dialogs, macro keys, number steppers, visual position picker |
 | Button placement | [src/pad-layout.ts](../src/pad-layout.ts) | Shared immutable move/swap operation for drag-and-drop, dialog saves, and position preview |
 | Native / preview adapter | [src/api.ts](../src/api.ts) | Electron bridge or explicitly limited browser preview |
 | Styling | [src/styles.css](../src/styles.css) | Traditional utility layout and per-pad themes |
@@ -37,6 +37,7 @@ Vite builds the renderer into `dist/`. TypeScript emits main/preload/shared modu
 - Both skip the taskbar. macOS uses the accessory activation policy and `LSUIElement` in the bundle.
 - First run, storage recovery warnings, shortcut-registration failure, or `--editor` opens the editor.
 - Close hides a window. The application stays alive with no visible windows. Quit releases the global shortcut and tray.
+- A second process for the same profile yields to the single-instance lock and asks the existing process to show its active launcher; `--editor` is only consulted during normal startup.
 - Tray left-click toggles the launcher. The right-click menu offers opening, pad selection, management, Settings, version, and Quit.
 - Tray, menu, app activation, and shortcut entry points use the same centering function. It centers within the work area of the display nearest the pointer, with bounds constrained to available space.
 - The hide-after-action setting also controls launcher hiding on blur. The test profile suppresses blur-hiding so automation can inspect it; this is a coverage limitation.
@@ -71,4 +72,6 @@ Requests return `Result<T>` (`ok/value` or `ok/error`). The API contract lists a
 
 The main process checks known web contents, the main frame, and the exact local file/dev origin for each request. Both windows have sandboxing, context isolation, and no Node integration. Navigation and new windows are blocked. The HTML CSP limits scripts to local assets and images to local/data sources. The development server is accepted only at the explicitly configured loopback URL and is ignored in packaged builds.
 
-Only HTTP(S) website actions and supported inline raster images are accepted. Native dialogs are the path/image input mechanism. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or cloud storage is implemented.
+Only HTTP(S) website actions and supported inline raster images are accepted. File/folder/app destinations can be typed or chosen with Browse; schema validation requires absolute paths and execution checks access/existence. Button images are selected through the native image dialog. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or cloud storage is implemented.
+
+The browser adapter stores a separate preview state in localStorage and can copy text, but cannot validate native lifecycle or OS actions. Its displayed version is currently a literal in `src/api.ts`; keep it aligned with package version during release preparation.

@@ -33,4 +33,4 @@ Provide accessible names for icon controls, visible keyboard focus, native modal
 
 Pad themes apply to the pad. Current pad themes are Paper, Graphite, Sage, Sand, Midnight, and High contrast. Settings → General → Theme controls KeePad's editor, dialogs, tooltips, and native appearance independently: Light, Dark, or System (default). System follows OS appearance changes without restarting. The High contrast pad theme is not a claim of a completed accessibility audit.
 
-Review [screenshots](screenshots/README.md) after visible changes, including edge tooltips, dialogs, and the editor's minimum size.
+Review [screenshots](screenshots/README.md) after visible changes, including edge tooltips, dialogs, and the editor's minimum size. Update these behavior rules and the affected user instructions in the same change; record actual visual/test evidence and remaining gaps in progress. A theme or icon change should include both Light and Dark review without assuming pad colors follow the app appearance.

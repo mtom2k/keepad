@@ -33,7 +33,7 @@ The file is `keepad.json` under Electron's `app.getPath('userData')`, normally `
 
 A save validates first, writes `keepad.json.tmp`, then renames it over the destination. The in-memory state changes only after the write succeeds. Files request owner-only permissions where supported. There is no encryption, database, fsync-based power-loss guarantee, or cloud replication.
 
-Missing state creates starter pads. Unreadable/invalid existing state is copied to a timestamped recovery file before defaults are written. If the recovery copy fails, startup fails instead of overwriting the original. There is currently no schema migration framework; introducing schema version 2 requires an explicit migration/recovery design, not a blind reset.
+Missing state creates starter pads. Unreadable/invalid existing state is copied to a timestamped recovery file before defaults are written. If the recovery copy fails, startup fails instead of overwriting the original. The missing-appearance default described above is supported within version 1; there is no general schema migration framework. Introducing schema version 2 requires an explicit migration/recovery design, not a blind reset.
 
 ## Concurrency
 

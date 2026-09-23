@@ -2,15 +2,15 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest application change is `27117d3` (appearance and optional pad icons); the documentation audit below reviews that source. Application validation was recorded on 2026-09-23, separately from documentation-only checks.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
-| macOS Apple Silicon | Locally built and exercised | Production build, native desktop suite, and unpacked app launch passed on 2026-09-22 |
+| macOS Apple Silicon | Locally built and exercised | Latest production build, native desktop suite, and unsigned unpacked app rebuild/reopen recorded on 2026-09-23 |
 | Windows | Implemented; full validation pending | Initial hosted run passed build/model checks but not the complete desktop suite; local native/installer checks remain |
-| User data | Local validated JSON and backups | Model/store and native import/export tests passed; no schema migration framework |
+| User data | Local validated JSON and backups | Ten model/placement/store tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
 | Editing / launcher | Implemented | Icon-free pads, independent app appearance, visual positioning, drag/swaps, activation, preview, centering, and focus regressions covered |
-| Documentation | Knowledge base added | Instructions, guides, ADRs, generation/link/impact checks, and sample-data screenshot workflow |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, seven ADRs, generated reference, four sample-data screenshots, and local checks |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
@@ -71,6 +71,24 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Validation: ten model/placement/store tests, production build, and extended native desktop suite passed locally on macOS. Coverage includes legacy-file loading, import preservation, icon-free creation/editing, explicit themes, simulated System changes, and restart persistence. Reviewed Dark Settings and editing dialogs; refreshed sample-data screenshots and generated reference. Windows native behavior and actual OS appearance switching remain manual validation work.
 - Formatting and documentation/impact checks passed. Rebuilt and reopened the unsigned macOS Apple Silicon project app; the separate installed copy was not replaced.
 
+### 2026-09-23 — Knowledge-base audit and handoff discipline
+
+- Audited current guides, root instructions/README, the PR template, ADR status/history, generated reference, and screenshot provenance against application source `27117d3`, local tooling, and recorded test outcomes. No application behavior changed.
+- Corrected the stale September 22 status date, the three-view screenshot description, and the claim that all path input uses native dialogs. Clarified packaged-versus-installed startup checks, additive schema defaults, downgrade limits, and browser-preview version maintenance.
+- Made documentation part of the definition of done for features, fixes, refactors, dependencies/configuration, and newly discovered limitations. Added [handoff](handoff.md), including interrupted-work records, meaningful Git comparison bases, and the distinction between source, built bundles, and a running app.
+- Documented the current checker's real limits: new files must be staged for impact review; heading anchors, external URLs, unspecified source paths, and semantic correctness require review. Kept checks local and retained the owner's no-CI/CD decision.
+- Existing screenshots still match unchanged application behavior; they were last captured/reviewed for the appearance change. Native tests and packaging were not rerun for this documentation-only audit; their prior September 23 results remain historical evidence.
+- Audit validation: `npm run docs:generate` produced no reference changes; `npm run docs:check` passed for all 25 Markdown files, and `git diff --check` passed. The staged documentation-impact comparison uses pre-change revision `27117d3`.
+
+| Audited area | Implementation / evidence consulted | Current guide |
+| --- | --- | --- |
+| Lifecycle, centering, activation, IPC and native actions | `electron/main.ts`, `electron/preload.cts`, desktop test coverage | [Architecture](architecture.md) |
+| State, placement, defaults, import and recovery | `shared/model.ts`, `electron/store.ts`, `src/pad-layout.ts`, model/placement tests | [Data model](data-model.md) |
+| Themes, optional icons, editing and tooltips | `src/main.tsx`, `src/components.tsx`, `src/styles.css`, four curated screenshots | [UX](ux.md) |
+| Commands, identity and packaging | `package.json`, lockfile, `src/api.ts`, packaging settings | [Reference](reference.md), [releasing](releasing.md) |
+| Validation and documentation tooling | Tests, screenshot script, reference generator, link/impact checker | [Testing](testing.md), [maintenance](maintenance.md) |
+| Owner decisions and knowledge transfer | AGENTS, contributor guide, ADRs 0001–0007, no-CI/CD decision | [Handoff](handoff.md), [ADR index](adr/README.md) |
+
 ## Next work / unresolved decisions
 
 1. Run local Windows tests and complete manual Windows tray, startup, file/app, permission, and installer checks when preparing that platform for release.
@@ -81,4 +99,4 @@ App version and dependency versions are in [generated reference](reference.md). 
 
 ## Handoff rule
 
-Update current status and add a dated evidence-based entry with each relevant change. Link CI/release evidence when available; never convert “configured” to “verified” without a result. Preserve historical records, supersede ADRs for changed decisions, and use [maintenance](maintenance.md) for the required documentation updates.
+Update current status and add a dated evidence-based entry with each relevant change. Record the tested revision, platform, and local checks; never convert “configured” to “verified” without a result. Preserve historical records, supersede ADRs for changed decisions, and use [maintenance](maintenance.md) and [handoff](handoff.md) before declaring work complete. Historical CI links above describe onboarding only; GitHub automation remains disabled by project policy.

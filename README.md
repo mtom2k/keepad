@@ -58,7 +58,7 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 
 The pad opens in the center of the screen containing your pointer. Click a button to run its action. **Esc** hides the pad. Closing a window keeps KeePad running; to exit, right-click its menu-bar/notification icon and choose **Quit KeePad**.
 
-Single-clicking a pad selects it for editing. The **eye**, **pencil**, **copy**, and **trash** toolbar buttons preview, edit, duplicate, and delete it. Hover over an icon for help. Settings lets you change the shortcut, choose whether the pad hides after an action, and manage backups.
+Single-clicking a pad selects it for editing. The **eye**, **pencil**, **copy**, and **trash** toolbar buttons preview, edit, duplicate, and delete it. Hover over an icon for help. Settings lets you choose Light/Dark/System appearance, change the shortcut, choose whether the pad hides after an action, and manage backups.
 
 ## 🚀 Try the development build
 
@@ -100,5 +100,6 @@ Start with [the knowledge base](docs/README.md) and [contributor instructions](A
 | Data formats and safeguards | [Data model](docs/data-model.md) |
 | Tests and screenshots | [Testing](docs/testing.md) |
 | Keeping documentation current | [Documentation maintenance](docs/maintenance.md) |
+| Taking over or handing off work | [Developer and AI handoff](docs/handoff.md) |
 
-Documentation changes belong in the same commit as the code they describe. Local checks verify links, generated reference freshness, and documentation impact; contributors still review the content for accuracy. GitHub hosts the private source repository; no CI/CD is configured.
+**Documentation is part of the feature:** work is complete when implementation, current guides, validation evidence, and handoff agree. Documentation changes belong in the same commit as the code they describe. Local checks verify relative file links, generated reference freshness, and documentation impact; contributors still review the content for accuracy. GitHub hosts the private source repository; no CI/CD is configured.

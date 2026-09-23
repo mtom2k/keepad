@@ -18,7 +18,7 @@ The host architecture is the default. Validate every architecture you intend to 
 
 ## Release checklist
 
-1. Confirm completed work and open issues in progress; select a version in `package.json` and update the lockfile. Data schema version is separate from app version.
+1. Confirm completed work and open issues in progress; select a version in `package.json` and update the lockfile. Also align the browser preview's current literal version in `src/api.ts`. Data schema version is separate from app version.
 2. Run build, model, desktop, formatting, and documentation checks on each target platform. Complete the manual release checks.
 3. Update README availability, progress, relevant ADRs, generated reference, and screenshots to match the release. Keep signing/OS limitations visible until actually resolved.
 4. Configure macOS Developer ID signing and notarization, and Windows code signing, through private local environment settings. Never commit credentials or certificates.
@@ -29,5 +29,9 @@ The host architecture is the default. Validate every architecture you intend to 
 ## Installation and local testing
 
 Move/install KeePad to its permanent location before enabling launch at login. Merely checking the setting in a development Electron process is intentionally blocked. A release bundle in the workspace is different from an installed copy; verify bundle ID and executable path before replacing an app. Keep user settings outside app bundles and do not delete them during a code-only update.
+
+The implementation checks `app.isPackaged`; it does not verify that the bundle is in a permanent installation directory or confirm the next login succeeds. Rebuilding `release/` does not update an existing installed copy. Record the exact bundle tested/reopened in the delivery handoff without publishing personal paths.
+
+Before replacing a build, export a backup. Current appearance defaults load older version-1 files, but older builds cannot read the newer `none` pad-icon value; see [compatibility](data-model.md) before a downgrade. Carry the current docs and completed [handoff](handoff.md) with each release decision; signing/installation work remains separate from private source pushes.
 
 Unsigned development builds may be rejected by OS distribution controls. Do not instruct people to disable system protections as the normal installation workflow; finish signing and clean-machine validation for public distribution.
