@@ -36,6 +36,10 @@ try {
       'The default shortcut is in use. Quit competing KeePad copies, then regenerate screenshots.',
     );
   await capture(editor, 'editor');
+  await editor.getByRole('button', { name: 'Edit Gmail', exact: true }).click({ button: 'right' });
+  await editor.getByRole('menu', { name: 'Button actions' }).waitFor();
+  await capture(editor, 'button-menu');
+  await editor.keyboard.press('Escape');
   await editor.getByLabel('Pad Theme', { exact: true }).selectOption('graphite');
   const opened = app.waitForEvent('window');
   await editor.getByRole('button', { name: 'Preview pad on screen', exact: true }).click();
@@ -54,7 +58,7 @@ try {
   await capture(editor, 'settings-dark');
 
   console.log(
-    'Captured sample-data editor, launcher, button editor, and Dark settings in docs/screenshots. Review them before committing.',
+    'Captured sample-data editor, button menu, launcher, button editor, and Dark settings in docs/screenshots. Review them before committing.',
   );
 } finally {
   if (app) await app.close();

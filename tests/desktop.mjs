@@ -1,5 +1,6 @@
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
+import { checkButtonInteractions } from './button-interactions.mjs';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -30,6 +31,7 @@ try {
   const errors = [];
   window.on('pageerror', (e) => errors.push(e.message));
   await window.getByRole('heading', { name: 'Everyday', exact: true }).waitFor();
+  await checkButtonInteractions(app, window, userData);
   const setLayoutStep = async (label, columns, rows) => {
     await window.getByRole('button', { name: label, exact: true }).click();
     await window.waitForFunction(
@@ -463,7 +465,7 @@ try {
   assert.equal(await reopened.locator('.pad-heading-icon').count(), 0, 'No icon survives restart');
   assert.deepEqual(errors, []);
   console.log(
-    'Desktop checks passed: editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
+    'Desktop checks passed: button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
   );
 } finally {
   if (app) {

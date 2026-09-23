@@ -17,6 +17,7 @@ The GitHub README is a separate audience: friendly emojis, screenshots, and plai
 - New/Edit pad offers None under Pad icon. Icon-free pads show their name without a placeholder in the sidebar, editor heading, launcher, and pad picker.
 - Clicking an occupied key edits it; clicking an empty key adds an action. Drag an occupied key onto an empty position to move it, or onto another key to swap. The destination has a clear outline. Releasing outside the grid or pressing Escape cancels the drag. Launcher keys are not draggable.
 - The button dialog's Position control is a miniature pad with the actual columns/rows, icons/images, position numbers, and a highlighted selection. Click a position or use arrow keys (Home/End for first/last); hover for row/column and swap guidance. Changes apply only on Save. Cancel discards them. A newly created button targeting an occupied position moves that occupant to the empty position where creation began.
+- Drop one local file, folder, or application from Finder/File Explorer onto an editor position. Empty positions become saved buttons with a filename and generic type icon. Occupied positions ask before replacing only the action type/destination; name, image, color, hint, and position remain unchanged. Cancel leaves the action untouched. Multiple files are rejected with a brief error; drops never execute actions. The compact launcher does not accept file bindings.
 - Macro keys show image/icon and label; action details stay in tooltips/dialogs.
 
 ## Launcher
@@ -24,8 +25,14 @@ The GitHub README is a separate audience: friendly emojis, screenshots, and plai
 - Tray/menu invocation and the global shortcut center the launcher on the pointer's display work area.
 - Previewing another pad does not change the saved active pad. The next normal summon returns to the active pad.
 - Launcher arrows/pad picker and tray radio items cycle the active pad.
-- Escape or X hides the launcher. Hide-after-action also governs blur-hiding. A hidden window remains alive.
+- Escape dismisses a button menu or dialog first; otherwise Escape or X hides the launcher. Hide-after-action also governs blur-hiding. A hidden window remains alive.
 - Reopening resets the previous control's focus to the root. Do not hide outlines globally: Tab navigation must remain usable and visible.
+
+## Button menu
+
+Right-click an occupied button in the editor or launcher for Edit…, Duplicate, Move to another pad…, and Delete…. Edit from the launcher opens that button in the editor. Duplicate uses the first empty position in the same pad; Move lets the user choose another pad and uses its first empty position. Full destinations are unavailable; both operations preserve the action/image and active pad. Delete requires confirmation.
+
+Shift+F10 or the context-menu key opens the menu for a focused key. Up/Down, Home/End, and Enter operate it; Escape or Tab dismisses it and restores focus to the originating key. Outside clicks, window blur/resize, or state changes dismiss it. Menus stay within the window and suppress underlying tooltips. Right-click does not run the action. A stale move/delete confirmation or file replacement is rejected instead of overwriting newer changes.
 
 ## Accessibility and feedback
 

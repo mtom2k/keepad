@@ -11,5 +11,6 @@ Accepted records describe the current implementation. Initial records were writt
 | [0005](0005-documentation-as-part-of-delivery.md) | Documentation is part of delivery with automated backstops | CI portion superseded by 0006 |
 | [0006](0006-private-source-hosting-with-local-checks.md) | Private GitHub source hosting; local checks, no CI/CD | Accepted |
 | [0007](0007-application-appearance-and-optional-pad-icons.md) | App appearance independent of pad themes; optional pad icons and additive defaults | Accepted |
+| [0008](0008-button-menus-and-native-file-drops.md) | Button context menus and explicit native file binding without execution | Accepted |
 
 Use [the template](template.md) for the next consequential decision. Update this index and the affected guides. Supersede an accepted decision with a new record rather than erasing its rationale.

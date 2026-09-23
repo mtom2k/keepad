@@ -11,6 +11,9 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | Changing Settings Theme does not recolor the pad | Expected. Light/Dark/System changes the app; Pad Theme controls that pad's colors independently. System follows the OS, while explicit Light/Dark overrides it. |
 | Pad has no icon | New/Edit pad → Pad icon → None was selected. Choose an icon there to restore it; action-button icons are separate. |
 | Moving a key displaces another key | Expected swap behavior. Drag in the editor or use the mini Position picker; the launcher does not rearrange keys. Dialog positioning saves only when Save button is pressed. |
+| Dropping a file does nothing | Drop one local item from Finder/File Explorer onto a grid position in the desktop editor. The compact launcher and browser preview do not bind files. Check for a missing/inaccessible destination or a stale-state error. |
+| Dropped file kept the old button name/image | Expected for occupied positions. Confirmation replaces only the action. Edit the button to change its name or image. |
+| Duplicate or Move is disabled in a button menu | Duplicate needs a free slot in this pad. Move needs another pad with an empty slot. Add space or create another pad. |
 | − control is disabled | The schema minimum was reached, or reducing capacity would hide a saved button. Move/remove those buttons first. |
 | Button action fails after moving a file/importing a backup | Edit its destination with Browse. Absolute paths belong to a particular computer. Check access/default app. |
 | A protected folder cannot be opened on macOS | Use the normal OS prompt and Files and Folders privacy settings for that folder. Broad Accessibility or Full Disk Access is not part of this app's design. |

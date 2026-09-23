@@ -57,6 +57,11 @@ const preview: KeePadAPI = {
   },
   pickPath: unavailable,
   pickImage: unavailable,
+  describeFile: unavailable,
+  editButton: async (padId, buttonId) => {
+    location.href = `/?mode=editor#pads?pad=${encodeURIComponent(padId)}&button=${encodeURIComponent(buttonId)}`;
+    return ok(undefined);
+  },
   showEditor: async (page) => {
     location.href = `/?mode=editor#${page || 'pads'}`;
     return ok(undefined);

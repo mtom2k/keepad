@@ -29,6 +29,7 @@ import {
   Shortcut,
   NumberStepper,
   PositionPicker,
+  ButtonMenu,
 } from './components';
 import {
   ButtonSchema,
@@ -43,6 +44,7 @@ import {
   type MacroButton,
 } from '../shared/model';
 import { placeButton } from './pad-layout';
+import { emptySlot, copyOrMoveButton } from './button-actions';
 import './styles.css';
 const themeNames = {
   paper: 'Paper',
@@ -53,6 +55,8 @@ const themeNames = {
   contrast: 'High contrast',
 };
 
+type ButtonTarget = { padId: string; buttonId: string; revision: number };
+type MenuTarget = ButtonTarget & { x: number; y: number; trigger: HTMLElement };
 const isLauncher = new URLSearchParams(location.search).get('mode') === 'launcher';
 function App() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null),
@@ -65,6 +69,53 @@ function App() {
     [confirmDelete, setConfirmDelete] = useState(false),
     [padPicker, setPadPicker] = useState(false);
   const [selectedPadId, setSelectedPadId] = useState<string | null>(null);
+  const [buttonMenu, setButtonMenu] = useState<MenuTarget | null>(null);
+  const [buttonAction, setButtonAction] = useState<
+    (ButtonTarget & { kind: 'delete' | 'move' }) | null
+  >(null);
+  const [replacement, setReplacement] = useState<{
+    next: State;
+    label: string;
+    file: string;
+  } | null>(null);
+  const [requestedButton, setRequestedButton] = useState<{
+    padId: string;
+    buttonId: string;
+  } | null>(null);
+  const latestState = useRef(snapshot?.state);
+  latestState.current = snapshot?.state;
+  const closeMenu = useCallback(() => setButtonMenu(null), []);
+  useEffect(closeMenu, [snapshot?.state.revision, selectedPadId, closeMenu]);
+  useEffect(() => {
+    const blockDrop = (event: DragEvent) => event.preventDefault();
+    const escape = (event: KeyboardEvent) => {
+      if (
+        isLauncher &&
+        event.key === 'Escape' &&
+        !document.querySelector('dialog[open], [role="menu"]')
+      )
+        void api.hide();
+    };
+    window.addEventListener('dragover', blockDrop);
+    window.addEventListener('drop', blockDrop);
+    window.addEventListener('keydown', escape);
+    return () => {
+      window.removeEventListener('dragover', blockDrop);
+      window.removeEventListener('drop', blockDrop);
+      window.removeEventListener('keydown', escape);
+    };
+  }, []);
+  useEffect(() => {
+    if (!requestedButton || !snapshot) return;
+    const selected = snapshot.state.pads.find((p) => p.id === requestedButton.padId);
+    const button = selected?.buttons.find((b) => b.id === requestedButton.buttonId);
+    if (selected && button) {
+      setSelectedPadId(selected.id);
+      setEditSlot(button.slot);
+    } else setError('This button no longer exists.');
+    setRequestedButton(null);
+    history.replaceState(null, '', '#pads');
+  }, [requestedButton, snapshot]);
   const dragSource = useRef<{ padId: string; buttonId: string; revision: number } | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dropSlot, setDropSlot] = useState<number | null>(null);
@@ -80,6 +131,7 @@ function App() {
     let frame = 0;
     const resetFocus = () => {
       setPadPicker(false);
+      setButtonMenu(null);
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => rootRef.current?.focus({ preventScroll: true }));
     };
@@ -109,7 +161,16 @@ function App() {
     return api.onChange(setSnapshot);
   }, []);
   useEffect(() => {
-    const onHash = () => setPage(location.hash === '#settings' ? 'settings' : 'pads');
+    const onHash = () => {
+      setPage(location.hash === '#settings' ? 'settings' : 'pads');
+      if (!isLauncher && location.hash.startsWith('#pads?')) {
+        const params = new URLSearchParams(location.hash.slice(6));
+        const padId = params.get('pad'),
+          buttonId = params.get('button');
+        if (padId && buttonId) setRequestedButton({ padId, buttonId });
+      }
+    };
+    onHash();
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -174,6 +235,36 @@ function App() {
     const at = state.pads.findIndex((p) => p.id === pad.id);
     void select(state.pads[(at + delta + state.pads.length) % state.pads.length].id);
   };
+  const dropFile = async (files: FileList, slot: number) => {
+    if (busy || isLauncher) return;
+    if (files.length !== 1) {
+      setError('Drop one file, folder, or application at a time.');
+      return;
+    }
+    setBusy(true);
+    setError('');
+    try {
+      const binding = await unwrap(api.describeFile(files[0]));
+      if (latestState.current?.revision !== state.revision)
+        throw Error('This pad changed. Drop the file again.');
+      const existing = pad.buttons.find((b) => b.slot === slot);
+      const button: MacroButton = existing
+        ? { ...existing, type: binding.type, target: binding.target }
+        : { ...binding, id: crypto.randomUUID(), slot, description: '', color: 'neutral' };
+      const next = {
+        ...state,
+        pads: state.pads.map((p) => (p.id === pad.id ? placeButton(p, button, slot) : p)),
+      };
+      if (existing) setReplacement({ next, label: existing.label, file: binding.label });
+      else if (await save(next)) notify('Button added');
+    } catch (error) {
+      setError((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const menuPad = state.pads.find((p) => p.id === buttonMenu?.padId);
+  const menuButton = menuPad?.buttons.find((b) => b.id === buttonMenu?.buttonId);
   const themeStyle = { '--pad-columns': pad.columns } as React.CSSProperties;
   const grid = (
     <div className="pad-grid" style={themeStyle}>
@@ -184,8 +275,21 @@ function App() {
           button={pad.buttons.find((b) => b.slot === slot)}
           editing={!isLauncher}
           dragging={draggedId === pad.buttons.find((b) => b.slot === slot)?.id}
-          draggingAny={draggedId !== null}
+          draggingAny={draggedId !== null || buttonMenu !== null || dropSlot !== null}
           dropTarget={dropSlot === slot}
+          onContextMenu={(event) => {
+            const button = pad.buttons.find((b) => b.slot === slot);
+            event.preventDefault();
+            if (!button || busy) return;
+            setButtonMenu({
+              padId: pad.id,
+              buttonId: button.id,
+              revision: state.revision,
+              x: event.clientX,
+              y: event.clientY,
+              trigger: event.currentTarget,
+            });
+          }}
           dragProps={
             isLauncher
               ? undefined
@@ -207,6 +311,12 @@ function App() {
                     event.dataTransfer.setData('application/x-keepad-button', source.id);
                   },
                   onDragOver: (event) => {
+                    if (event.dataTransfer.types.includes('Files') && !busy) {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = 'copy';
+                      setDropSlot(slot);
+                      return;
+                    }
                     const source = dragSource.current;
                     if (busy || source?.padId !== pad.id || source.revision !== state.revision)
                       return;
@@ -220,6 +330,12 @@ function App() {
                   },
                   onDragEnd: clearDrag,
                   onDrop: (event) => {
+                    event.preventDefault();
+                    if (event.dataTransfer.types.includes('Files')) {
+                      clearDrag();
+                      void dropFile(event.dataTransfer.files, slot);
+                      return;
+                    }
                     const source = dragSource.current;
                     clearDrag();
                     if (busy || source?.padId !== pad.id || source.revision !== state.revision)
@@ -561,6 +677,124 @@ function App() {
           {toast}
         </div>
       )}
+      {buttonMenu && menuPad && menuButton && (
+        <ButtonMenu
+          {...buttonMenu}
+          onClose={closeMenu}
+          items={[
+            {
+              label: 'Edit…',
+              onSelect: () => {
+                if (isLauncher)
+                  void perform(() => unwrap(api.editButton(menuPad.id, menuButton.id)));
+                else setEditSlot(menuButton.slot);
+              },
+            },
+            {
+              label: 'Duplicate',
+              disabled: emptySlot(menuPad) === undefined,
+              onSelect: () =>
+                void perform(async () => {
+                  if (
+                    await save(
+                      copyOrMoveButton(
+                        state,
+                        menuPad.id,
+                        menuButton.id,
+                        menuPad.id,
+                        true,
+                        crypto.randomUUID(),
+                      ),
+                    )
+                  )
+                    notify('Button duplicated');
+                }),
+            },
+            {
+              label: 'Move to another pad…',
+              disabled: !state.pads.some((p) => p.id !== menuPad.id && emptySlot(p) !== undefined),
+              onSelect: () => setButtonAction({ ...buttonMenu, kind: 'move' }),
+            },
+            {
+              label: 'Delete…',
+              danger: true,
+              onSelect: () => setButtonAction({ ...buttonMenu, kind: 'delete' }),
+            },
+          ]}
+        />
+      )}
+      {buttonAction && (
+        <ButtonActionDialog
+          target={buttonAction}
+          state={state}
+          busy={busy}
+          onClose={() => setButtonAction(null)}
+          onConfirm={async (destination) => {
+            if (state.revision !== buttonAction.revision) {
+              setButtonAction(null);
+              setError('This pad changed. Open the button menu again.');
+              return;
+            }
+            await perform(async () => {
+              const next =
+                buttonAction.kind === 'move'
+                  ? copyOrMoveButton(
+                      state,
+                      buttonAction.padId,
+                      buttonAction.buttonId,
+                      destination!,
+                      false,
+                      crypto.randomUUID(),
+                    )
+                  : {
+                      ...state,
+                      pads: state.pads.map((p) =>
+                        p.id === buttonAction.padId
+                          ? {
+                              ...p,
+                              buttons: p.buttons.filter((b) => b.id !== buttonAction.buttonId),
+                            }
+                          : p,
+                      ),
+                    };
+              if (await save(next)) {
+                setButtonAction(null);
+                notify(buttonAction.kind === 'move' ? 'Button moved' : 'Button deleted');
+              }
+            });
+          }}
+        />
+      )}
+      {replacement && (
+        <Modal title="Replace button action?" onClose={() => setReplacement(null)}>
+          <p className="modal-description">
+            Bind “{replacement.label}” to “{replacement.file}”? Its name, image, and position will
+            stay the same.
+          </p>
+          <div className="modal-actions">
+            <button className="secondary" onClick={() => setReplacement(null)}>
+              Cancel
+            </button>
+            <button
+              className="primary"
+              disabled={busy}
+              onClick={async () => {
+                if (replacement.next.revision !== state.revision) {
+                  setReplacement(null);
+                  setError('This pad changed. Drop the file again.');
+                  return;
+                }
+                if (await save(replacement.next)) {
+                  setReplacement(null);
+                  notify('Button updated');
+                }
+              }}
+            >
+              Replace action
+            </button>
+          </div>
+        </Modal>
+      )}
       {editSlot !== null && (
         <ButtonEditor
           key={`${pad.id}-${editSlot}`}
@@ -633,6 +867,67 @@ function App() {
         </Modal>
       )}
     </div>
+  );
+}
+function ButtonActionDialog({
+  target,
+  state,
+  busy,
+  onClose,
+  onConfirm,
+}: {
+  target: ButtonTarget & { kind: 'delete' | 'move' };
+  state: State;
+  busy: boolean;
+  onClose: () => void;
+  onConfirm: (destination?: string) => Promise<void>;
+}) {
+  const destinations = state.pads.filter((p) => p.id !== target.padId);
+  const [destination, setDestination] = useState(
+    destinations.find((p) => emptySlot(p) !== undefined)?.id ?? '',
+  );
+  const button = state.pads
+    .find((p) => p.id === target.padId)
+    ?.buttons.find((b) => b.id === target.buttonId);
+  return (
+    <Modal title={target.kind === 'move' ? 'Move button' : 'Delete button?'} onClose={onClose}>
+      <p className="modal-description">
+        {target.kind === 'move'
+          ? `Move “${button?.label ?? 'Button'}” to the first empty position on another pad.`
+          : `Delete “${button?.label ?? 'Button'}”? This cannot be undone.`}
+      </p>
+      {target.kind === 'move' && (
+        <>
+          <label className="field-label" htmlFor="destination-pad">
+            Pad
+          </label>
+          <select
+            id="destination-pad"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+          >
+            {destinations.map((p) => (
+              <option value={p.id} key={p.id} disabled={emptySlot(p) === undefined}>
+                {p.name}
+                {emptySlot(p) === undefined ? ' (full)' : ''}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
+      <div className="modal-actions">
+        <button className="secondary" onClick={onClose}>
+          Cancel
+        </button>
+        <button
+          className={target.kind === 'delete' ? 'danger' : 'primary'}
+          disabled={busy || !button || (target.kind === 'move' && !destination)}
+          onClick={() => void onConfirm(destination)}
+        >
+          {target.kind === 'move' ? 'Move button' : 'Delete button'}
+        </button>
+      </div>
+    </Modal>
   );
 }
 function PadDialog({

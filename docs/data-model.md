@@ -27,6 +27,8 @@ The editor's steppers stop at schema limits and disable shrinking if a button wo
 
 Drag-and-drop and the dialog's visual position picker share `src/pad-layout.ts`. When a new button targets an occupied slot, the existing occupant moves to the empty origin where creation started. Moves preserve IDs, images, and action data. The dialog previews its draft without saving until confirmed; a canceled drag or dialog leaves persisted slots unchanged.
 
+Button duplication copies all action/appearance fields with a fresh ID into the first empty slot. Cross-pad moves preserve the ID unless it collides with a destination button, then allocate a fresh one. A full destination rejects insertion; neither operation changes the active pad. File drops use existing button fields, so schema version remains 1 with no migration. Empty drops generate a filename label (up to 40 characters) and generic file/folder/app icon; confirmed replacements change only `type` and `target`. Files are referenced by absolute path, never copied into KeePad or embedded in backups. Main checks existence/type when describing the drop and checks access again when the action runs. See [ADR 0008](adr/0008-button-menus-and-native-file-drops.md).
+
 ## Storage and recovery
 
 The file is `keepad.json` under Electron's `app.getPath('userData')`, normally `~/Library/Application Support/KeePad/` on macOS and `%APPDATA%/KeePad/` on Windows. Do not assume paths for tests; use a temporary profile.

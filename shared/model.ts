@@ -129,12 +129,15 @@ export type Info = {
 };
 export type Snapshot = { state: State; info: Info; launcherPadId?: string };
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
+export type FileBinding = Pick<MacroButton, 'label' | 'target' | 'type' | 'icon'>;
 export interface KeePadAPI {
   load(): Promise<Result<Snapshot>>;
   save(state: State): Promise<Result<Snapshot>>;
   run(padId: string, buttonId: string): Promise<Result<string>>;
   pickPath(type: string): Promise<Result<string | null>>;
   pickImage(): Promise<Result<string | null>>;
+  describeFile(file: File): Promise<Result<FileBinding>>;
+  editButton(padId: string, buttonId: string): Promise<Result<void>>;
   showEditor(page?: string): Promise<Result<void>>;
   showLauncher(padId?: string): Promise<Result<void>>;
   hide(): Promise<Result<void>>;

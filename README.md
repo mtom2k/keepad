@@ -30,6 +30,13 @@ Open your compact pad from the menu bar, notification area, or keyboard shortcut
 
 </details>
 
+<details>
+<summary>Right-click a button</summary>
+
+![KeePad button menu with Edit, Duplicate, Move to another pad, and Delete](docs/screenshots/button-menu.png)
+
+</details>
+
 Screenshots use sample data from the actual app. [How they are made](docs/screenshots/README.md).
 
 ## ✨ What you can do
@@ -40,6 +47,8 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 - **Choose Light, Dark, or System** in Settings → Theme. Each pad keeps its own **Pad Theme**, and its pad icon can be **None**.
 - **Adjust Columns and Rows** with simple −/+ controls. KeePad prevents shrinking a pad if it would hide saved buttons.
 - **Arrange buttons visually:** drag them around the editor, or choose a spot on the mini pad in the button dialog. Dropping onto another button swaps their positions.
+- **Right-click a button** to edit, duplicate, move it to another pad, or delete it. This works in the editor and the compact pad.
+- **Drop a file onto the editor grid** to make an open-file button. Folders and applications work too. Drop one item at a time; replacing an existing action asks for confirmation.
 - **Preview before activating.** The eye button shows a pad without changing your active choice.
 - **Keep your setup locally**, with backup export and import. No account or cloud sync required.
 
@@ -57,6 +66,8 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 | Windows | **Ctrl + Shift + Space** | Click KeePad in the notification area beside the clock |
 
 The pad opens in the center of the screen containing your pointer. Click a button to run its action. **Esc** hides the pad. Closing a window keeps KeePad running; to exit, right-click its menu-bar/notification icon and choose **Quit KeePad**.
+
+To bind a file quickly, drag it from Finder or File Explorer onto an empty **+** position in the editor. Dropping onto an existing button replaces only its action after confirmation; its name and image stay the same. Files stay in their original location.
 
 Single-clicking a pad selects it for editing. The **eye**, **pencil**, **copy**, and **trash** toolbar buttons preview, edit, duplicate, and delete it. Hover over an icon for help. Settings lets you choose Light/Dark/System appearance, change the shortcut, choose whether the pad hides after an action, and manage backups.
 

@@ -2,15 +2,15 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest application change is `27117d3` (appearance and optional pad icons); the documentation audit below reviews that source. Application validation was recorded on 2026-09-23, separately from documentation-only checks.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest feature work adds button context menus and native file binding by drop, based on `ae83b58`. Its source, guides, and native validation are recorded below on 2026-09-23; earlier documentation-audit evidence applies to its named revision.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
 | macOS Apple Silicon | Locally built and exercised | Latest production build, native desktop suite, and unsigned unpacked app rebuild/reopen recorded on 2026-09-23 |
 | Windows | Implemented; full validation pending | Initial hosted run passed build/model checks but not the complete desktop suite; local native/installer checks remain |
-| User data | Local validated JSON and backups | Ten model/placement/store tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
-| Editing / launcher | Implemented | Icon-free pads, independent app appearance, visual positioning, drag/swaps, activation, preview, centering, and focus regressions covered |
-| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, seven ADRs, generated reference, four sample-data screenshots, and local checks |
+| User data | Local validated JSON and backups | Thirteen model/placement/button/store tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
+| Editing / launcher | Implemented | Button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, and focus regressions covered |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, eight ADRs, generated reference, five sample-data screenshots, and local checks |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
@@ -88,6 +88,14 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Commands, identity and packaging | `package.json`, lockfile, `src/api.ts`, packaging settings | [Reference](reference.md), [releasing](releasing.md) |
 | Validation and documentation tooling | Tests, screenshot script, reference generator, link/impact checker | [Testing](testing.md), [maintenance](maintenance.md) |
 | Owner decisions and knowledge transfer | AGENTS, contributor guide, ADRs 0001–0007, no-CI/CD decision | [Handoff](handoff.md), [ADR index](adr/README.md) |
+
+### 2026-09-23 — Button menus and dropped file bindings
+
+- Added right-click menus in the editor and launcher with Edit, Duplicate, Move to another pad, and confirmed Delete. Menus support keyboard navigation and stay within window bounds. Launcher Edit opens the exact button in the editor; Escape dismisses menus/dialogs before hiding the pad. Copy/move preserve action data and activation, reject full destinations, and resolve destination ID collisions.
+- Added editor-only single-file drops through Electron's native File path bridge and main-process metadata validation. Empty positions become file/folder/app buttons. Occupied positions require confirmation and preserve existing labels, images, hints, colors, IDs, and position. Drops never execute actions; multiple files, invalid native paths, and stale replacements are rejected. Schema version 1 and existing backups remain compatible. [ADR 0008](adr/0008-button-menus-and-native-file-drops.md) records the boundary and scope.
+- Validation: all 13 model/store/placement/button tests, production build, and extended native Electron suite passed locally on macOS Apple Silicon. Native coverage includes menus and keyboard/bounds behavior, duplicate/move/delete, launcher Edit routing, real filesystem-backed File objects, empty/occupied drops, confirmation/cancel, persistence, forged/multiple files, stale replacement rejection, and no action execution. Early test attempts exposed an active-badge locator mismatch and focus interference between concurrent native suites; corrected the locator and documented sequential native runs. Subsequent complete runs passed.
+- Verified and visually reviewed the new menu and replacement dialog in Dark mode at the minimum 820×600 editor size. Rebuilt and reopened the unsigned macOS Apple Silicon project application (`app.keepad.desktop`); no separate installed copy was replaced. Formatting, documentation, and source-impact checks passed against starting revision `ae83b58`.
+- Updated README, architecture, data/UX/testing/troubleshooting guides, ADR index, and screenshot provenance in the same change. Regenerated reference (no public choices changed), captured all five sample views, and reviewed them. Windows native behavior, actual Finder/File Explorer drag gestures, and OS permission prompts remain manual verification work; synthetic drag events do not prove those OS integrations.
 
 ## Next work / unresolved decisions
 

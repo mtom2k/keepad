@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type ReactNode, type ButtonHTMLAttributes } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type ButtonHTMLAttributes,
+} from 'react';
 import { createPortal } from 'react-dom';
 import {
   useFloating,
@@ -176,6 +183,7 @@ export function MacroKey({
   dragging = false,
   dropTarget = false,
   draggingAny = false,
+  onContextMenu,
 }: {
   button?: MacroButton;
   slot: number;
@@ -189,6 +197,7 @@ export function MacroKey({
   dragging?: boolean;
   dropTarget?: boolean;
   draggingAny?: boolean;
+  onContextMenu?: ButtonHTMLAttributes<HTMLButtonElement>['onContextMenu'];
 }) {
   return (
     <Tip
@@ -199,7 +208,7 @@ export function MacroKey({
             ? `${actionNames[button.type]} · Click to edit ${button.label}${dragProps ? ' · Drag to move; drop on a button to swap' : ''}`
             : button.description || `${actionNames[button.type]}: ${button.target}`
           : editing
-            ? 'Add an action to this button'
+            ? 'Add an action, or drop a file here'
             : 'An empty button. Add an action in the editor.'
       }
     >
@@ -207,6 +216,23 @@ export function MacroKey({
         {...dragProps}
         className={`macro-key ${button ? '' : 'empty'} ${selected ? 'selected' : ''} ${dragging ? 'dragging' : ''} ${dropTarget ? 'drop-target' : ''}`}
         onClick={onClick}
+        onContextMenu={onContextMenu}
+        onKeyDown={(event) => {
+          if (
+            onContextMenu &&
+            (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10'))
+          ) {
+            event.preventDefault();
+            const bounds = event.currentTarget.getBoundingClientRect();
+            event.currentTarget.dispatchEvent(
+              new MouseEvent('contextmenu', {
+                bubbles: true,
+                clientX: bounds.left + 12,
+                clientY: bounds.top + 12,
+              }),
+            );
+          }
+        }}
         disabled={!button && !editing}
         aria-label={
           button ? `${editing ? 'Edit' : 'Run'} ${button.label}` : `Add button ${slot + 1}`
@@ -230,6 +256,91 @@ export function MacroKey({
         )}
       </button>
     </Tip>
+  );
+}
+export function ButtonMenu({
+  x,
+  y,
+  trigger,
+  items,
+  onClose,
+}: {
+  x: number;
+  y: number;
+  trigger: HTMLElement;
+  items: { label: string; disabled?: boolean; danger?: boolean; onSelect: () => void }[];
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ left: x, top: y });
+  useLayoutEffect(() => {
+    const menu = ref.current!;
+    setPosition({
+      left: Math.max(8, Math.min(x, innerWidth - menu.offsetWidth - 8)),
+      top: Math.max(8, Math.min(y, innerHeight - menu.offsetHeight - 8)),
+    });
+    menu.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+  }, [x, y]);
+  useEffect(() => {
+    const outside = (event: PointerEvent) => {
+      if (!ref.current?.contains(event.target as Node)) onClose();
+    };
+    document.addEventListener('pointerdown', outside);
+    window.addEventListener('blur', onClose);
+    window.addEventListener('resize', onClose);
+    return () => {
+      document.removeEventListener('pointerdown', outside);
+      window.removeEventListener('blur', onClose);
+      window.removeEventListener('resize', onClose);
+    };
+  }, [onClose]);
+  return createPortal(
+    <div
+      ref={ref}
+      className="button-context-menu"
+      role="menu"
+      aria-label="Button actions"
+      style={position}
+      onContextMenu={(event) => event.preventDefault()}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          event.preventDefault();
+          event.stopPropagation();
+          onClose();
+          trigger.focus();
+          return;
+        }
+        const buttons = Array.from(
+          ref.current!.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'),
+        );
+        const current = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        let next = current;
+        if (event.key === 'ArrowDown') next = (current + 1) % buttons.length;
+        else if (event.key === 'ArrowUp') next = (current + buttons.length - 1) % buttons.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = buttons.length - 1;
+        else return;
+        event.preventDefault();
+        buttons[next]?.focus();
+      }}
+    >
+      {items.map((item) => (
+        <button
+          key={item.label}
+          role="menuitem"
+          disabled={item.disabled}
+          className={item.danger ? 'danger-text' : ''}
+          onClick={() => {
+            onClose();
+            trigger.focus();
+            item.onSelect();
+          }}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>,
+    document.body,
   );
 }
 export function PositionPicker({

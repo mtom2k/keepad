@@ -1110,6 +1110,31 @@ button {
 .setting-row select {
   width: 150px;
 }
+.button-context-menu {
+  position: fixed;
+  z-index: 400;
+  min-width: 190px;
+  padding: 4px;
+  background: var(--field);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 3px 12px #0003;
+}
+.button-context-menu button {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 2px;
+  font-size: 12px;
+}
+.button-context-menu button:hover:not(:disabled),
+.button-context-menu button:focus-visible {
+  background: var(--selected-bg);
+  color: var(--selected-text);
+  outline-offset: -2px;
+}
 .icon-picker .tip-anchor {
   display: flex;
 }

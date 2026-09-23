@@ -24,8 +24,10 @@ flowchart LR
 | Store | [electron/store.ts](../electron/store.ts) | Validation, temporary-file replacement, corruption recovery |
 | Shared contract | [shared/model.ts](../shared/model.ts) | Zod schemas, types, starter state, import merge |
 | Renderer | [src/main.tsx](../src/main.tsx) | Editor, launcher, dialogs, settings, local edit selection |
-| UI primitives | [src/components.tsx](../src/components.tsx) | Optional pad glyphs, tooltips, modal dialogs, macro keys, number steppers, visual position picker |
+| UI primitives | [src/components.tsx](../src/components.tsx) | Optional pad glyphs, tooltips, modal dialogs, macro keys, number steppers, visual position picker, keyboard-accessible button menu |
 | Button placement | [src/pad-layout.ts](../src/pad-layout.ts) | Shared immutable move/swap operation for drag-and-drop, dialog saves, and position preview |
+| Button duplication/moves | [src/button-actions.ts](../src/button-actions.ts) | Immutable first-free-slot copy/move; full-pad rejection and ID collision handling |
+| Dropped destinations | [electron/file-binding.ts](../electron/file-binding.ts) | Validate native absolute path and inspect file metadata to describe a binding |
 | Native / preview adapter | [src/api.ts](../src/api.ts) | Electron bridge or explicitly limited browser preview |
 | Styling | [src/styles.css](../src/styles.css) | Traditional utility layout and per-pad themes |
 
@@ -62,6 +64,10 @@ Imports are validated and merged inside the serialized mutation queue. Exports w
 
 Editor drag-and-drop uses native HTML drag events and an in-memory source identity/revision; arbitrary external drag payloads cannot move keys. A changed pad/revision or an in-flight save rejects the drop. A valid drop saves through the existing state API, and tooltips are suppressed while dragging. The mini pad previews the same placement operation as Save; keyboard navigation provides a non-drag alternative. Neither path changes the persisted schema or invokes actions.
 
+Right-click menus are renderer portals in either window. Duplicate/move/delete use the same revision-checked save path; menu dialogs retain the initiating revision. Edit from the launcher uses `window:edit-button`: main validates stored pad/button IDs before routing the editor through an encoded local hash. Escape handling lives in the renderer so a menu/dialog dismisses before the launcher hides.
+
+External file drops are separate from internal rearrangement. The editor passes the actual `File` object to preload, which resolves its native path with Electron `webUtils.getPathForFile`. `file:describe` validates the trusted sender and the host-native absolute path, then stats the destination without reading contents or opening it. It returns a name, type, generic icon, and path. The renderer creates a button or asks before replacing an occupied action, then saves through ordinary revision validation. State changes while metadata is being resolved or replacement is pending reject the draft. Global drop prevention blocks browser navigation; only editor cells bind files. See [ADR 0008](adr/0008-button-menus-and-native-file-drops.md).
+
 ## Application appearance
 
 Application appearance is stored in `settings.theme` separately from `Pad.theme`. Main applies Electron `nativeTheme.themeSource` after persistence and at startup. The renderer resolves System with a live `prefers-color-scheme` listener and sets an attribute on the document root so portaled dialogs/tooltips share editor appearance. CSS tokens handle application surfaces; existing pad color variables remain independent. See [ADR 0007](adr/0007-application-appearance-and-optional-pad-icons.md).
@@ -72,6 +78,6 @@ Requests return `Result<T>` (`ok/value` or `ok/error`). The API contract lists a
 
 The main process checks known web contents, the main frame, and the exact local file/dev origin for each request. Both windows have sandboxing, context isolation, and no Node integration. Navigation and new windows are blocked. The HTML CSP limits scripts to local assets and images to local/data sources. The development server is accepted only at the explicitly configured loopback URL and is ignored in packaged builds.
 
-Only HTTP(S) website actions and supported inline raster images are accepted. File/folder/app destinations can be typed or chosen with Browse; schema validation requires absolute paths and execution checks access/existence. Button images are selected through the native image dialog. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or cloud storage is implemented.
+Only HTTP(S) website actions and supported inline raster images are accepted. File/folder/app destinations can be typed, chosen with Browse, or bound by dropping a local item in the editor; schema validation requires absolute paths and execution checks access/existence. Button images are selected through the native image dialog. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or cloud storage is implemented.
 
-The browser adapter stores a separate preview state in localStorage and can copy text, but cannot validate native lifecycle or OS actions. Its displayed version is currently a literal in `src/api.ts`; keep it aligned with package version during release preparation.
+The browser adapter stores a separate preview state in localStorage and can copy text, but cannot bind dropped native files or validate native lifecycle or OS actions. Its displayed version is currently a literal in `src/api.ts`; keep it aligned with package version during release preparation.

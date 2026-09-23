@@ -25,6 +25,7 @@ import {
   type Snapshot,
 } from '../shared/model.js';
 import { Store } from './store.js';
+import { describeFile } from './file-binding.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const devUrl = app.isPackaged ? undefined : process.env.KEEPAD_DEV_URL;
 if (devUrl && devUrl !== 'http://127.0.0.1:5173') throw Error('Unexpected development server.');
@@ -88,9 +89,6 @@ function windowFor(mode: 'launcher' | 'editor') {
       win.hide();
     }
   });
-  win.webContents.on('before-input-event', (_e, input) => {
-    if (input.key === 'Escape' && mode === 'launcher') win.hide();
-  });
   if (mode === 'launcher') {
     win.on('show', () => win.webContents.send('launcher:shown'));
     win.on('focus', () => win.webContents.send('launcher:shown'));
@@ -102,7 +100,7 @@ function windowFor(mode: 'launcher' | 'editor') {
   else void win.loadFile(path.join(root, 'dist/index.html'), { query: { mode } });
   return win;
 }
-function showEditor(page = 'pads') {
+function showEditor(page = 'pads', target?: { padId: string; buttonId: string }) {
   if (!editor || editor.isDestroyed()) editor = windowFor('editor');
   const show = () => {
     editor!.show();
@@ -113,7 +111,9 @@ function showEditor(page = 'pads') {
   else show();
   // The hash is local navigation only; no remote content is allowed.
   void editor.webContents
-    .executeJavaScript(`location.hash=${JSON.stringify(page)}`)
+    .executeJavaScript(
+      `location.hash=${JSON.stringify(target ? `pads?pad=${encodeURIComponent(target.padId)}&button=${encodeURIComponent(target.buttonId)}` : page)}`,
+    )
     .catch(() => {});
   launcher?.hide();
 }
@@ -257,6 +257,16 @@ function handle(channel: string, fn: (event: IpcMainInvokeEvent, ...args: any[])
 function setupIPC() {
   handle('state:load', () => snapshot());
   handle('state:save', (_e, raw) => serial(() => commit(raw)));
+  handle('file:describe', (_e, target) => describeFile(target));
+  handle('window:edit-button', (_e, padId, buttonId) => {
+    if (
+      typeof padId !== 'string' ||
+      typeof buttonId !== 'string' ||
+      !store.state.pads.find((p) => p.id === padId)?.buttons.some((b) => b.id === buttonId)
+    )
+      throw Error('This button no longer exists.');
+    showEditor('pads', { padId, buttonId });
+  });
   handle('window:editor', (_e, page) => showEditor(page === 'settings' ? 'settings' : 'pads'));
   handle('window:launcher', (_e, padId) => {
     if (padId !== undefined && typeof padId !== 'string') throw Error('Invalid pad.');
