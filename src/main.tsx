@@ -45,6 +45,7 @@ import {
 } from '../shared/model';
 import { placeButton } from './pad-layout';
 import { emptySlot, copyOrMoveButton } from './button-actions';
+import { LauncherSearch } from './launcher-search';
 import './styles.css';
 const themeNames = {
   paper: 'Paper',
@@ -92,6 +93,8 @@ function App() {
       if (
         isLauncher &&
         event.key === 'Escape' &&
+        !event.defaultPrevented &&
+        !event.isComposing &&
         !document.querySelector('dialog[open], [role="menu"]')
       )
         void api.hide();
@@ -125,21 +128,20 @@ function App() {
     setDropSlot(null);
   };
   const rootRef = useRef<HTMLDivElement>(null);
+  const [launcherInvocation, setLauncherInvocation] = useState(0);
   useEffect(() => {
     if (!isLauncher || !snapshot) return;
-    // Reopening a hidden native window must not restore focus to its last button.
-    let frame = 0;
-    const resetFocus = () => {
+    // Search owns summon focus; close transient pad controls alongside it.
+    const resetControls = () => {
       setPadPicker(false);
       setButtonMenu(null);
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => rootRef.current?.focus({ preventScroll: true }));
+      setButtonAction(null);
+      setLauncherInvocation((invocation) => invocation + 1);
     };
-    resetFocus();
-    const unsubscribe = api.onLauncherShown(resetFocus);
+    resetControls();
+    const unsubscribe = api.onLauncherShown(resetControls);
     return () => {
       unsubscribe();
-      cancelAnimationFrame(frame);
     };
   }, [Boolean(snapshot)]);
   const appTheme = snapshot?.state.settings.theme ?? 'system';
@@ -395,43 +397,68 @@ function App() {
             </div>
           </header>
           <section className="launcher-content">
-            <div className="launcher-title">
-              <button
-                className="pad-picker"
-                onClick={() => setPadPicker(!padPicker)}
-                aria-expanded={padPicker}
-              >
-                <Glyph name={pad.icon} />
-                <strong>{pad.name}</strong>
-                <ChevronDown size={16} />
-              </button>
-              <div className="cycle">
-                <button className="icon-button" aria-label="Previous pad" onClick={() => cycle(-1)}>
-                  <ChevronLeft size={17} />
+            <LauncherSearch
+              pads={state.pads}
+              menuOpen={buttonMenu !== null}
+              invocation={launcherInvocation}
+              onRun={(padId, button) =>
+                void perform(async () => notify(await unwrap(api.run(padId, button.id))))
+              }
+              onMenu={(sourcePad, button, event) => {
+                event.preventDefault();
+                if (!busy)
+                  setButtonMenu({
+                    padId: sourcePad.id,
+                    buttonId: button.id,
+                    revision: state.revision,
+                    x: event.clientX,
+                    y: event.clientY,
+                    trigger: event.currentTarget,
+                  });
+              }}
+            >
+              <div className="launcher-title">
+                <button
+                  className="pad-picker"
+                  onClick={() => setPadPicker(!padPicker)}
+                  aria-expanded={padPicker}
+                >
+                  <Glyph name={pad.icon} />
+                  <strong>{pad.name}</strong>
+                  <ChevronDown size={16} />
                 </button>
-                <button className="icon-button" aria-label="Next pad" onClick={() => cycle(1)}>
-                  <ChevronRight size={17} />
-                </button>
-              </div>
-            </div>
-            {padPicker && (
-              <div className="pad-popover">
-                {state.pads.map((p) => (
-                  <button key={p.id} onClick={() => void select(p.id)}>
-                    <Glyph name={p.icon} />
-                    {p.name}
-                    {pad.id === p.id && <Check size={16} />}
+                <div className="cycle">
+                  <button
+                    className="icon-button"
+                    aria-label="Previous pad"
+                    onClick={() => cycle(-1)}
+                  >
+                    <ChevronLeft size={17} />
                   </button>
-                ))}
+                  <button className="icon-button" aria-label="Next pad" onClick={() => cycle(1)}>
+                    <ChevronRight size={17} />
+                  </button>
+                </div>
               </div>
-            )}
-            {grid}
+              {padPicker && (
+                <div className="pad-popover">
+                  {state.pads.map((p) => (
+                    <button key={p.id} onClick={() => void select(p.id)}>
+                      <Glyph name={p.icon} />
+                      {p.name}
+                      {pad.id === p.id && <Check size={16} />}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {grid}
+            </LauncherSearch>
           </section>
           <footer className="launcher-footer">
             <span>
               <Shortcut value={state.settings.shortcut} mac={mac} />
             </span>
-            <span>Esc to close</span>
+            <span>Esc to clear / close</span>
           </footer>
         </>
       ) : (

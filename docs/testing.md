@@ -9,7 +9,7 @@ Run validation locally. GitHub hosts the private source repository and does not 
 | Command | Purpose | Limits |
 | --- | --- | --- |
 | `npm run build` | Strict TypeScript checks and production renderer/main builds | Does not prove native behavior |
-| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, immutable placement/copy/move, and native destination metadata | Does not exercise OS permissions |
+| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, immutable placement/copy/move, native destination metadata, and cross-pad search ranking | Does not exercise OS permissions |
 | `npm run test:desktop` | Playwright driving actual Electron with temporary data | Requires a graphical macOS/Windows session |
 | `npm run format:check` | Source/test formatting | Not a semantic test |
 | `npm run docs:check` | Local docs, links, generated reference, screenshots | Does not prove prose correctness |
@@ -17,6 +17,8 @@ Run validation locally. GitHub hosts the private source repository and does not 
 | `npm run docs:screenshots` | Rebuild and capture curated native UI with sample data | Review images; not a substitute for interaction tests |
 
 ## Native suite coverage
+
+[Launcher search checks](../tests/launcher-search.mjs) exercise immediate typing on summon, description/diacritic matches across pads, duplicate labels, keyboard selection and execution of the correct stored source, unchanged activation, no-result Enter, reset on resummon, Escape clear/hide order, result-menu routing, synthetic IME-key suppression, mouse execution in keep-open mode, native-refocus query retention, and dismissal of stale confirmations on resummon. The existing reopen tests now expect the search input instead of the launcher root and retain visible Tab focus checks. Pure tests verify ranking, all-term matching across fields, accent/case/whitespace normalization, exclusion of targets/pad names, stable duplicate results, and immutable source state.
 
 [Button interaction checks](../tests/button-interactions.mjs) run within the desktop suite: right-click and Shift+F10, menu keyboard focus/bounds, duplicate/move/delete and cancellation, launcher-to-editor routing, Escape keeping the launcher visible when dismissing a menu, and absence of action execution. Real filesystem-backed `File` objects pass through Electron's preload path bridge via synthetic drag events. Tests cover single/multiple files, empty/occupied destinations, confirmation/cancel, persistence, forged files without a native path, and stale replacement rejection. Pure tests cover full-pad rejection, ID collisions, immutability, file/folder/application classification, and invalid/missing paths. Actual Finder/File Explorer dragging, permission prompts, and Windows native behavior still require manual checks.
 
@@ -32,7 +34,7 @@ Clipboard entries with no MIME types are omitted from the test's saved clipboard
 
 Run native suites and screenshot capture sequentially; concurrent Electron automation can steal native keyboard focus and produce misleading failures.
 
-The reopen keyboard test waits for the launcher document to gain native focus and for animation-frame focus resets to settle before sending Tab. An already focused DOM root in a hidden window alone is not proof that the OS has finished showing it. Failure output includes the actual focused control, focus visibility, and document focus.
+The reopen keyboard test waits for the launcher document to gain native focus and for animation-frame focus resets to settle before sending Tab. An already focused search input in a hidden window alone is not proof that the OS has finished showing it. Failure output includes the actual focused control, focus visibility, and document focus.
 
 The suite does **not** click the native tray menu, verify real shell-launched apps, grant OS permissions, log in/out, certify multi-monitor arrangements, or validate signatures/notarization. Blur-hiding is suppressed in the test environment. Clipboard APIs in the pinned Electron version are asynchronous; restoration constructs writable clipboard items rather than reusing read-only items returned by `read()`.
 
@@ -44,6 +46,7 @@ The suite does **not** click the native tray menu, verify real shell-launched ap
 - Drag real files, folders, and apps from Finder/File Explorer into empty and occupied editor cells; cancel/confirm replacements and reject multiple files. Check minimum-size menus and both appearance modes.
 - Missing/denied files, macOS `.app` selection, Windows `.exe`/`.lnk`, default browser, clipboard, and protected-folder prompts.
 - Shortcut collision and restoration; native startup registration from the installed app, then a real login/reboot.
+- Search with duplicate labels, long descriptions, large result lists, screen readers, and real IME composition; verify search focus on actual tray/shortcut summon.
 - All themes and layout bounds; dialog keyboard navigation; tooltips near each window edge; text scaling and minimum editor size.
 - Backup round-trip between operating systems and clear path-repair guidance.
 - Installer/uninstaller behavior, signatures, and a clean machine without developer dependencies.
@@ -52,7 +55,7 @@ Record the OS, architecture, commands, date, and result in progress/release note
 
 ## Screenshots
 
-Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, button editor, and Dark Settings, and removes the profile. App appearance is explicitly Light for the first four views and Dark for Settings; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
+Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, launcher search, button editor, and Dark Settings, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
 
 Review all generated files in [screenshots](screenshots/README.md) before committing. UI changes require refreshed relevant images; documentation-only changes do not.
 

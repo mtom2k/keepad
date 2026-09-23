@@ -45,8 +45,12 @@ try {
   await editor.getByRole('button', { name: 'Preview pad on screen', exact: true }).click();
   const launcher = await opened;
   await launcher.getByRole('button', { name: 'Run Gmail', exact: true }).waitFor();
-  await launcher.waitForFunction(() => document.activeElement?.classList.contains('launcher'));
+  await launcher.waitForFunction(() => document.activeElement?.id === 'launcher-search');
   await capture(launcher, 'launcher');
+  await launcher.getByRole('combobox', { name: 'Search all buttons' }).fill('open');
+  await launcher.getByRole('listbox').waitFor();
+  await capture(launcher, 'launcher-search');
+  await launcher.keyboard.press('Escape');
   await editor.evaluate(() => window.keepad.showEditor());
   await editor.getByRole('button', { name: 'Edit Quick reply', exact: true }).click();
   await editor.getByRole('heading', { name: 'Edit button', exact: true }).waitFor();
@@ -58,7 +62,7 @@ try {
   await capture(editor, 'settings-dark');
 
   console.log(
-    'Captured sample-data editor, button menu, launcher, button editor, and Dark settings in docs/screenshots. Review them before committing.',
+    'Captured sample-data editor, button menu, launcher, search, button editor, and Dark settings in docs/screenshots. Review them before committing.',
   );
 } finally {
   if (app) await app.close();

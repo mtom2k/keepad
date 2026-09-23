@@ -17,6 +17,13 @@ Open your compact pad from the menu bar, notification area, or keyboard shortcut
 ![KeePad compact launcher in the Graphite theme](docs/screenshots/launcher.png)
 
 <details>
+<summary>Find a button across all pads</summary>
+
+![KeePad launcher searching button names and descriptions across all pads](docs/screenshots/launcher-search.png)
+
+</details>
+
+<details>
 <summary>See the button editor</summary>
 
 ![KeePad button editor with a sample text action, icons, and colors](docs/screenshots/button-editor.png)
@@ -41,6 +48,7 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 
 ## ✨ What you can do
 
+- **Find any button quickly:** summon KeePad and type. Search covers button names and descriptions across every pad, with name matches first.
 - **Make several pads** for work, projects, or personal shortcuts.
 - **Give each button an action:** website, file, folder, app, or text to copy.
 - **Choose icons or your own images**, button colors, and six pad themes.
@@ -65,7 +73,9 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 | Mac | **Command + Shift + Space** | Click KeePad in the menu bar |
 | Windows | **Ctrl + Shift + Space** | Click KeePad in the notification area beside the clock |
 
-The pad opens in the center of the screen containing your pointer. Click a button to run its action. **Esc** hides the pad. Closing a window keeps KeePad running; to exit, right-click its menu-bar/notification icon and choose **Quit KeePad**.
+The pad opens in the center of the screen containing your pointer. Click a button to run its action, or type into the automatically focused search box. Use **↑/↓** and **Enter** to run a result; each result shows its pad. Searching and running a result leave your active pad unchanged. **Esc** clears a search first, then hides the pad. Closing a window keeps KeePad running; to exit, right-click its menu-bar/notification icon and choose **Quit KeePad**.
+
+Search ignores case and accents and matches all the words you type in button names or descriptions (the **Hover hint** field). It does not inspect files, paths, URLs, or copied text. Each summon clears the previous search.
 
 To bind a file quickly, drag it from Finder or File Explorer onto an empty **+** position in the editor. Dropping onto an existing button replaces only its action after confirmation; its name and image stay the same. Files stay in their original location.
 

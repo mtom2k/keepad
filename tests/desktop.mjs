@@ -1,5 +1,6 @@
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
+import { checkLauncherSearch } from './launcher-search.mjs';
 import { checkButtonInteractions } from './button-interactions.mjs';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import os from 'node:os';
@@ -198,7 +199,7 @@ try {
   const launcherReady = app.waitForEvent('window');
   await window.getByRole('button', { name: 'Preview pad on screen', exact: true }).click();
   const launcher = await launcherReady;
-  await launcher.waitForFunction(() => document.activeElement?.classList.contains('launcher'));
+  await launcher.waitForFunction(() => document.activeElement?.id === 'launcher-search');
   const position = await app.evaluate(({ BrowserWindow, screen }) => {
     const win = BrowserWindow.getAllWindows().find((w) =>
       w.webContents.getURL().includes('mode=launcher'),
@@ -240,15 +241,15 @@ try {
   // A normal summon restores the active pad, rather than the last preview.
   await window.evaluate(() => window.keepad.showLauncher());
   await launcher.getByRole('button', { name: 'Run Gmail', exact: true }).waitFor();
-  await launcher.waitForFunction(() => document.activeElement?.classList.contains('launcher'));
+  await launcher.waitForFunction(() => document.activeElement?.id === 'launcher-search');
   for (const control of ['Manage pads', 'Hide KeePad']) {
     await launcher.getByRole('button', { name: control, exact: true }).focus();
     await launcher.keyboard.press('Enter');
     await window.evaluate(() => window.keepad.showLauncher());
-    // A hidden page can retain the root as activeElement before the OS has
+    // A hidden page can retain the search field as activeElement before the OS has
     // focused it. Wait for native focus and the queued reset before sending Tab.
     await launcher.waitForFunction(
-      () => document.hasFocus() && document.activeElement?.classList.contains('launcher'),
+      () => document.hasFocus() && document.activeElement?.id === 'launcher-search',
     );
     await launcher.evaluate(
       () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
@@ -266,10 +267,11 @@ try {
     }));
     assert.deepEqual(
       keyboardFocus,
-      { label: 'Manage pads', visible: true, hasFocus: true },
+      { label: null, visible: true, hasFocus: true },
       `Keyboard focus remains visible after reopening from ${control}`,
     );
   }
+  await checkLauncherSearch(app, window, launcher);
   await window.evaluate(() => window.keepad.showEditor());
   await window.getByRole('button', { name: 'Make Active', exact: true }).click();
   await window.waitForFunction(
@@ -465,7 +467,7 @@ try {
   assert.equal(await reopened.locator('.pad-heading-icon').count(), 0, 'No icon survives restart');
   assert.deepEqual(errors, []);
   console.log(
-    'Desktop checks passed: button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
+    'Desktop checks passed: global launcher search, button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
   );
 } finally {
   if (app) {

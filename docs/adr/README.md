@@ -7,10 +7,11 @@ Accepted records describe the current implementation. Initial records were writt
 | [0001](0001-electron-and-process-boundaries.md) | Electron, React, and a narrow privileged boundary | Accepted |
 | [0002](0002-local-state-and-backups.md) | Validated local JSON, revisions, and additive backups | Accepted |
 | [0003](0003-traditional-utility-interface.md) | Traditional utility UI with progressive guidance | Accepted |
-| [0004](0004-pad-selection-and-launcher-behavior.md) | Separate selection/activation/preview; shared centering and focus reset | Accepted |
+| [0004](0004-pad-selection-and-launcher-behavior.md) | Separate selection/activation/preview; shared centering and focus reset | Focus portion superseded by 0009 |
 | [0005](0005-documentation-as-part-of-delivery.md) | Documentation is part of delivery with automated backstops | CI portion superseded by 0006 |
 | [0006](0006-private-source-hosting-with-local-checks.md) | Private GitHub source hosting; local checks, no CI/CD | Accepted |
 | [0007](0007-application-appearance-and-optional-pad-icons.md) | App appearance independent of pad themes; optional pad icons and additive defaults | Accepted |
 | [0008](0008-button-menus-and-native-file-drops.md) | Button context menus and explicit native file binding without execution | Accepted |
+| [0009](0009-global-launcher-search.md) | Global launcher search with automatic focus and unchanged activation | Accepted |
 
 Use [the template](template.md) for the next consequential decision. Update this index and the affected guides. Supersede an accepted decision with a new record rather than erasing its rationale.

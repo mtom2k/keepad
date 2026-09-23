@@ -10,6 +10,9 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | Previewed pad is gone on next summon | Expected. Preview is temporary; normal summon opens the active pad. |
 | Changing Settings Theme does not recolor the pad | Expected. Light/Dark/System changes the app; Pad Theme controls that pad's colors independently. System follows the OS, while explicit Light/Dark overrides it. |
 | Pad has no icon | New/Edit pad → Pad icon → None was selected. Choose an icon there to restore it; action-button icons are separate. |
+| Search finds a button on another pad | Expected: search spans all pads and shows each result's source pad. Running a result does not activate that pad. |
+| Search misses a destination or snippet | Search covers button names and descriptions (Hover hint) only. Add useful terms there; targets/file contents are not indexed and typo matching is not implemented. |
+| Escape did not hide KeePad | It dismisses an open menu/dialog or clears a search first. Press it again with an empty search to hide. |
 | Moving a key displaces another key | Expected swap behavior. Drag in the editor or use the mini Position picker; the launcher does not rearrange keys. Dialog positioning saves only when Save button is pressed. |
 | Dropping a file does nothing | Drop one local item from Finder/File Explorer onto a grid position in the desktop editor. The compact launcher and browser preview do not bind files. Check for a missing/inaccessible destination or a stale-state error. |
 | Dropped file kept the old button name/image | Expected for occupied positions. Confirmation replaces only the action. Edit the button to change its name or image. |
@@ -17,7 +20,7 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | − control is disabled | The schema minimum was reached, or reducing capacity would hide a saved button. Move/remove those buttons first. |
 | Button action fails after moving a file/importing a backup | Edit its destination with Browse. Absolute paths belong to a particular computer. Check access/default app. |
 | A protected folder cannot be opened on macOS | Use the normal OS prompt and Files and Folders privacy settings for that folder. Broad Accessibility or Full Disk Access is not part of this app's design. |
-| Last-used Settings/X appears focused on summon | Regressed launcher focus reset. Check `launcher:shown` events, root focus scheduling, and the desktop regression test. Keep Tab focus styling intact. |
+| Last-used Settings/X appears focused on summon | Regressed launcher focus reset. Check `launcher:shown` events, search-field focus scheduling, and the desktop regression test. Keep Tab focus styling intact. |
 | Changes rejected after another window saved | Optimistic revision conflict. The UI refreshes; reapply the edit. Do not bypass revision validation. |
 | Settings reset with a recovery warning | Inspect the timestamped recovery copy next to `keepad.json`. Failed backup creation must stop startup rather than overwrite the original. |
 | An older build cannot load icon-free pads | Older validators do not recognize `none`. Use a pre-change backup to downgrade; keep the recovery copy. Missing app-theme settings alone are supported by the current build and default to System. |

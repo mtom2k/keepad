@@ -4,7 +4,7 @@ Canonical schema: [shared/model.ts](../shared/model.ts). Store implementation: [
 
 ## Persisted state
 
-`State` contains `schemaVersion` (currently 1), an integer `revision`, an existing `activePadId`, `pads`, and settings. The selected editor pad and temporary preview are not persisted.
+`State` contains `schemaVersion` (currently 1), an integer `revision`, an existing `activePadId`, `pads`, and settings. The selected editor pad, temporary preview, launcher search query, and highlighted search result are not persisted. Search reads only existing button labels/descriptions and adds no fields or migration.
 
 | Record | Fields and constraints |
 | --- | --- |

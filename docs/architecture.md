@@ -25,6 +25,7 @@ flowchart LR
 | Shared contract | [shared/model.ts](../shared/model.ts) | Zod schemas, types, starter state, import merge |
 | Renderer | [src/main.tsx](../src/main.tsx) | Editor, launcher, dialogs, settings, local edit selection |
 | UI primitives | [src/components.tsx](../src/components.tsx) | Optional pad glyphs, tooltips, modal dialogs, macro keys, number steppers, visual position picker, keyboard-accessible button menu |
+| Launcher search | [src/launcher-search.tsx](../src/launcher-search.tsx), [src/search.ts](../src/search.ts) | Transient query/focus, accessible result navigation, pure cross-pad ranking |
 | Button placement | [src/pad-layout.ts](../src/pad-layout.ts) | Shared immutable move/swap operation for drag-and-drop, dialog saves, and position preview |
 | Button duplication/moves | [src/button-actions.ts](../src/button-actions.ts) | Immutable first-free-slot copy/move; full-pad rejection and ID collision handling |
 | Dropped destinations | [electron/file-binding.ts](../electron/file-binding.ts) | Validate native absolute path and inspect file metadata to describe a binding |
@@ -52,7 +53,7 @@ These are three different concepts; see [ADR 0004](adr/0004-pad-selection-and-la
 - **Active:** persisted `State.activePadId`; used by tray/shortcut invocation. Make Active, sidebar double-click, tray radio selection, and launcher pad cycling can change it.
 - **Preview:** main-process `previewPadId`, exposed as `Snapshot.launcherPadId`; allows the eye button to display a selected inactive pad without activating it. Normal summon clears it. Active-pad changes or deletion of the previewed pad clear it.
 
-The launcher resets focus to its non-tab-stop root on initial load and `launcher:shown`. Native show/focus events trigger that notification. It does not remove keyboard focus styling from actual controls: Tab still provides a visible focus indicator.
+The launcher clears and focuses its search field on initial load and `launcher:shown`. The shared `showLauncher` path sends that event after showing/focusing, including already-visible previews; ordinary native refocus does not reset an unfinished query. Pending launcher confirmation/menu/picker state is discarded on summon. Visible Tab focus is preserved. [ADR 0009](adr/0009-global-launcher-search.md) supersedes the root-focus portion of ADR 0004.
 
 ## Saving and executing
 
@@ -67,6 +68,12 @@ Editor drag-and-drop uses native HTML drag events and an in-memory source identi
 Right-click menus are renderer portals in either window. Duplicate/move/delete use the same revision-checked save path; menu dialogs retain the initiating revision. Edit from the launcher uses `window:edit-button`: main validates stored pad/button IDs before routing the editor through an encoded local hash. Escape handling lives in the renderer so a menu/dialog dismisses before the launcher hides.
 
 External file drops are separate from internal rearrangement. The editor passes the actual `File` object to preload, which resolves its native path with Electron `webUtils.getPathForFile`. `file:describe` validates the trusted sender and the host-native absolute path, then stats the destination without reading contents or opening it. It returns a name, type, generic icon, and path. The renderer creates a button or asks before replacing an occupied action, then saves through ordinary revision validation. State changes while metadata is being resolved or replacement is pending reject the draft. Global drop prevention blocks browser navigation; only editor cells bind files. See [ADR 0008](adr/0008-button-menus-and-native-file-drops.md).
+
+## Search execution and scope
+
+`searchButtons` scans the current snapshot's bounded set of saved buttons (at most 600), matching normalized label/description terms and ranking name matches first. No index, dependency, IPC method, schema change, file read, or network request is added. The renderer uses the stored source pad/button IDs for `action:run` and context-menu operations; main still resolves/validates the current stored action. Search never writes activation or editor selection. Results update from snapshots, and an empty query renders the usual active/preview grid.
+
+The input uses combobox/listbox semantics with an active descendant. Arrow keys change selection; composition and repeated Enter events do not run actions. Escape capture clears the query only when no modal/menu is open, allowing those components to dismiss first. Search results scroll independently beneath a fixed search field. The centered window allows an additional search row and remains constrained to the display work area.
 
 ## Application appearance
 

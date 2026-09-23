@@ -2,15 +2,15 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest feature work adds button context menus and native file binding by drop, based on `ae83b58`. Its source, guides, and native validation are recorded below on 2026-09-23; earlier documentation-audit evidence applies to its named revision.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest feature work adds global launcher search and automatic search focus, based on `abc4ec7`. Its source, guides, and native validation are recorded below on 2026-09-23; earlier documentation-audit evidence applies to its named revision.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
 | macOS Apple Silicon | Locally built and exercised | Latest production build, native desktop suite, and unsigned unpacked app rebuild/reopen recorded on 2026-09-23 |
 | Windows | Implemented; full validation pending | Initial hosted run passed build/model checks but not the complete desktop suite; local native/installer checks remain |
-| User data | Local validated JSON and backups | Thirteen model/placement/button/store tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
-| Editing / launcher | Implemented | Button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, and focus regressions covered |
-| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, eight ADRs, generated reference, five sample-data screenshots, and local checks |
+| User data | Local validated JSON and backups | Fifteen model/placement/button/search/store tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
+| Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, and focus regressions covered |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, nine ADRs, generated reference, six sample-data screenshots, and local checks |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
@@ -96,6 +96,14 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Validation: all 13 model/store/placement/button tests, production build, and extended native Electron suite passed locally on macOS Apple Silicon. Native coverage includes menus and keyboard/bounds behavior, duplicate/move/delete, launcher Edit routing, real filesystem-backed File objects, empty/occupied drops, confirmation/cancel, persistence, forged/multiple files, stale replacement rejection, and no action execution. Early test attempts exposed an active-badge locator mismatch and focus interference between concurrent native suites; corrected the locator and documented sequential native runs. Subsequent complete runs passed.
 - Verified and visually reviewed the new menu and replacement dialog in Dark mode at the minimum 820×600 editor size. Rebuilt and reopened the unsigned macOS Apple Silicon project application (`app.keepad.desktop`); no separate installed copy was replaced. Formatting, documentation, and source-impact checks passed against starting revision `ae83b58`.
 - Updated README, architecture, data/UX/testing/troubleshooting guides, ADR index, and screenshot provenance in the same change. Regenerated reference (no public choices changed), captured all five sample views, and reviewed them. Windows native behavior, actual Finder/File Explorer drag gestures, and OS permission prompts remain manual verification work; synthetic drag events do not prove those OS integrations.
+
+### 2026-09-23 — Global launcher search
+
+- Added a compact launcher search field, focused and cleared on each summon/preview. Names and descriptions (Hover hint) match across all pads, ignoring case/accents and requiring all query terms. Exact names/prefixes rank ahead of other name matches and description matches. Source pad names distinguish duplicate buttons; running a result does not change activation.
+- Blank queries keep the normal pad. Results support mouse execution, Up/Down and Enter, and source-aware context menus. Escape dismisses menus/dialogs, clears a query, then hides. Composition keys do not execute actions. Keep-open mode retains a query after execution and native refocus; explicit summon resets it and dismisses stale launcher confirmations. Main emits the summon notification explicitly rather than on every focus event. [ADR 0009](adr/0009-global-launcher-search.md) supersedes the older root-focus decision; schema, action validation, and persistence remain unchanged.
+- Validation: 15 unit tests passed locally, including ranking, duplicate identities, normalization, all-term matching, excluded targets, and immutability. Native macOS suite and production build cover immediate typing, cross-pad execution, unchanged activation, query reset, keyboard/context-menu routing, empty-result behavior, synthetic composition keys, mouse execution, keep-open/refocus query preservation, and stale-dialog dismissal. Fixed a pending-dialog focus race by coordinating modal removal and search focus in the same renderer commit. An initial test incorrectly assumed hidden Electron documents lose DOM focus; corrected it to inspect native window visibility. Real Windows, tray/shortcut gestures, screen readers, and real IME input remain manual release checks.
+- Regenerated six sample-data screenshot views and reviewed the updated launcher/search captures; generated reference remained unchanged. Formatting, documentation/impact checks against starting revision `abc4ec7`, and the full desktop suite passed. Rebuilt and reopened the unsigned macOS Apple Silicon project bundle (`app.keepad.desktop`); no separate installed copy was replaced.
+- Updated current README, architecture, UX/data/testing/troubleshooting, contributor guidance, ADR index, and screenshot provenance together. Search scans only saved names/descriptions: file contents, destinations, clipboard payloads, pad names, and fuzzy matching are outside scope. No new dependency, permission, network service, or stored search history was added.
 
 ## Next work / unresolved decisions
 

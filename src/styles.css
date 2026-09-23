@@ -915,7 +915,8 @@ button {
 .launcher-content {
   padding: 0 18px 12px;
   position: relative;
-  overflow: auto;
+  overflow: hidden;
+  display: flex;
   flex: 1;
 }
 .launcher-title {
@@ -961,7 +962,7 @@ button {
   position: absolute;
   z-index: 30;
   top: 32px;
-  left: 18px;
+  left: 0;
   width: 220px;
   background: var(--pad-key);
   border: 1px solid var(--pad-line);
@@ -1142,4 +1143,107 @@ button {
   width: 100%;
   font-size: 10px;
   padding: 2px;
+}
+
+.launcher-search {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+.launcher-search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin: 4px 0 12px;
+  padding: 0 10px;
+  border: 1px solid var(--pad-line);
+  border-radius: 4px;
+  background: var(--pad-key);
+  color: var(--pad-subtle);
+}
+.launcher-search-field:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.launcher-search-field input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  height: 34px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  color: var(--pad-text);
+}
+.launcher-search-field input::placeholder {
+  color: var(--pad-subtle);
+}
+.launcher-pad,
+.search-results {
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+.search-count {
+  font-size: 11px;
+  color: var(--pad-subtle);
+  margin: 0 0 8px;
+}
+.search-result {
+  display: flex;
+  text-align: left;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 10px;
+  color: var(--pad-text);
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.search-result[aria-selected='true'],
+.search-result:hover {
+  background: var(--pad-hover);
+  border-color: var(--pad-line);
+}
+.search-result .key-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+}
+.search-result img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.search-result-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.search-result-copy strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.search-result-copy span {
+  color: var(--pad-subtle);
+  font-size: 11px;
+}
+.search-result-copy strong,
+.search-result-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-results > .tip-anchor {
+  display: block;
+}
+
+.launcher-pad {
+  position: relative;
 }

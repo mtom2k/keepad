@@ -90,8 +90,6 @@ function windowFor(mode: 'launcher' | 'editor') {
     }
   });
   if (mode === 'launcher') {
-    win.on('show', () => win.webContents.send('launcher:shown'));
-    win.on('focus', () => win.webContents.send('launcher:shown'));
     win.on('blur', () => {
       if (!process.env.KEEPAD_TEST_DATA && store.state.settings.hideAfterAction) win.hide();
     });
@@ -126,7 +124,7 @@ function showLauncher(padId?: string) {
   const pad = store.state.pads.find((p) => p.id === (previewPadId ?? store.state.activePadId))!;
   const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
   const width = Math.min(580, area.width - 24),
-    height = Math.min(180 + pad.rows * 108, area.height - 24);
+    height = Math.min(224 + pad.rows * 108, area.height - 24);
   const x = area.x + (area.width - width) / 2,
     y = area.y + (area.height - height) / 2;
   launcher.setBounds({
@@ -139,10 +137,12 @@ function showLauncher(padId?: string) {
     launcher.webContents.once('did-finish-load', () => {
       launcher!.show();
       launcher!.focus();
+      launcher!.webContents.send('launcher:shown');
     });
   else {
     launcher.show();
     launcher.focus();
+    launcher.webContents.send('launcher:shown');
   }
 }
 function toggleLauncher() {

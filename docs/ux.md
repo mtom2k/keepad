@@ -25,8 +25,18 @@ The GitHub README is a separate audience: friendly emojis, screenshots, and plai
 - Tray/menu invocation and the global shortcut center the launcher on the pointer's display work area.
 - Previewing another pad does not change the saved active pad. The next normal summon returns to the active pad.
 - Launcher arrows/pad picker and tray radio items cycle the active pad.
-- Escape dismisses a button menu or dialog first; otherwise Escape or X hides the launcher. Hide-after-action also governs blur-hiding. A hidden window remains alive.
-- Reopening resets the previous control's focus to the root. Do not hide outlines globally: Tab navigation must remain usable and visible.
+- Escape dismisses a button menu or dialog first, then clears a nonempty search, then hides the launcher. X hides immediately. Hide-after-action also governs blur-hiding. A hidden window remains alive.
+- Each summon clears the search and focuses its field, discarding a pending launcher move/delete confirmation. Native refocus alone preserves the query. Do not hide outlines globally: Tab navigation must remain usable and visible.
+
+## Launcher search
+
+The launcher has one compact field, “Search all pads…”, focused on initial load and every invocation (including preview). Blank/whitespace queries show the usual pad grid. Nonempty queries replace it with a scrollable result list across **all pads**, including inactive pads. A result shows the button icon/image, name, originating pad, action type, and description when present; hover reveals the full name/pad/description if truncated. This does not select or activate the source pad.
+
+Search matches the button label and description (the Hover hint field), ignoring case and accents. All whitespace-separated query terms must appear in those fields, in any order. Exact-name matches rank first, then name prefixes, then other all-name matches, then matches requiring descriptions. Ties retain pad order and slot order; duplicate names remain separate results with their pad names. Pad names, destinations, file contents, and clipboard text are not search fields. There is no fuzzy/typo matching or scope toggle.
+
+The first result is selected. Up/Down changes selection and scrolls it into view while typing focus remains in the input. Enter runs the selected button through the existing action path; mouse clicks run their clicked result. Empty results show “No matching buttons”; Enter does nothing. IME composition keys must not run actions or dismiss the launcher. Clear search and Escape restore the grid and focus; a subsequent Escape hides. Hide-after-action still applies. Search is temporary, local, and never stored or exported.
+
+Right-click results, or use Shift+F10/the context-menu key from the search field, for the existing button menu. The source pad/button IDs identify the action, even with duplicate labels. Menu dismissal preserves the query and returns focus to search. Visible Tab focus remains available for other controls.
 
 ## Button menu
 
