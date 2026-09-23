@@ -15,9 +15,11 @@ Canonical schema: [shared/model.ts](../shared/model.ts). Store implementation: [
 | Slot | Integer 0–19, unique within the pad, less than columns × rows |
 | IDs | Nonempty, ≤80 characters; button IDs unique within each pad |
 | Image | PNG/JPEG/WebP base64 data URL, ≤1,500,000 characters in persisted state |
-| Settings | Shortcut string (1–100), hide-after-action boolean, launch-at-login boolean |
+| Settings | Theme (`light`, `dark`, `system`), shortcut string (1–100), hide-after-action boolean, launch-at-login boolean |
 
 Labels/names are trimmed by validation. Allowed choices and startup defaults are listed in [generated reference](reference.md).
+
+Pad icons additionally accept `none`; button icons do not. Version-1 data missing `settings.theme` parses with `system` without resetting existing data. Loading does not rewrite the file; the default is persisted by the next ordinary save. Imports retain the receiving device's theme. Builds predating icon-free pads cannot read `none`; retain a pre-change backup for downgrades. See [ADR 0007](adr/0007-application-appearance-and-optional-pad-icons.md) for compatibility and recovery.
 
 Website targets require a full HTTP(S) URL with a hostname. File/folder/app targets require an absolute Unix, Windows drive, or UNC path and cannot contain a NUL character. Existence and access are checked at execution time. Shortcuts are validated by native registration as well as basic string constraints.
 

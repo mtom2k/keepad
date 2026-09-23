@@ -37,6 +37,7 @@ import {
   icons,
   colors,
   themes,
+  appThemes,
   type State,
   type Pad,
   type MacroButton,
@@ -89,6 +90,17 @@ function App() {
       cancelAnimationFrame(frame);
     };
   }, [Boolean(snapshot)]);
+  const appTheme = snapshot?.state.settings.theme ?? 'system';
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = () => {
+      document.documentElement.dataset.appearance =
+        appTheme === 'system' ? (media.matches ? 'dark' : 'light') : appTheme;
+    };
+    apply();
+    media.addEventListener('change', apply);
+    return () => media.removeEventListener('change', apply);
+  }, [appTheme]);
   const notify = useCallback((text: string) => setToast(text), []);
   useEffect(() => {
     unwrap(api.load())
@@ -376,9 +388,11 @@ function App() {
                 <>
                   <div className="workspace-toolbar">
                     <div className="pad-heading">
-                      <span className="pad-heading-icon">
-                        <Glyph name={pad.icon} />
-                      </span>
+                      {pad.icon !== 'none' && (
+                        <span className="pad-heading-icon">
+                          <Glyph name={pad.icon} />
+                        </span>
+                      )}
                       <div>
                         <h1>{pad.name}</h1>
                       </div>
@@ -467,7 +481,7 @@ function App() {
                   </div>
                   <div className="editor-workspace">
                     <div className="appearance">
-                      <label htmlFor="theme">Theme</label>
+                      <label htmlFor="theme">Pad Theme</label>
                       <select
                         id="theme"
                         value={pad.theme}
@@ -667,6 +681,17 @@ function PadDialog({
         />
         <label className="field-label">Pad icon</label>
         <div className="icon-picker">
+          <Tip text="Show the pad name without an icon">
+            <button
+              type="button"
+              aria-label="No pad icon"
+              aria-pressed={icon === 'none'}
+              className={`no-icon-option ${icon === 'none' ? 'selected' : ''}`}
+              onClick={() => setIcon('none')}
+            >
+              None
+            </button>
+          </Tip>
           {icons.map((i) => (
             <button
               type="button"
@@ -1001,6 +1026,23 @@ function SettingsPage({
       </div>
       <section className="settings-card">
         <h2>General</h2>
+        <div className="setting-row">
+          <label htmlFor="app-theme">Theme</label>
+          <select
+            id="app-theme"
+            value={state.settings.theme}
+            disabled={busy}
+            onChange={(event) =>
+              void update({ theme: event.target.value as State['settings']['theme'] })
+            }
+          >
+            {appThemes.map((theme) => (
+              <option key={theme} value={theme}>
+                {theme[0].toUpperCase() + theme.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="setting-row">
           <div>
             <strong>Global shortcut</strong>

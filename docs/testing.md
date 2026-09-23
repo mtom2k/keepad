@@ -18,6 +18,8 @@ Run validation locally. GitHub hosts the private source repository and does not 
 
 ## Native suite coverage
 
+Appearance checks cover Light/Dark selection, simulated live System color-scheme changes, native theme preference, independent pad colors, icon-free creation/editing, and restart persistence. Model/store tests load legacy settings without resetting data, round-trip `none` pad icons, retain local theme during import, and reject invalid appearance or button-icon values. Windows native title bars and actual OS appearance switching still need manual validation.
+
 Positioning coverage includes native mouse dragging into empty/occupied cells, canceled outside-grid drops, absence of accidental edit dialogs, click/arrow-key position selection, canceled position drafts, new-button placement, launcher non-draggability, and restart persistence of a dragged position. Pure placement tests also check action preservation, immutability, new-button displacement, and invalid slot bounds.
 
 [tests/desktop.mjs](../tests/desktop.mjs) covers creation/editing, images, themes, layout steppers and bounds, preservation of buttons, single-click selection versus double-click activation, explicit activation, independent preview, centered launcher bounds, exposed pad controls, stale-focus reset, keyboard focus, tooltip bounds, native clipboard, backup merge, stale saves, unsafe URLs, missing-file recovery, and restart persistence.

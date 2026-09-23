@@ -1,5 +1,6 @@
 import { z } from 'zod';
 export const themes = ['paper', 'graphite', 'sage', 'sand', 'midnight', 'contrast'] as const;
+export const appThemes = ['light', 'dark', 'system'] as const;
 export const icons = [
   'globe',
   'folder',
@@ -22,6 +23,7 @@ export const icons = [
   'grid',
   'search',
 ] as const;
+export const padIcons = ['none', ...icons] as const;
 export const colors = ['green', 'blue', 'orange', 'purple', 'rose', 'neutral'] as const;
 export const actionTypes = ['url', 'file', 'folder', 'app', 'text'] as const;
 export const actionNames = {
@@ -76,7 +78,7 @@ export const PadSchema = z
     id,
     name: z.string().trim().min(1).max(32),
     description: z.string().max(100),
-    icon: z.enum(icons),
+    icon: z.enum(padIcons),
     theme: z.enum(themes),
     columns: z.number().int().min(3).max(5),
     rows: z.number().int().min(2).max(4),
@@ -101,6 +103,7 @@ export const StateSchema = z
     activePadId: id,
     pads: z.array(PadSchema).min(1).max(30),
     settings: z.object({
+      theme: z.enum(appThemes).default('system'),
       shortcut: z.string().min(1).max(100),
       hideAfterAction: z.boolean(),
       launchAtLogin: z.boolean(),
@@ -304,6 +307,7 @@ export function makeDefaultState(paths?: {
       },
     ],
     settings: {
+      theme: 'system',
       shortcut: 'CommandOrControl+Shift+Space',
       hideAfterAction: true,
       launchAtLogin: false,

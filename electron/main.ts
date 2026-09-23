@@ -9,6 +9,7 @@ import {
   shell,
   clipboard,
   nativeImage,
+  nativeTheme,
   screen,
 } from 'electron';
 import type { IpcMainInvokeEvent } from 'electron';
@@ -70,7 +71,7 @@ function windowFor(mode: 'launcher' | 'editor') {
     resizable: mode === 'editor',
     skipTaskbar: true,
     alwaysOnTop: mode === 'launcher',
-    backgroundColor: '#f4f4f4',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#202124' : '#fafafa',
     title: 'KeePad',
     webPreferences: {
       preload: path.join(root, 'dist-electron/electron/preload.cjs'),
@@ -191,6 +192,7 @@ async function commit(raw: unknown) {
     globalShortcut.unregister(previous.settings.shortcut);
     shortcutRegistered = true;
   }
+  nativeTheme.themeSource = store.state.settings.theme;
   if (next.activePadId !== previous.activePadId || !next.pads.some((p) => p.id === previewPadId))
     previewPadId = undefined;
   broadcast();
@@ -383,6 +385,7 @@ if (!app.requestSingleInstanceLock()) {
         }),
       );
       await store.load();
+      nativeTheme.themeSource = store.state.settings.theme;
       setupIPC();
       const icon = nativeImage.createFromPath(
         path.join(root, 'assets', process.platform === 'darwin' ? 'trayTemplate.png' : 'tray.png'),

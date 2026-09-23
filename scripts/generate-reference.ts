@@ -2,6 +2,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import {
   actionNames,
   themes,
+  appThemes,
+  padIcons,
   colors,
   icons,
   makeDefaultState,
@@ -55,7 +57,10 @@ ${rows([
   ['Starter layout', `${defaults.pads[0].columns} columns × ${defaults.pads[0].rows} rows`],
   ['Column limits', `${PadSchema.shape.columns.minValue}–${PadSchema.shape.columns.maxValue}`],
   ['Row limits', `${PadSchema.shape.rows.minValue}–${PadSchema.shape.rows.maxValue}`],
-  ['Themes', themes.join(', ')],
+  ['Pad themes', themes.join(', ')],
+  ['App themes', appThemes.join(', ')],
+  ['Default app theme', defaults.settings.theme],
+  ['Pad icon keys', padIcons.join(', ')],
   ['Button colors', colors.join(', ')],
   ['Icon keys', icons.join(', ')],
 ])}

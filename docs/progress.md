@@ -9,7 +9,7 @@ App version and dependency versions are in [generated reference](reference.md). 
 | macOS Apple Silicon | Locally built and exercised | Production build, native desktop suite, and unpacked app launch passed on 2026-09-22 |
 | Windows | Implemented; full validation pending | Initial hosted run passed build/model checks but not the complete desktop suite; local native/installer checks remain |
 | User data | Local validated JSON and backups | Model/store and native import/export tests passed; no schema migration framework |
-| Editing / launcher | Implemented | Visual position picker and editor drag/swaps added; steppers, activation, independent preview, center geometry, and focus regressions covered |
+| Editing / launcher | Implemented | Icon-free pads, independent app appearance, visual positioning, drag/swaps, activation, preview, centering, and focus regressions covered |
 | Documentation | Knowledge base added | Instructions, guides, ADRs, generation/link/impact checks, and sample-data screenshot workflow |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
@@ -62,6 +62,14 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Added editor-only drag-and-drop. Empty targets move buttons; occupied targets swap without losing actions. Outside-grid drops cancel; stale/cross-pad/external drags are ignored. Existing IDs, actions, image data, and the persisted schema are unchanged.
 - Validation: all nine model/placement tests, the extended native Electron suite, and production build passed locally on macOS. Native checks cover moving, swapping, canceling, keyboard selection, new-button placement, launcher non-draggability, and restart persistence. The 5×4 picker, tooltip bounds, and reachable Save button were also verified at 820×600. Refreshed and reviewed the sample-data dialog screenshot. Windows native behavior remains unverified locally.
 - Documentation/impact and formatting checks passed. Rebuilt the unsigned macOS Apple Silicon app and reopened the project copy (`app.keepad.desktop`); no separate installed application was replaced.
+
+### 2026-09-23 — Pad icons and application appearance
+
+- Added None to New/Edit pad icons and removed icon placeholders from pad headings. Renamed the per-pad selector to Pad Theme.
+- Added Settings → General → Theme with Light, Dark, and System. App surfaces, dialogs, tooltips, and native appearance follow the preference; pad colors remain independent. System follows live OS color-scheme changes.
+- Added a default for older settings files without resetting saved pads. Existing backup import preserves local appearance. [ADR 0007](adr/0007-application-appearance-and-optional-pad-icons.md) records compatibility and downgrade limits.
+- Validation: ten model/placement/store tests, production build, and extended native desktop suite passed locally on macOS. Coverage includes legacy-file loading, import preservation, icon-free creation/editing, explicit themes, simulated System changes, and restart persistence. Reviewed Dark Settings and editing dialogs; refreshed sample-data screenshots and generated reference. Windows native behavior and actual OS appearance switching remain manual validation work.
+- Formatting and documentation/impact checks passed. Rebuilt and reopened the unsigned macOS Apple Silicon project app; the separate installed copy was not replaced.
 
 ## Next work / unresolved decisions
 

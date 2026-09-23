@@ -54,7 +54,10 @@ Run `npm run docs:generate` after changing package metadata, commands, dependenc
 | Starter layout | 4 columns × 3 rows |
 | Column limits | 3–5 |
 | Row limits | 2–4 |
-| Themes | paper, graphite, sage, sand, midnight, contrast |
+| Pad themes | paper, graphite, sage, sand, midnight, contrast |
+| App themes | light, dark, system |
+| Default app theme | system |
+| Pad icon keys | none, globe, folder, file, app, copy, mail, music, code, calendar, camera, pen, coffee, book, terminal, heart, video, download, message, grid, search |
 | Button colors | green, blue, orange, purple, rose, neutral |
 | Icon keys | globe, folder, file, app, copy, mail, music, code, calendar, camera, pen, coffee, book, terminal, heart, video, download, message, grid, search |
 

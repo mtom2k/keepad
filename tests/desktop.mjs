@@ -143,6 +143,7 @@ try {
   assert.equal(status.value.info.desktop, true);
   await window.getByRole('button', { name: 'New pad', exact: true }).click();
   await window.getByLabel('Pad name', { exact: true }).fill('Test workspace');
+  await window.getByRole('button', { name: 'No pad icon', exact: true }).click();
   await window.getByRole('button', { name: 'Create pad', exact: true }).click();
   await window.getByRole('heading', { name: 'Test workspace' }).waitFor();
   const currentActive = async () =>
@@ -189,7 +190,7 @@ try {
   await window.screenshot({ path: 'test-results/button-editor.png' });
   await window.getByRole('button', { name: 'Save button', exact: true }).click();
   await window.getByRole('button', { name: 'Edit Test snippet', exact: true }).waitFor();
-  await window.getByLabel('Theme', { exact: true }).selectOption('graphite');
+  await window.getByLabel('Pad Theme', { exact: true }).selectOption('graphite');
   await window.getByRole('button', { name: 'Preview pad on screen', exact: true }).hover();
   await window.getByRole('tooltip', { name: 'Preview pad on screen' }).waitFor();
   const launcherReady = app.waitForEvent('window');
@@ -289,6 +290,54 @@ try {
   await window.getByRole('button', { name: 'Settings', exact: true }).click();
   await window.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
   await window.screenshot({ path: 'test-results/settings.png' });
+  const setAppTheme = async (theme, resolved = theme) => {
+    await window.getByLabel('Theme', { exact: true }).selectOption(theme);
+    await window.waitForFunction(
+      (value) => document.documentElement.dataset.appearance === value,
+      resolved,
+    );
+    await window.waitForFunction(
+      async (value) => (await window.keepad.load()).value.state.settings.theme === value,
+      theme,
+    );
+    assert.equal(await app.evaluate(({ nativeTheme }) => nativeTheme.themeSource), theme);
+  };
+  await setAppTheme('dark');
+  await window.screenshot({ path: 'test-results/settings-dark.png' });
+  assert.equal(
+    await window.evaluate(async () => {
+      const {
+        value: { state },
+      } = await window.keepad.load();
+      return state.pads.find((p) => p.id === state.activePadId).theme;
+    }),
+    'graphite',
+    'App appearance leaves the pad theme unchanged',
+  );
+  await window.locator('.pad-nav-item').filter({ hasText: 'Test workspace' }).click();
+  await window.getByRole('button', { name: 'Edit Pad', exact: true }).click();
+  await window.getByRole('button', { name: 'No pad icon', exact: true }).click();
+  await window.screenshot({ path: 'test-results/pad-no-icon-dark.png' });
+  await window.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await window.waitForFunction(() => !document.querySelector('.pad-heading-icon'));
+  assert.equal(await window.locator('.pad-nav-item.selected svg').count(), 0);
+  await window.getByRole('button', { name: 'Edit Test snippet', exact: true }).click();
+  await window.screenshot({ path: 'test-results/button-dark.png' });
+  await window.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await window.getByRole('button', { name: 'Settings', exact: true }).click();
+  await setAppTheme('light');
+  await window.emulateMedia({ colorScheme: 'dark' });
+  assert.equal(
+    await window.evaluate(() => document.documentElement.dataset.appearance),
+    'light',
+    'Explicit Light ignores system dark',
+  );
+  await setAppTheme('system', 'dark');
+  await window.emulateMedia({ colorScheme: 'light' });
+  await window.waitForFunction(() => document.documentElement.dataset.appearance === 'light');
+  await window.emulateMedia({ colorScheme: null });
+  await setAppTheme('dark');
+
   const before = await window.evaluate(async () => (await window.keepad.load()).value.state);
   await app.evaluate(({ globalShortcut }) =>
     globalShortcut.register('CommandOrControl+Alt+9', () => {}),
@@ -409,6 +458,9 @@ try {
     0,
     'Dragged position survives restart',
   );
+  await reopened.waitForFunction(() => document.documentElement.dataset.appearance === 'dark');
+  assert.equal(await app.evaluate(({ nativeTheme }) => nativeTheme.themeSource), 'dark');
+  assert.equal(await reopened.locator('.pad-heading-icon').count(), 0, 'No icon survives restart');
   assert.deepEqual(errors, []);
   console.log(
     'Desktop checks passed: editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',

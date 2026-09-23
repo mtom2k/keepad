@@ -13,7 +13,8 @@ The GitHub README is a separate audience: friendly emojis, screenshots, and plai
 - Single-click a sidebar pad to edit it. Double-click activates it, as does Make Active. An ACTIVE badge marks only the active pad.
 - The toolbar exposes Make Active plus eye, pencil, copy, and trash controls. Use widely recognized icons. The eye tooltip is exactly “Preview pad on screen”.
 - New and duplicated pads become selected, not active. Deleting an inactive pad preserves the active pad; deleting the active pad selects the first remaining pad. The final pad cannot be deleted.
-- Theme is a dropdown. Columns and Rows have labeled −/count/+ steppers. Disabled controls explain limits or protected actions on hover.
+- Pad Theme is a dropdown. Columns and Rows have labeled −/count/+ steppers. Disabled controls explain limits or protected actions on hover.
+- New/Edit pad offers None under Pad icon. Icon-free pads show their name without a placeholder in the sidebar, editor heading, launcher, and pad picker.
 - Clicking an occupied key edits it; clicking an empty key adds an action. Drag an occupied key onto an empty position to move it, or onto another key to swap. The destination has a clear outline. Releasing outside the grid or pressing Escape cancels the drag. Launcher keys are not draggable.
 - The button dialog's Position control is a miniature pad with the actual columns/rows, icons/images, position numbers, and a highlighted selection. Click a position or use arrow keys (Home/End for first/last); hover for row/column and swap guidance. Changes apply only on Save. Cancel discards them. A newly created button targeting an occupied position moves that occupant to the empty position where creation began.
 - Macro keys show image/icon and label; action details stay in tooltips/dialogs.
@@ -30,6 +31,6 @@ The GitHub README is a separate audience: friendly emojis, screenshots, and plai
 
 Provide accessible names for icon controls, visible keyboard focus, native modal focus containment, and clear error messages. Floating UI flips/shifts custom tooltips within the viewport; dialogs use a portal inside their top layer. Stepper counts use live outputs. Preserve existing values when a save or native operation fails.
 
-Themes apply to the pad, not the entire editor. Current themes are Paper, Graphite, Sage, Sand, Midnight, and High contrast. The High contrast theme is not a claim of a completed accessibility audit.
+Pad themes apply to the pad. Current pad themes are Paper, Graphite, Sage, Sand, Midnight, and High contrast. Settings → General → Theme controls KeePad's editor, dialogs, tooltips, and native appearance independently: Light, Dark, or System (default). System follows OS appearance changes without restarting. The High contrast pad theme is not a claim of a completed accessibility audit.
 
 Review [screenshots](screenshots/README.md) after visible changes, including edge tooltips, dialogs, and the editor's minimum size.

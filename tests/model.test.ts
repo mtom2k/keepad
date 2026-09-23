@@ -5,6 +5,42 @@ import os from 'node:os';
 import path from 'node:path';
 import { makeDefaultState, StateSchema, ButtonSchema, mergeImported } from '../shared/model.js';
 import { Store } from '../electron/store.js';
+test('legacy settings gain System appearance without resetting existing data', async () => {
+  const original = makeDefaultState();
+  const legacy = JSON.parse(JSON.stringify(original));
+  delete legacy.settings.theme;
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'keepad-legacy-theme-'));
+  try {
+    const file = path.join(dir, 'keepad.json');
+    await writeFile(file, JSON.stringify(legacy));
+    const store = new Store(file, makeDefaultState());
+    assert.deepEqual(await store.load(), original);
+    assert.equal(store.warning, undefined);
+    assert.deepEqual(await readdir(dir), ['keepad.json']);
+    const next = structuredClone(store.state);
+    next.settings.theme = 'dark';
+    next.pads[0].icon = 'none';
+    await store.write(next);
+    assert.deepEqual(await new Store(file, makeDefaultState()).load(), next);
+    let counter = 0;
+    const imported = mergeImported(next, legacy, () => `legacy-${counter++}`);
+    assert.equal(imported.settings.theme, 'dark');
+    assert.equal(imported.pads.length, next.pads.length + legacy.pads.length);
+    const roundTrip = mergeImported(original, next, () => `new-${counter++}`);
+    assert.equal(roundTrip.pads[original.pads.length].icon, 'none');
+    assert.equal(roundTrip.settings.theme, 'system');
+    assert.equal(
+      StateSchema.safeParse({ ...next, settings: { ...next.settings, theme: 'invalid' } }).success,
+      false,
+    );
+    assert.equal(
+      ButtonSchema.safeParse({ ...next.pads[0].buttons[0], icon: 'none' }).success,
+      false,
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 test('starter pads validate on both operating systems', () => {
   for (const home of ['/Users/test', 'C:\\Users\\test'])
     assert.equal(

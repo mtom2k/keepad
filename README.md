@@ -23,6 +23,13 @@ Open your compact pad from the menu bar, notification area, or keyboard shortcut
 
 </details>
 
+<details>
+<summary>KeePad in Dark mode</summary>
+
+![KeePad Settings in Dark mode with the app-wide Theme selector](docs/screenshots/settings-dark.png)
+
+</details>
+
 Screenshots use sample data from the actual app. [How they are made](docs/screenshots/README.md).
 
 ## ✨ What you can do
@@ -30,6 +37,7 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 - **Make several pads** for work, projects, or personal shortcuts.
 - **Give each button an action:** website, file, folder, app, or text to copy.
 - **Choose icons or your own images**, button colors, and six pad themes.
+- **Choose Light, Dark, or System** in Settings → Theme. Each pad keeps its own **Pad Theme**, and its pad icon can be **None**.
 - **Adjust Columns and Rows** with simple −/+ controls. KeePad prevents shrinking a pad if it would hide saved buttons.
 - **Arrange buttons visually:** drag them around the editor, or choose a spot on the mini pad in the button dialog. Dropping onto another button swaps their positions.
 - **Preview before activating.** The eye button shows a pad without changing your active choice.
@@ -39,7 +47,7 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 
 1. Click **New pad**, give it a name, and create it.
 2. Click an empty **+** button. Choose an action, enter its destination, then save.
-3. Adjust **Theme**, **Columns**, and **Rows** as needed.
+3. Adjust **Pad Theme**, **Columns**, and **Rows** as needed.
 4. Click **Make Active**, or double-click the pad's name in the sidebar. Its **ACTIVE** badge tells you it is selected for everyday use.
 5. Open the pad whenever you need it:
 

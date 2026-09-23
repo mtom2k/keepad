@@ -67,10 +67,11 @@ export function Glyph({
   size = 20,
   ...props
 }: {
-  name: keyof typeof iconMap;
+  name: keyof typeof iconMap | 'none';
   size?: number;
   className?: string;
 }) {
+  if (name === 'none') return null;
   const Component = iconMap[name] || Grid2X2;
   return <Component size={size} strokeWidth={1.7} {...props} />;
 }

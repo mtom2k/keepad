@@ -1,12 +1,30 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
-  color: #262626;
-  background: #fafafa;
+  color: var(--text);
+  background: var(--surface);
   font-synthesis: none;
   --accent: #356ac3;
   --border: #d5d5d5;
+  color-scheme: light;
+  --text: #262626;
+  --surface: #fafafa;
+  --field: #fff;
+  --field-alt: #f5f5f5;
+  --sidebar: #ededed;
+  --hover: #e5e5e5;
   --muted: #666;
+  --subtle: #777;
+  --selected-bg: #d6e2f4;
+  --selected-text: #234a85;
+  --danger-text: #ad3932;
+  --tooltip-bg: #fffde7;
+  --error-bg: #fff4ed;
+  --error-border: #d7b29f;
+  --error-text: #86492e;
+  --warning-bg: #fff8df;
+  --warning-border: #e2d5ae;
+  --warning-text: #756131;
 }
 * {
   box-sizing: border-box;
@@ -64,10 +82,10 @@ select,
 textarea {
   width: 100%;
   min-width: 0;
-  border: 1px solid #bdbdbd;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #262626;
-  background: #fff;
+  color: var(--text);
+  background: var(--field);
   padding: 6px 8px;
   line-height: 1.4;
 }
@@ -79,7 +97,7 @@ textarea {
 }
 input::placeholder,
 textarea::placeholder {
-  color: #818181;
+  color: var(--subtle);
 }
 .drag {
   -webkit-app-region: drag;
@@ -100,14 +118,14 @@ button {
   width: 216px;
   display: flex;
   flex-direction: column;
-  background: #ededed;
+  background: var(--sidebar);
   border-right: 1px solid var(--border);
   padding: 17px 10px 10px;
 }
 .sidebar-heading {
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: var(--muted);
   margin: 0 10px 12px;
 }
 .pad-nav {
@@ -132,23 +150,23 @@ button {
 }
 .pad-nav-item svg,
 .nav-item svg {
-  color: #666;
+  color: var(--muted);
 }
 .pad-nav-item:hover,
 .nav-item:hover {
-  background: #e1e1e1;
+  background: var(--hover);
 }
 .pad-nav-item.selected,
 .nav-item.active {
-  background: #d6e2f4;
-  color: #234a85;
+  background: var(--selected-bg);
+  color: var(--selected-text);
 }
 .pad-nav-item.selected svg,
 .nav-item.active svg {
-  color: #345c98;
+  color: var(--selected-text);
 }
 .new-pad-link {
-  color: #555;
+  color: var(--muted);
   padding: 9px 10px;
   margin-top: 7px;
   justify-content: flex-start;
@@ -156,7 +174,7 @@ button {
   border-radius: 4px;
 }
 .new-pad-link:hover {
-  background: #e1e1e1;
+  background: var(--hover);
 }
 .sidebar-bottom {
   border-top: 1px solid var(--border);
@@ -192,7 +210,7 @@ button {
 }
 .pad-heading-icon {
   display: flex;
-  color: #666;
+  color: var(--muted);
 }
 .toolbar-actions {
   display: flex;
@@ -218,12 +236,12 @@ button {
   background: #285bac;
 }
 .secondary {
-  background: #fff;
-  border: 1px solid #c5c5c5;
+  background: var(--field);
+  border: 1px solid var(--border);
   box-shadow: 0 1px 1px #00000008;
 }
 .secondary:hover:not(:disabled) {
-  background: #f0f0f0;
+  background: var(--hover);
 }
 .danger {
   background: #b33d35;
@@ -235,20 +253,20 @@ button {
   height: 28px;
   padding: 0;
   border-radius: 4px;
-  color: #666;
+  color: var(--muted);
   flex-shrink: 0;
 }
 .icon-button:hover {
-  background: #e5e5e5;
+  background: var(--hover);
 }
 .bordered {
   width: 30px;
   height: 30px;
-  border: 1px solid #c5c5c5;
-  background: #fff;
+  border: 1px solid var(--border);
+  background: var(--field);
 }
 .danger-text {
-  color: #ad3932 !important;
+  color: var(--danger-text) !important;
 }
 .editor-workspace {
   display: flex;
@@ -264,7 +282,7 @@ button {
   flex-wrap: wrap;
 }
 .appearance label {
-  color: #555;
+  color: var(--muted);
   margin: 0;
   font-size: 12px;
   font-weight: 400;
@@ -403,19 +421,19 @@ button {
   position: relative;
   width: 100%;
   height: 36px;
-  border: 1px solid #c9c9c9;
+  border: 1px solid var(--border);
   border-radius: 3px;
-  color: #666;
-  background: #f5f5f5;
+  color: var(--muted);
+  background: var(--field-alt);
   padding: 3px 3px 3px 14px;
 }
 .position-cell:hover {
-  background: #e9edf2;
+  background: var(--hover);
 }
 .position-cell.selected {
   border: 2px solid var(--accent);
-  background: #e5edf9;
-  color: #285797;
+  background: var(--selected-bg);
+  color: var(--selected-text);
 }
 .position-number {
   position: absolute;
@@ -489,7 +507,7 @@ button {
   min-height: 33px;
   margin-top: 5px;
   font-size: 11px;
-  color: #666;
+  color: var(--muted);
 }
 .shortcut {
   display: inline-flex;
@@ -502,20 +520,20 @@ button {
   font-size: 11px;
   min-width: 20px;
   padding: 2px 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
   border-radius: 3px;
-  background: #fff;
+  background: var(--field);
   line-height: 1.2;
-  color: #555;
+  color: var(--muted);
 }
 .shortcut-link {
   padding: 0;
 }
 .tooltip {
   z-index: 10000;
-  background: #fffde7;
-  color: #333;
-  border: 1px solid #b8b59f;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 7px 9px;
   border-radius: 3px;
   font-size: 12px;
@@ -527,10 +545,10 @@ button {
 }
 .modal {
   padding: 20px;
-  border: 1px solid #aaa;
+  border: 1px solid var(--border);
   border-radius: 7px;
-  background: #fafafa;
-  color: #262626;
+  background: var(--surface);
+  color: var(--text);
   width: min(440px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
   overflow: auto;
@@ -555,7 +573,7 @@ button {
 }
 .modal-description {
   font-size: 12px;
-  color: #555;
+  color: var(--muted);
   margin: 12px 0 20px;
   line-height: 1.6;
 }
@@ -565,16 +583,16 @@ button {
   align-items: center;
   font-size: 12px;
   font-weight: 400;
-  color: #444;
+  color: var(--text);
   margin: 13px 0 6px;
 }
 .field-label span {
   font-size: 11px;
-  color: #777;
+  color: var(--subtle);
 }
 .field-hint {
   font-size: 11px;
-  color: #777;
+  color: var(--subtle);
   line-height: 1.5;
   margin-top: 9px;
 }
@@ -585,7 +603,7 @@ button {
   align-items: center;
   margin-top: 20px;
   padding-top: 14px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border);
 }
 .modal-actions.split {
   justify-content: space-between;
@@ -603,17 +621,17 @@ button {
 .icon-picker button {
   aspect-ratio: 1;
   padding: 5px;
-  color: #666;
+  color: var(--muted);
   border: 1px solid transparent;
   border-radius: 3px;
 }
 .icon-picker button:hover {
-  background: #e8e8e8;
+  background: var(--hover);
 }
 .icon-picker button.selected {
-  background: #e0e9f7;
-  color: #285797;
-  border-color: #9db4d6;
+  background: var(--selected-bg);
+  color: var(--selected-text);
+  border-color: var(--accent);
 }
 .icon-picker.compact {
   grid-template-columns: repeat(5, 1fr);
@@ -627,12 +645,12 @@ button {
   margin-top: 0;
 }
 .button-visual {
-  border-left: 1px solid #ddd;
+  border-left: 1px solid var(--border);
   padding-left: 20px;
 }
 .panel-eyebrow {
   font-size: 12px;
-  color: #666;
+  color: var(--muted);
 }
 .key-preview {
   padding: 12px 15px;
@@ -678,7 +696,7 @@ button {
 .text-button {
   font-size: 12px;
   padding: 4px 0;
-  color: #555;
+  color: var(--muted);
 }
 .button-visual .text-button {
   width: 100%;
@@ -688,7 +706,7 @@ button {
   font-size: 11px;
 }
 .inline-error {
-  color: #b33d35;
+  color: var(--danger-text);
   font-size: 12px;
   margin-top: 10px;
 }
@@ -713,14 +731,14 @@ button {
   left: 20px;
   right: 20px;
   z-index: 300;
-  background: #fff4ed;
-  border: 1px solid #d7b29f;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
   border-radius: 4px;
   padding: 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #86492e;
+  color: var(--error-text);
   font-size: 12px;
 }
 .error-banner > span {
@@ -745,9 +763,9 @@ button {
   line-height: 1.5;
   padding: 10px 12px;
   border-radius: 4px;
-  background: #fff8df;
-  border: 1px solid #e2d5ae;
-  color: #756131;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning-text);
   margin-bottom: 15px;
   display: flex;
   align-items: center;
@@ -763,7 +781,7 @@ button {
 .settings-card {
   padding: 0 0 18px;
   margin-bottom: 20px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
 }
 .settings-card h2 {
   font-size: 13px;
@@ -783,13 +801,13 @@ button {
 }
 .setting-row p {
   font-size: 11px;
-  color: #777;
+  color: var(--subtle);
   line-height: 1.5;
   margin-top: 3px;
 }
 .settings-hint {
   font-size: 11px;
-  color: #777;
+  color: var(--subtle);
   margin-bottom: 5px;
 }
 .shortcut-controls {
@@ -799,14 +817,14 @@ button {
 }
 .shortcut-capture {
   padding: 5px;
-  border: 1px solid #bbb;
+  border: 1px solid var(--border);
   min-height: 30px;
   border-radius: 4px;
-  background: #fff;
+  background: var(--field);
 }
 .shortcut-capture.recording {
   font-size: 12px;
-  background: #e8effb;
+  background: var(--selected-bg);
   border-color: var(--accent);
   min-width: 170px;
 }
@@ -819,7 +837,7 @@ button {
 }
 .settings-copy {
   font-size: 12px;
-  color: #666;
+  color: var(--muted);
   line-height: 1.6;
 }
 .backup-actions {
@@ -829,11 +847,11 @@ button {
 }
 .permissions-details {
   font-size: 12px;
-  color: #555;
+  color: var(--muted);
 }
 .permissions-details summary {
   cursor: pointer;
-  color: #444;
+  color: var(--text);
 }
 .permissions-details p {
   margin: 10px 0;
@@ -842,7 +860,7 @@ button {
 }
 .settings-footer {
   font-size: 11px;
-  color: #777;
+  color: var(--subtle);
   margin-top: auto;
   padding-top: 28px;
   padding-bottom: 8px;
@@ -972,7 +990,7 @@ button {
   justify-content: center;
   flex-direction: column;
   gap: 16px;
-  color: #666;
+  color: var(--muted);
 }
 .loading p {
   max-width: 550px;
@@ -1036,14 +1054,14 @@ button {
   margin-left: 10px;
 }
 .stepper-label {
-  color: #555;
+  color: var(--muted);
 }
 .number-stepper {
   display: flex;
   align-items: center;
-  border: 1px solid #c5c5c5;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: #f1f1f1;
+  background: var(--field-alt);
   overflow: hidden;
 }
 .number-stepper button {
@@ -1052,7 +1070,7 @@ button {
   padding: 0;
 }
 .number-stepper button:hover:not(:disabled) {
-  background: #e2e2e2;
+  background: var(--hover);
 }
 .number-stepper button:focus-visible {
   outline-offset: -3px;
@@ -1064,4 +1082,39 @@ button {
   font-size: 13px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+}
+
+:root[data-appearance='dark'] {
+  color-scheme: dark;
+  --text: #e5e7eb;
+  --surface: #202124;
+  --field: #292c30;
+  --field-alt: #2d3035;
+  --sidebar: #25272b;
+  --hover: #393d43;
+  --muted: #b6bac2;
+  --subtle: #a4a9b2;
+  --border: #51555e;
+  --accent: #8ab4f8;
+  --selected-bg: #304668;
+  --selected-text: #d6e6ff;
+  --danger-text: #ff9c94;
+  --tooltip-bg: #34363b;
+  --error-bg: #402b26;
+  --error-border: #85584a;
+  --error-text: #ffbaa1;
+  --warning-bg: #393322;
+  --warning-border: #77673b;
+  --warning-text: #e9d393;
+}
+.setting-row select {
+  width: 150px;
+}
+.icon-picker .tip-anchor {
+  display: flex;
+}
+.icon-picker .no-icon-option {
+  width: 100%;
+  font-size: 10px;
+  padding: 2px;
 }

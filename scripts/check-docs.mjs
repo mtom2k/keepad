@@ -65,7 +65,7 @@ for (const file of markdown.filter(existsSync)) {
     else if (!existsSync(target)) failures.push(`${file}: broken link ${raw}`);
   }
 }
-for (const name of ['editor', 'launcher', 'button-editor']) {
+for (const name of ['editor', 'launcher', 'button-editor', 'settings-dark']) {
   const file = `docs/screenshots/${name}.png`;
   if (!existsSync(file)) failures.push(`Missing screenshot: ${file}`);
   else {
