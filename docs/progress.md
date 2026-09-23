@@ -9,7 +9,7 @@ App version and dependency versions are in [generated reference](reference.md). 
 | macOS Apple Silicon | Locally built and exercised | Production build, native desktop suite, and unpacked app launch passed on 2026-09-22 |
 | Windows | Implemented; full validation pending | Initial hosted run passed build/model checks but not the complete desktop suite; local native/installer checks remain |
 | User data | Local validated JSON and backups | Model/store and native import/export tests passed; no schema migration framework |
-| Editing / launcher | Implemented | Steppers, activation, independent preview, center geometry, and focus regressions covered |
+| Editing / launcher | Implemented | Visual position picker and editor drag/swaps added; steppers, activation, independent preview, center geometry, and focus regressions covered |
 | Documentation | Knowledge base added | Instructions, guides, ADRs, generation/link/impact checks, and sample-data screenshot workflow |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
@@ -55,6 +55,13 @@ App version and dependency versions are in [generated reference](reference.md). 
 - The owner clarified that GitHub should house the code without CI/CD. Removed the Actions workflow and canceled the active run. [ADR 0006](adr/0006-private-source-hosting-with-local-checks.md) records this preference and supersedes the earlier hosted-check requirement.
 - Kept local tests, documentation/reference checks, screenshot capture, and same-change documentation responsibilities. Updated contributor, testing, release, and maintenance guidance to match.
 - Latest native desktop suite and production build passed locally after the focus-test synchronization change. Hosted onboarding attempts above are historical; future checks are run locally when relevant.
+
+### 2026-09-23 — Visual button positioning
+
+- Replaced the Position dropdown with a miniature pad matching the current grid. It previews icons/images and swaps, supports clicking and arrow/Home/End navigation, and explains destinations in unclipped tooltips. Dialog changes remain drafts until Save.
+- Added editor-only drag-and-drop. Empty targets move buttons; occupied targets swap without losing actions. Outside-grid drops cancel; stale/cross-pad/external drags are ignored. Existing IDs, actions, image data, and the persisted schema are unchanged.
+- Validation: all nine model/placement tests, the extended native Electron suite, and production build passed locally on macOS. Native checks cover moving, swapping, canceling, keyboard selection, new-button placement, launcher non-draggability, and restart persistence. The 5×4 picker, tooltip bounds, and reachable Save button were also verified at 820×600. Refreshed and reviewed the sample-data dialog screenshot. Windows native behavior remains unverified locally.
+- Documentation/impact and formatting checks passed. Rebuilt the unsigned macOS Apple Silicon app and reopened the project copy (`app.keepad.desktop`); no separate installed application was replaced.
 
 ## Next work / unresolved decisions
 

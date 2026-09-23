@@ -18,6 +18,8 @@ Run validation locally. GitHub hosts the private source repository and does not 
 
 ## Native suite coverage
 
+Positioning coverage includes native mouse dragging into empty/occupied cells, canceled outside-grid drops, absence of accidental edit dialogs, click/arrow-key position selection, canceled position drafts, new-button placement, launcher non-draggability, and restart persistence of a dragged position. Pure placement tests also check action preservation, immutability, new-button displacement, and invalid slot bounds.
+
 [tests/desktop.mjs](../tests/desktop.mjs) covers creation/editing, images, themes, layout steppers and bounds, preservation of buttons, single-click selection versus double-click activation, explicit activation, independent preview, centered launcher bounds, exposed pad controls, stale-focus reset, keyboard focus, tooltip bounds, native clipboard, backup merge, stale saves, unsafe URLs, missing-file recovery, and restart persistence.
 
 It uses a temporary `KEEPAD_TEST_DATA` path, copies supported clipboard formats into new Electron `ClipboardItem` objects for restoration, and stubs file/URL shell handlers to avoid opening unrelated applications. The main process accepts the test profile override only in development, not packaged builds.

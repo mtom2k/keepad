@@ -20,7 +20,16 @@ import {
   Info,
 } from 'lucide-react';
 import { api, unwrap, type Snapshot } from './api';
-import { Glyph, Logo, Tip, Modal, MacroKey, Shortcut, NumberStepper } from './components';
+import {
+  Glyph,
+  Logo,
+  Tip,
+  Modal,
+  MacroKey,
+  Shortcut,
+  NumberStepper,
+  PositionPicker,
+} from './components';
 import {
   ButtonSchema,
   actionNames,
@@ -32,6 +41,7 @@ import {
   type Pad,
   type MacroButton,
 } from '../shared/model';
+import { placeButton } from './pad-layout';
 import './styles.css';
 const themeNames = {
   paper: 'Paper',
@@ -41,6 +51,7 @@ const themeNames = {
   midnight: 'Midnight',
   contrast: 'High contrast',
 };
+
 const isLauncher = new URLSearchParams(location.search).get('mode') === 'launcher';
 function App() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null),
@@ -53,6 +64,14 @@ function App() {
     [confirmDelete, setConfirmDelete] = useState(false),
     [padPicker, setPadPicker] = useState(false);
   const [selectedPadId, setSelectedPadId] = useState<string | null>(null);
+  const dragSource = useRef<{ padId: string; buttonId: string; revision: number } | null>(null);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dropSlot, setDropSlot] = useState<number | null>(null);
+  const clearDrag = () => {
+    dragSource.current = null;
+    setDraggedId(null);
+    setDropSlot(null);
+  };
   const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!isLauncher || !snapshot) return;
@@ -152,6 +171,58 @@ function App() {
           slot={slot}
           button={pad.buttons.find((b) => b.slot === slot)}
           editing={!isLauncher}
+          dragging={draggedId === pad.buttons.find((b) => b.slot === slot)?.id}
+          draggingAny={draggedId !== null}
+          dropTarget={dropSlot === slot}
+          dragProps={
+            isLauncher
+              ? undefined
+              : {
+                  draggable: !busy && !!pad.buttons.find((b) => b.slot === slot),
+                  onDragStart: (event) => {
+                    const source = pad.buttons.find((b) => b.slot === slot);
+                    if (!source || busy) {
+                      event.preventDefault();
+                      return;
+                    }
+                    dragSource.current = {
+                      padId: pad.id,
+                      buttonId: source.id,
+                      revision: state.revision,
+                    };
+                    setDraggedId(source.id);
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('application/x-keepad-button', source.id);
+                  },
+                  onDragOver: (event) => {
+                    const source = dragSource.current;
+                    if (busy || source?.padId !== pad.id || source.revision !== state.revision)
+                      return;
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                    setDropSlot(slot);
+                  },
+                  onDragLeave: (event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+                      setDropSlot(null);
+                  },
+                  onDragEnd: clearDrag,
+                  onDrop: (event) => {
+                    const source = dragSource.current;
+                    clearDrag();
+                    if (busy || source?.padId !== pad.id || source.revision !== state.revision)
+                      return;
+                    event.preventDefault();
+                    const moved = pad.buttons.find((b) => b.id === source.buttonId);
+                    if (!moved || moved.slot === slot) return;
+                    void (async () => {
+                      const swapped = pad.buttons.some((b) => b.slot === slot);
+                      if (await updatePad(placeButton(pad, { ...moved, slot }, moved.slot)))
+                        notify(swapped ? 'Buttons swapped' : 'Button moved');
+                    })();
+                  },
+                }
+          }
           onClick={() => {
             const b = pad.buttons.find((b) => b.slot === slot);
             if (isLauncher) {
@@ -664,16 +735,7 @@ function ButtonEditor({
       setValidation(parsed.error.issues[0].message);
       return;
     }
-    const other = pad.buttons.find((b) => b.slot === button.slot && b.id !== button.id);
-    onSave({
-      ...pad,
-      buttons: [
-        ...pad.buttons
-          .filter((b) => b.id !== button.id)
-          .map((b) => (b.id === other?.id ? { ...b, slot } : b)),
-        parsed.data,
-      ],
-    });
+    onSave(placeButton(pad, parsed.data, slot));
   };
   return (
     <Modal title={existing ? 'Edit button' : 'New button'} onClose={onClose} wide>
@@ -774,21 +836,14 @@ function ButtonEditor({
               onChange={(e) => change({ description: e.target.value })}
               placeholder="Optional tooltip"
             />
-            <label className="field-label" htmlFor="button-position">
-              Position
-            </label>
-            <select
-              id="button-position"
-              value={button.slot}
-              onChange={(e) => change({ slot: Number(e.target.value) })}
-            >
-              {Array.from({ length: pad.columns * pad.rows }, (_, i) => (
-                <option value={i} key={i}>
-                  Button {i + 1}
-                  {i !== slot && pad.buttons.some((b) => b.slot === i) ? ' · swap positions' : ''}
-                </option>
-              ))}
-            </select>
+            <span className="field-label">Position</span>
+            <PositionPicker
+              pad={pad}
+              button={button}
+              origin={slot}
+              disabled={busy}
+              onChange={(nextSlot) => change({ slot: nextSlot })}
+            />
             {validation && (
               <p className="inline-error" role="alert">
                 {validation}

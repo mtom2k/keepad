@@ -383,6 +383,51 @@ button {
   background: var(--pad-empty);
   border-bottom-width: 1px;
 }
+.macro-key[draggable='true'] {
+  cursor: grab;
+}
+.macro-key.dragging {
+  opacity: 0.45;
+}
+.macro-key.drop-target {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.position-picker {
+  display: grid;
+  grid-template-columns: repeat(var(--pad-columns), minmax(0, 1fr));
+  gap: 5px;
+  max-width: 280px;
+}
+.position-cell {
+  position: relative;
+  width: 100%;
+  height: 36px;
+  border: 1px solid #c9c9c9;
+  border-radius: 3px;
+  color: #666;
+  background: #f5f5f5;
+  padding: 3px 3px 3px 14px;
+}
+.position-cell:hover {
+  background: #e9edf2;
+}
+.position-cell.selected {
+  border: 2px solid var(--accent);
+  background: #e5edf9;
+  color: #285797;
+}
+.position-number {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 9px;
+}
+.position-cell img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
 .key-icon {
   display: grid;
   place-items: center;

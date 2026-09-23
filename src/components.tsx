@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type ButtonHTMLAttributes } from 'react';
 import { createPortal } from 'react-dom';
 import {
   useFloating,
@@ -38,7 +38,8 @@ import {
   Plus,
   Minus,
 } from 'lucide-react';
-import { actionNames, type MacroButton } from '../shared/model';
+import { actionNames, type MacroButton, type Pad } from '../shared/model';
+import { placeButton } from './pad-layout';
 export const iconMap = {
   globe: Globe,
   folder: Folder,
@@ -83,7 +84,15 @@ export function Logo() {
     </span>
   );
 }
-export function Tip({ text, children }: { text: string; children: ReactNode }) {
+export function Tip({
+  text,
+  children,
+  disabled = false,
+}: {
+  text: string;
+  children: ReactNode;
+  disabled?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const { refs, floatingStyles, context } = useFloating({
     open,
@@ -92,8 +101,8 @@ export function Tip({ text, children }: { text: string; children: ReactNode }) {
     middleware: [offset(9), flip({ padding: 12 }), shift({ padding: 12 })],
     whileElementsMounted: autoUpdate,
   });
-  const hover = useHover(context, { delay: { open: 450, close: 0 } }),
-    focus = useFocus(context),
+  const hover = useHover(context, { enabled: !disabled, delay: { open: 450, close: 0 } }),
+    focus = useFocus(context, { enabled: !disabled }),
     dismiss = useDismiss(context),
     role = useRole(context, { role: 'tooltip' });
   const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role]);
@@ -102,7 +111,7 @@ export function Tip({ text, children }: { text: string; children: ReactNode }) {
       <span className="tip-anchor" ref={refs.setReference} {...getReferenceProps()}>
         {children}
       </span>
-      {open && (
+      {open && !disabled && (
         <FloatingPortal root={refs.domReference.current?.closest('dialog') ?? undefined}>
           <div
             className="tooltip"
@@ -162,19 +171,31 @@ export function MacroKey({
   editing,
   onClick,
   selected = false,
+  dragProps,
+  dragging = false,
+  dropTarget = false,
+  draggingAny = false,
 }: {
   button?: MacroButton;
   slot: number;
   editing: boolean;
   onClick: () => void;
   selected?: boolean;
+  dragProps?: Pick<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    'draggable' | 'onDragStart' | 'onDragEnd' | 'onDragOver' | 'onDragLeave' | 'onDrop'
+  >;
+  dragging?: boolean;
+  dropTarget?: boolean;
+  draggingAny?: boolean;
 }) {
   return (
     <Tip
+      disabled={draggingAny}
       text={
         button
           ? editing
-            ? `${actionNames[button.type]} · Click to edit ${button.label}`
+            ? `${actionNames[button.type]} · Click to edit ${button.label}${dragProps ? ' · Drag to move; drop on a button to swap' : ''}`
             : button.description || `${actionNames[button.type]}: ${button.target}`
           : editing
             ? 'Add an action to this button'
@@ -182,7 +203,8 @@ export function MacroKey({
       }
     >
       <button
-        className={`macro-key ${button ? '' : 'empty'} ${selected ? 'selected' : ''}`}
+        {...dragProps}
+        className={`macro-key ${button ? '' : 'empty'} ${selected ? 'selected' : ''} ${dragging ? 'dragging' : ''} ${dropTarget ? 'drop-target' : ''}`}
         onClick={onClick}
         disabled={!button && !editing}
         aria-label={
@@ -193,7 +215,7 @@ export function MacroKey({
           <>
             <span className={`key-icon tone-${button.color}`}>
               {button.image ? (
-                <img src={button.image} alt="" />
+                <img src={button.image} alt="" draggable={false} />
               ) : (
                 <Glyph name={button.icon} size={26} />
               )}
@@ -207,6 +229,77 @@ export function MacroKey({
         )}
       </button>
     </Tip>
+  );
+}
+export function PositionPicker({
+  pad,
+  button,
+  origin,
+  disabled,
+  onChange,
+}: {
+  pad: Pad;
+  button: MacroButton;
+  origin: number;
+  disabled: boolean;
+  onChange: (slot: number) => void;
+}) {
+  const preview = placeButton(pad, button, origin);
+  return (
+    <div
+      className="position-picker"
+      role="group"
+      aria-label="Position"
+      style={{ '--pad-columns': pad.columns } as React.CSSProperties}
+    >
+      {Array.from({ length: pad.columns * pad.rows }, (_, slot) => {
+        const occupant = pad.buttons.find((item) => item.slot === slot && item.id !== button.id);
+        const displayed = preview.buttons.find((item) => item.slot === slot);
+        const selected = button.slot === slot;
+        const hint = `Row ${Math.floor(slot / pad.columns) + 1}, column ${(slot % pad.columns) + 1}${occupant ? ` · Swap with ${occupant.label}` : ''}`;
+        return (
+          <Tip key={slot} text={hint}>
+            <button
+              type="button"
+              className={`position-cell ${selected ? 'selected' : ''}`}
+              aria-label={`Position ${slot + 1}${occupant ? `: ${occupant.label}` : ''}`}
+              aria-pressed={selected}
+              disabled={disabled}
+              tabIndex={selected ? 0 : -1}
+              onClick={() => onChange(slot)}
+              onKeyDown={(event) => {
+                let next = slot;
+                if (event.key === 'ArrowLeft' && slot % pad.columns > 0) next--;
+                else if (event.key === 'ArrowRight' && slot % pad.columns < pad.columns - 1) next++;
+                else if (event.key === 'ArrowUp') next = Math.max(0, slot - pad.columns);
+                else if (event.key === 'ArrowDown')
+                  next = Math.min(pad.columns * pad.rows - 1, slot + pad.columns);
+                else if (event.key === 'Home') next = 0;
+                else if (event.key === 'End') next = pad.columns * pad.rows - 1;
+                else return;
+                event.preventDefault();
+                onChange(next);
+                event.currentTarget
+                  .closest('.position-picker')
+                  ?.querySelectorAll<HTMLButtonElement>('button')
+                  [next]?.focus();
+              }}
+            >
+              <span className="position-number">{slot + 1}</span>
+              {displayed ? (
+                displayed.image ? (
+                  <img src={displayed.image} alt="" draggable={false} />
+                ) : (
+                  <Glyph name={displayed.icon} size={18} />
+                )
+              ) : (
+                <Plus size={14} />
+              )}
+            </button>
+          </Tip>
+        );
+      })}
+    </div>
   );
 }
 export function Shortcut({ value, mac }: { value: string; mac: boolean }) {

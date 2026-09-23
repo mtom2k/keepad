@@ -25,6 +25,7 @@ flowchart LR
 | Shared contract | [shared/model.ts](../shared/model.ts) | Zod schemas, types, starter state, import merge |
 | Renderer | [src/main.tsx](../src/main.tsx) | Editor, launcher, dialogs, settings, local edit selection |
 | UI primitives | [src/components.tsx](../src/components.tsx) | Icons, tooltips, modal dialogs, macro keys, number steppers |
+| Button placement | [src/pad-layout.ts](../src/pad-layout.ts) | Shared immutable move/swap operation for drag-and-drop, dialog saves, and position preview |
 | Native / preview adapter | [src/api.ts](../src/api.ts) | Electron bridge or explicitly limited browser preview |
 | Styling | [src/styles.css](../src/styles.css) | Traditional utility layout and per-pad themes |
 
@@ -57,6 +58,8 @@ Renderer edits submit complete state through `state:save`. Main-process mutation
 Action requests contain pad/button IDs. Main resolves the stored action; renderers do not supply arbitrary shell instructions. Website actions call the OS browser handler; file/folder/app actions use native path opening; text actions await clipboard writes. Native failures return a typed error for UI display.
 
 Imports are validated and merged inside the serialized mutation queue. Exports write a snapshot to a user-selected location. See [data model](data-model.md).
+
+Editor drag-and-drop uses native HTML drag events and an in-memory source identity/revision; arbitrary external drag payloads cannot move keys. A changed pad/revision or an in-flight save rejects the drop. A valid drop saves through the existing state API, and tooltips are suppressed while dragging. The mini pad previews the same placement operation as Save; keyboard navigation provides a non-drag alternative. Neither path changes the persisted schema or invokes actions.
 
 ## IPC and security boundary
 

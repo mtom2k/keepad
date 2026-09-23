@@ -72,6 +72,69 @@ try {
   await setLayoutStep('Increase columns', 4, 3);
   const resizedState = await window.evaluate(async () => (await window.keepad.load()).value.state);
   assert.equal(resizedState.pads[0].buttons.length, 8, 'Resizing preserves actions');
+  const slots = () =>
+    window.evaluate(async () => {
+      const state = (await window.keepad.load()).value.state;
+      return Object.fromEntries(state.pads[0].buttons.map((button) => [button.label, button.slot]));
+    });
+  const waitSlot = async (label, slot) =>
+    window.waitForFunction(
+      async ({ label, slot }) =>
+        (await window.keepad.load()).value.state.pads[0].buttons.find((b) => b.label === label)
+          ?.slot === slot,
+      { label, slot },
+    );
+  await window
+    .getByRole('button', { name: 'Edit Gmail', exact: true })
+    .dragTo(window.getByRole('button', { name: 'Add button 12', exact: true }));
+  await waitSlot('Gmail', 11);
+  assert.equal(
+    await window.locator('dialog[open]').count(),
+    0,
+    'Dragging must not open the editor',
+  );
+  await window
+    .getByRole('button', { name: 'Edit Gmail', exact: true })
+    .dragTo(window.getByRole('button', { name: 'Edit Calendar', exact: true }));
+  await waitSlot('Gmail', 1);
+  assert.equal((await slots()).Calendar, 11, 'Drop on an occupied slot swaps');
+  await window
+    .getByRole('button', { name: 'Edit Gmail', exact: true })
+    .dragTo(window.getByRole('button', { name: 'Add button 1', exact: true }));
+  await waitSlot('Gmail', 0);
+  await window
+    .getByRole('button', { name: 'Edit Calendar', exact: true })
+    .dragTo(window.getByRole('button', { name: 'Add button 2', exact: true }));
+  await waitSlot('Calendar', 1);
+  const originalSlots = await slots();
+  // Releasing outside the pad cancels the move.
+  await window
+    .getByRole('button', { name: 'Edit Gmail', exact: true })
+    .dragTo(window.getByRole('heading', { name: 'Everyday', exact: true }));
+  assert.deepEqual(await slots(), originalSlots);
+  await window.getByRole('button', { name: 'Edit Gmail', exact: true }).click();
+  const picker = window.getByRole('group', { name: 'Position', exact: true });
+  assert.equal(await picker.getByRole('button').count(), 12);
+  await picker.getByRole('button', { name: 'Position 12', exact: true }).click();
+  await window.getByRole('button', { name: 'Cancel', exact: true }).click();
+  assert.deepEqual(await slots(), originalSlots, 'Cancel discards the selected position');
+  await window.getByRole('button', { name: 'Edit Gmail', exact: true }).click();
+  await picker.getByRole('button', { name: 'Position 2: Calendar', exact: true }).click();
+  await window.getByRole('button', { name: 'Save button', exact: true }).click();
+  await waitSlot('Gmail', 1);
+  assert.equal((await slots()).Calendar, 0);
+  await window.getByRole('button', { name: 'Edit Gmail', exact: true }).click();
+  await picker.locator('button[aria-pressed="true"]').focus();
+  await window.keyboard.press('ArrowLeft');
+  assert.equal(
+    await picker
+      .getByRole('button', { name: 'Position 1: Calendar', exact: true })
+      .getAttribute('aria-pressed'),
+    'true',
+  );
+  await window.getByRole('button', { name: 'Save button', exact: true }).click();
+  await waitSlot('Gmail', 0);
+  assert.deepEqual(await slots(), originalSlots);
   await window.screenshot({ path: 'test-results/editor.png' });
   if (process.platform === 'darwin')
     assert.equal(await app.evaluate(({ app }) => app.dock?.isVisible()), false);
@@ -100,6 +163,10 @@ try {
   await window.getByRole('button', { name: 'Test workspace', exact: true }).click();
   await window.getByRole('button', { name: 'Add button 1', exact: true }).click();
   await window.getByLabel('Button name', { exact: true }).fill('Test snippet');
+  await window
+    .getByRole('group', { name: 'Position', exact: true })
+    .getByRole('button', { name: 'Position 12', exact: true })
+    .click();
   await window.getByLabel('Action', { exact: true }).selectOption('text');
   await window.getByLabel('Text to copy').fill('KeePad native clipboard test');
   await window
@@ -107,6 +174,12 @@ try {
     .fill('A custom tooltip that must stay within the viewport.');
   await window.getByRole('button', { name: 'Save button', exact: true }).click();
   await window.getByRole('button', { name: 'Edit Test snippet', exact: true }).waitFor();
+  await window
+    .getByRole('button', { name: 'Edit Test snippet', exact: true })
+    .dragTo(window.getByRole('button', { name: 'Add button 1', exact: true }));
+  await window.waitForFunction(
+    async () => (await window.keepad.load()).value.state.pads.at(-1).buttons[0].slot === 0,
+  );
   await window.getByRole('button', { name: 'Edit Test snippet', exact: true }).click();
   await app.evaluate(({ dialog }, imagePath) => {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [imagePath] });
@@ -144,6 +217,11 @@ try {
   );
   assert.equal(await currentActive(), 'everyday', 'Previewing a pad must not activate it');
   await launcher.getByRole('button', { name: 'Run Test snippet', exact: true }).waitFor();
+  assert.equal(
+    await launcher.locator('[draggable="true"]').count(),
+    0,
+    'Launcher does not allow rearranging',
+  );
   await launcher.getByRole('button', { name: 'Run Test snippet', exact: true }).hover();
   await launcher.getByRole('tooltip').waitFor();
   const box = await launcher.getByRole('tooltip').boundingBox(),
@@ -321,6 +399,16 @@ try {
   const reopened = await app.firstWindow();
   await reopened.getByRole('heading', { name: 'Test workspace' }).waitFor();
   await reopened.getByRole('button', { name: 'Edit Test snippet' }).waitFor();
+  assert.equal(
+    await reopened.evaluate(
+      async () =>
+        (await window.keepad.load()).value.state.pads
+          .find((p) => p.name === 'Test workspace')
+          .buttons.find((b) => b.label === 'Test snippet').slot,
+    ),
+    0,
+    'Dragged position survives restart',
+  );
   assert.deepEqual(errors, []);
   console.log(
     'Desktop checks passed: editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',

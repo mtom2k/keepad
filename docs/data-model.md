@@ -23,6 +23,8 @@ Website targets require a full HTTP(S) URL with a hostname. File/folder/app targ
 
 The editor's steppers stop at schema limits and disable shrinking if a button would fall outside the new capacity. Changing column count reflows linear slot indices; it does not maintain fixed row/column coordinates. Moving a button onto an occupied position swaps the two slots.
 
+Drag-and-drop and the dialog's visual position picker share `src/pad-layout.ts`. When a new button targets an occupied slot, the existing occupant moves to the empty origin where creation started. Moves preserve IDs, images, and action data. The dialog previews its draft without saving until confirmed; a canceled drag or dialog leaves persisted slots unchanged.
+
 ## Storage and recovery
 
 The file is `keepad.json` under Electron's `app.getPath('userData')`, normally `~/Library/Application Support/KeePad/` on macOS and `%APPDATA%/KeePad/` on Windows. Do not assume paths for tests; use a temporary profile.

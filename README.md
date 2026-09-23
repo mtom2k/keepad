@@ -31,6 +31,7 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 - **Give each button an action:** website, file, folder, app, or text to copy.
 - **Choose icons or your own images**, button colors, and six pad themes.
 - **Adjust Columns and Rows** with simple −/+ controls. KeePad prevents shrinking a pad if it would hide saved buttons.
+- **Arrange buttons visually:** drag them around the editor, or choose a spot on the mini pad in the button dialog. Dropping onto another button swaps their positions.
 - **Preview before activating.** The eye button shows a pad without changing your active choice.
 - **Keep your setup locally**, with backup export and import. No account or cloud sync required.
 
