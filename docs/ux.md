@@ -26,7 +26,7 @@ The GitHub README is a separate audience: friendly emojis, screenshots, and plai
 - Previewing another pad does not change the saved active pad. The next normal summon returns to the active pad.
 - Launcher arrows/pad picker and tray radio items cycle the active pad.
 - Escape dismisses a button menu or dialog first, then clears a nonempty search, then hides the launcher. X hides immediately. Hide-after-action also governs blur-hiding. A hidden window remains alive.
-- Each summon clears the search and focuses its field, discarding a pending launcher move/delete confirmation. Native refocus alone preserves the query. Do not hide outlines globally: Tab navigation must remain usable and visible.
+- Each summon clears the search and focuses its field, discarding a pending launcher move/delete confirmation. Native refocus alone preserves the query. Each summon also clears retained mouse-hover highlights/tooltips; moving the pointer over a control restores normal hover. Do not hide outlines globally: Tab navigation must remain usable and visible.
 
 ## Launcher search
 

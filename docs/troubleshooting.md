@@ -10,6 +10,7 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | Previewed pad is gone on next summon | Expected. Preview is temporary; normal summon opens the active pad. |
 | Changing Settings Theme does not recolor the pad | Expected. Light/Dark/System changes the app; Pad Theme controls that pad's colors independently. System follows the OS, while explicit Light/Dark overrides it. |
 | Pad has no icon | New/Edit pad → Pad icon → None was selected. Choose an icon there to restore it; action-button icons are separate. |
+| Settings or X stays highlighted after summon | Search focus and mouse hover are separate. The shared summon path now clears Chromium’s cached hover state before notifying the renderer. Use a current build; ordinary highlighting returns when the pointer moves over the control. |
 | Search finds a button on another pad | Expected: search spans all pads and shows each result's source pad. Running a result does not activate that pad. |
 | Search misses a destination or snippet | Search covers button names and descriptions (Hover hint) only. Add useful terms there; targets/file contents are not indexed and typo matching is not implemented. |
 | Escape did not hide KeePad | It dismisses an open menu/dialog or clears a search first. Press it again with an empty search to hide. |

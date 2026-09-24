@@ -1,6 +1,7 @@
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { checkSync } from './sync-desktop.mjs';
+import { checkLauncherHover } from './launcher-hover.mjs';
 import { checkLauncherSearch } from './launcher-search.mjs';
 import { checkButtonInteractions } from './button-interactions.mjs';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
@@ -273,6 +274,7 @@ try {
       `Keyboard focus remains visible after reopening from ${control}`,
     );
   }
+  await checkLauncherHover(app, window, launcher);
   await checkLauncherSearch(app, window, launcher);
   await window.evaluate(() => window.keepad.showEditor());
   await window.getByRole('button', { name: 'Make Active', exact: true }).click();

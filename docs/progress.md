@@ -2,7 +2,7 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest feature work adds optional folder synchronization and per-device destinations, based on `cde727e`. Its source, guides, and validation are recorded below on 2026-09-24; earlier documentation-audit evidence applies to its named revision.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest fix clears retained launcher hover highlighting on summon, based on `36c488a`. Folder synchronization is unchanged. Source, guides, and validation are recorded below on 2026-09-24; earlier documentation-audit evidence applies to its named revision.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
@@ -10,7 +10,7 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Windows | Implemented; full validation pending | Unsigned Windows x64 cross-build passed on macOS; native Windows and installer checks remain |
 | User data | Local validated JSON and backups | Model/placement/button/search/store and synchronization tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
 | Synchronization | Opt-in shared-folder implementation | Common Mac/Windows protocol, durable local outbox, pad-level conflicts, device destinations; native Windows and real provider end-to-end checks pending |
-| Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, and focus regressions covered |
+| Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, keyboard focus, and stale pointer-hover reset covered |
 | Documentation | Audited against current source | Same-change completion/handoff rules, current guides, ten ADRs, generated reference, seven sample-data screenshots, and local checks |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
@@ -114,6 +114,13 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Validation: all 24 unit tests and the full native macOS desktop suite passed. Sync fixtures cover simulated Mac/Windows convergence, conflicts, tombstones, offline restart, delayed/missing history, record integrity, provider-duplicate/invalid files, destination isolation, and recovery. Native checks cover opt-in/cancel, incoming UI updates, local destination dispatch, stale-draft rejection, blocked conflict execution, review/keep-both, and disconnect. An earlier full-suite attempt timed out in an existing position-picker keyboard check; failure screenshot/dialog diagnostics were added, and the subsequent complete suite passed.
 - Refreshed and reviewed seven sample-data documentation screenshots, including device-specific destinations, and inspected conflict controls/review at the minimum editor size. Production and unsigned Mac Apple Silicon/Windows x64 unpacked builds passed; Windows executable resource editing/signing was skipped in the Mac-hosted build. A successful cross-build does not verify native Windows or actual Dropbox/OneDrive delivery; both remain manual release checks.
 - Rebuilt and reopened the unsigned macOS project bundle (`app.keepad.desktop`), leaving the separate installed application unchanged. Formatting, generated-reference, all 29 Markdown documents, and source-impact checks passed against the refreshed `origin/main`/starting revision `cde727e`. GitHub remains private source storage with no CI/CD.
+
+### 2026-09-24 — Clear retained launcher hover on summon
+
+- The owner’s screenshot shows a highlighted Settings control while search has keyboard focus. Reproduced cached `:hover` on an already-visible summon; on this host the hidden-window variant cleared naturally. Search focus alone did not remove the hover background. The shared summon path now sends a window-local pointer-leave event after show/focus, clearing hover/tooltips without moving the system cursor or suppressing keyboard focus. Normal pointer movement restores hover. All launcher entry points use this same path; synchronization behavior is unchanged.
+- Added a native regression for Settings/Hide hover reset, Settings tooltip dismissal, actual control clicks followed by close/reopen, immediate search typing, and visible Tab focus. It failed against the pre-fix build as expected. During test development, corrected an assumption that Hide also has a tooltip and allowed native show/focus events to settle before pointer assertions. The complete native desktop suite then passed on macOS Apple Silicon.
+- Production build, formatting, and documentation checks passed. Regenerated all seven sample screenshots; inspected the hover-reset capture and changed Settings image. The other documentation images remain byte-identical, preserving their prior visual review. No schema/default/package changes require a new reference or ADR; this restores the established summon behavior. Actual tray gestures and native Windows input remain manual validation gaps.
+- Unsigned Mac Apple Silicon and Windows x64 unpacked packages rebuilt successfully (Windows executable resource editing/signing skipped). Reopened the verified project macOS bundle, leaving other installed copies untouched. Source-impact comparison uses starting revision `36c488a`; the private main-branch commit carries implementation, regression, and guides together.
 
 ## Next work / unresolved decisions
 

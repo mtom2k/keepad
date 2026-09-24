@@ -151,17 +151,16 @@ function showLauncher(padId?: string) {
     width: Math.round(width),
     height: Math.round(height),
   });
-  if (launcher.webContents.isLoading())
-    launcher.webContents.once('did-finish-load', () => {
-      launcher!.show();
-      launcher!.focus();
-      launcher!.webContents.send('launcher:shown');
-    });
-  else {
-    launcher.show();
-    launcher.focus();
-    launcher.webContents.send('launcher:shown');
-  }
+  const show = () => {
+    launcher!.show();
+    launcher!.focus();
+    // A reused window can retain Chromium's last hovered control even after
+    // search takes keyboard focus. Clear pointer state without moving the OS cursor.
+    launcher!.webContents.sendInputEvent({ type: 'mouseLeave', x: 0, y: 0 });
+    launcher!.webContents.send('launcher:shown');
+  };
+  if (launcher.webContents.isLoading()) launcher.webContents.once('did-finish-load', show);
+  else show();
 }
 function toggleLauncher() {
   if (launcher?.isVisible()) launcher.hide();

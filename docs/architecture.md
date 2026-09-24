@@ -55,7 +55,7 @@ These are three different concepts; see [ADR 0004](adr/0004-pad-selection-and-la
 - **Active:** persisted `State.activePadId`; used by tray/shortcut invocation. Make Active, sidebar double-click, tray radio selection, and launcher pad cycling can change it.
 - **Preview:** main-process `previewPadId`, exposed as `Snapshot.launcherPadId`; allows the eye button to display a selected inactive pad without activating it. Normal summon clears it. Active-pad changes or deletion of the previewed pad clear it.
 
-The launcher clears and focuses its search field on initial load and `launcher:shown`. The shared `showLauncher` path sends that event after showing/focusing, including already-visible previews; ordinary native refocus does not reset an unfinished query. Pending launcher confirmation/menu/picker state is discarded on summon. Visible Tab focus is preserved. [ADR 0009](adr/0009-global-launcher-search.md) supersedes the root-focus portion of ADR 0004.
+The launcher clears and focuses its search field on initial load and `launcher:shown`. The shared `showLauncher` path sends that event after showing/focusing, including already-visible previews; ordinary native refocus does not reset an unfinished query. Pending launcher confirmation/menu/picker state is discarded on summon. Main also sends a window-local `mouseLeave` input event after showing/focusing to clear Chromium’s cached hover state. This does not move the OS cursor or remove focus styling; the next pointer movement restores normal hover/tooltips. Visible Tab focus is preserved. [ADR 0009](adr/0009-global-launcher-search.md) supersedes the root-focus portion of ADR 0004.
 
 ## Saving and executing
 
