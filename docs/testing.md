@@ -9,12 +9,18 @@ Run validation locally. GitHub hosts the private source repository and does not 
 | Command | Purpose | Limits |
 | --- | --- | --- |
 | `npm run build` | Strict TypeScript checks and production renderer/main builds | Does not prove native behavior |
-| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, immutable placement/copy/move, native destination metadata, and cross-pad search ranking | Does not exercise OS permissions |
+| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, immutable placement/copy/move, native destination metadata, cross-pad search ranking, and folder-sync consistency/recovery | Does not exercise OS permissions |
 | `npm run test:desktop` | Playwright driving actual Electron with temporary data | Requires a graphical macOS/Windows session |
 | `npm run format:check` | Source/test formatting | Not a semantic test |
 | `npm run docs:check` | Local docs, links, generated reference, screenshots | Does not prove prose correctness |
 | `npm run docs:check -- --base <ref>` | Source-to-documentation impact checks | Requires a valid Git base and human review |
 | `npm run docs:screenshots` | Rebuild and capture curated native UI with sample data | Review images; not a substitute for interaction tests |
+
+## Synchronization coverage
+
+[Sync engine tests](../tests/sync.test.ts) use independent temporary stores with Mac/Windows platform fixtures and replicated directories. They verify independent-pad convergence, preferences/active selection staying local, concurrent-version preservation, keep-both resolution, edit/delete tombstones, out-of-order delivery, offline outbox restart, invalid/future/provider-duplicate files, changed-record integrity and missing known heads, device destinations/foreign paths, join/disconnect recovery, and malformed local sync metadata preserving pads. These fixtures test the common protocol and path rules on the host filesystem, not a native Windows installation or cloud provider.
+
+[Native sync checks](../tests/sync-desktop.mjs) run within the desktop suite with a simulated Windows engine peer. They cover folder-picker confirmation/cancel, token validation, incoming UI updates, device-only destination execution with a stubbed opener, stale-draft rejection, conflict review/keep-both, blocked execution of unresolved pads, and disconnect. The conflict controls and review dialog are captured at the minimum editor size for visual inspection. Providers do not receive test data; filesystem profiles are disposable.
 
 ## Native suite coverage
 
@@ -49,13 +55,14 @@ The suite does **not** click the native tray menu, verify real shell-launched ap
 - Search with duplicate labels, long descriptions, large result lists, screen readers, and real IME composition; verify search focus on actual tray/shortcut summon.
 - All themes and layout bounds; dialog keyboard navigation; tooltips near each window edge; text scaling and minimum editor size.
 - Backup round-trip between operating systems and clear path-repair guidance.
+- On a real Mac and Windows pair: select corresponding Dropbox/OneDrive folders, keep them downloaded, edit independently/simultaneously/offline, restart, resolve conflicts, test provider-renamed files and device destinations, disconnect, and inspect recovery copies. Confirm platform preferences never transfer. Exercise permissions, UNC paths, file-provider hydration, and provider delays.
 - Installer/uninstaller behavior, signatures, and a clean machine without developer dependencies.
 
 Record the OS, architecture, commands, date, and result in progress/release notes. “Build configured” and “tested” are different claims.
 
 ## Screenshots
 
-Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, launcher search, button editor, and Dark Settings, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
+Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, launcher search, button editor, Dark Settings (including local-default synchronization), and a device-destination example using fictional Mac/Windows Sample paths, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings and the destination example; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
 
 Review all generated files in [screenshots](screenshots/README.md) before committing. UI changes require refreshed relevant images; documentation-only changes do not.
 

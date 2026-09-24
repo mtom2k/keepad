@@ -13,6 +13,10 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | Search finds a button on another pad | Expected: search spans all pads and shows each result's source pad. Running a result does not activate that pad. |
 | Search misses a destination or snippet | Search covers button names and descriptions (Hover hint) only. Add useful terms there; targets/file contents are not indexed and typo matching is not implemented. |
 | Escape did not hide KeePad | It dismisses an open menu/dialog or clears a search first. Press it again with an empty search to hide. |
+| Shared pads have not reached another computer | KeePad checks local folders. Verify both installations chose corresponding provider folders, the provider has delivered all files, and the folder is available offline. Check folder does not force cloud delivery. |
+| Synchronization needs attention | Review Settings for competing versions or incomplete/invalid history. Local data is retained. Do not remove change records; see [sync recovery](synchronization.md). |
+| A shared Mac/Windows file action cannot run | Edit button → This device → Choose… and save the local destination. Shared definitions do not install applications, copy files, or translate paths. |
+| A dialog says the library changed | Incoming state made its draft stale. Review/copy the draft if needed, close it, and reopen the current button/pad before saving. |
 | Moving a key displaces another key | Expected swap behavior. Drag in the editor or use the mini Position picker; the launcher does not rearrange keys. Dialog positioning saves only when Save button is pressed. |
 | Dropping a file does nothing | Drop one local item from Finder/File Explorer onto a grid position in the desktop editor. The compact launcher and browser preview do not bind files. Check for a missing/inaccessible destination or a stale-state error. |
 | Dropped file kept the old button name/image | Expected for occupied positions. Confirmation replaces only the action. Edit the button to change its name or image. |
@@ -32,7 +36,7 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 ## Known boundaries to preserve in handoffs
 
 - Windows support is implemented; complete validation still requires local Windows testing and manual checks. Hosted automation is not configured. See progress for historical onboarding test results and remaining gaps.
-- The native file-open error currently includes macOS privacy instructions even on Windows. Platform-specific error copy is a follow-up improvement, not a completed fix.
+- Native file errors now use platform-specific permission guidance and device-destination instructions. Windows native permission behavior still needs manual validation.
 - Images are resized to square thumbnails; cropping/aspect-ratio controls are not implemented.
 - Multiple monitors, unusual screen sizes, native blur behavior, reserved shortcuts, and non-QWERTY layouts require real device verification.
 - Startup preferences are written via Electron but do not prove a successful next login; verify after installation.

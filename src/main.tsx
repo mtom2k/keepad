@@ -46,6 +46,8 @@ import {
 import { placeButton } from './pad-layout';
 import { emptySlot, copyOrMoveButton } from './button-actions';
 import { LauncherSearch } from './launcher-search';
+import { SyncSettings } from './sync-settings';
+import type { TargetUpdate, SyncStatus } from '../shared/sync';
 import './styles.css';
 const themeNames = {
   paper: 'Paper',
@@ -67,7 +69,12 @@ function App() {
     [busy, setBusy] = useState(false);
   const [editSlot, setEditSlot] = useState<number | null>(null),
     [padDialog, setPadDialog] = useState<'new' | 'rename' | null>(null),
-    [confirmDelete, setConfirmDelete] = useState(false),
+    [confirmDelete, setConfirmDelete] = useState<{
+      padId: string;
+      revision: number;
+      name: string;
+      count: number;
+    } | null>(null),
     [padPicker, setPadPicker] = useState(false);
   const [selectedPadId, setSelectedPadId] = useState<string | null>(null);
   const [buttonMenu, setButtonMenu] = useState<MenuTarget | null>(null);
@@ -83,6 +90,20 @@ function App() {
     padId: string;
     buttonId: string;
   } | null>(null);
+  const previousEditingPad = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!snapshot || isLauncher) return;
+    if (
+      previousEditingPad.current &&
+      !snapshot.state.pads.some((p) => p.id === previousEditingPad.current)
+    ) {
+      setEditSlot(null);
+      setPadDialog(null);
+      setConfirmDelete(null);
+    }
+    previousEditingPad.current =
+      snapshot.state.pads.find((p) => p.id === selectedPadId)?.id ?? snapshot.state.activePadId;
+  }, [snapshot?.state.revision, selectedPadId]);
   const latestState = useRef(snapshot?.state);
   latestState.current = snapshot?.state;
   const closeMenu = useCallback(() => setButtonMenu(null), []);
@@ -189,10 +210,10 @@ function App() {
       setError(e instanceof Error ? e.message : String(e));
     }
   }
-  async function save(next: State) {
+  async function save(next: State, target?: TargetUpdate) {
     setBusy(true);
     try {
-      const result = await unwrap(api.save(next));
+      const result = await unwrap(api.save(next, target));
       setSnapshot(result);
       return true;
     } catch (e) {
@@ -231,6 +252,17 @@ function App() {
     location.hash = next;
     setPage(next);
   };
+  const syncNotice = (snapshot.sync?.error || !!snapshot.sync?.conflicts.length) && (
+    <button
+      className="sync-attention"
+      onClick={() => {
+        if (isLauncher) void perform(() => unwrap(api.showEditor('settings')));
+        else navigate('settings');
+      }}
+    >
+      Sync needs attention
+    </button>
+  );
   const run = async (button: MacroButton) =>
     perform(async () => notify(await unwrap(api.run(pad.id, button.id))));
   const cycle = (delta: number) => {
@@ -458,7 +490,7 @@ function App() {
             <span>
               <Shortcut value={state.settings.shortcut} mac={mac} />
             </span>
-            <span>Esc to clear / close</span>
+            {syncNotice || <span>Esc to clear / close</span>}
           </footer>
         </>
       ) : (
@@ -520,6 +552,7 @@ function App() {
               )}
               {page === 'settings' ? (
                 <SettingsPage
+                  syncStatus={snapshot.sync}
                   state={state}
                   info={info}
                   save={save}
@@ -615,7 +648,14 @@ function App() {
                           className="icon-button bordered"
                           aria-label="Delete Pad"
                           disabled={busy || state.pads.length === 1}
-                          onClick={() => setConfirmDelete(true)}
+                          onClick={() =>
+                            setConfirmDelete({
+                              padId: pad.id,
+                              revision: state.revision,
+                              name: pad.name,
+                              count: pad.buttons.length,
+                            })
+                          }
                         >
                           <Trash2 size={17} />
                         </button>
@@ -671,6 +711,7 @@ function App() {
                         ? 'Saving…'
                         : `${pad.buttons.length} / ${pad.columns * pad.rows} buttons`}
                     </span>
+                    {syncNotice}
                     <Tip text="Show or hide KeePad. Change this shortcut in Settings.">
                       <button
                         className="shortcut-link"
@@ -826,11 +867,25 @@ function App() {
         <ButtonEditor
           key={`${pad.id}-${editSlot}`}
           pad={pad}
+          deviceTarget={
+            snapshot.deviceTargets?.find(
+              (t) =>
+                t.padId === pad.id &&
+                t.buttonId === pad.buttons.find((b) => b.slot === editSlot)?.id,
+            )?.target ?? undefined
+          }
+          desktop={info.desktop}
+          revision={state.revision}
           slot={editSlot}
           busy={busy}
           onClose={() => setEditSlot(null)}
-          onSave={async (next) => {
-            if (await updatePad(next)) {
+          onSave={async (next, target) => {
+            if (
+              await save(
+                { ...state, pads: state.pads.map((p) => (p.id === next.id ? next : p)) },
+                target,
+              )
+            ) {
               setEditSlot(null);
               notify('Button saved');
             }
@@ -840,6 +895,7 @@ function App() {
       {padDialog && (
         <PadDialog
           pad={padDialog === 'rename' ? pad : undefined}
+          revision={state.revision}
           onClose={() => setPadDialog(null)}
           busy={busy}
           onSave={async (values) => {
@@ -866,24 +922,30 @@ function App() {
         />
       )}
       {confirmDelete && (
-        <Modal title={`Delete ${pad.name}?`} onClose={() => setConfirmDelete(false)}>
+        <Modal title={`Delete ${confirmDelete.name}?`} onClose={() => setConfirmDelete(null)}>
           <p className="modal-description">
-            This removes the pad and its {pad.buttons.length} buttons from this device. This cannot
-            be undone.
+            This removes the pad and its {confirmDelete.count} buttons from{' '}
+            {snapshot.sync?.folder ? 'the shared library on all connected devices' : 'this device'}.
+            This cannot be undone.
           </p>
           <div className="modal-actions">
-            <button className="secondary" onClick={() => setConfirmDelete(false)}>
+            <button className="secondary" onClick={() => setConfirmDelete(null)}>
               Keep pad
             </button>
             <button
               className="danger"
               disabled={busy}
               onClick={async () => {
+                if (confirmDelete.revision !== state.revision || confirmDelete.padId !== pad.id) {
+                  setConfirmDelete(null);
+                  setError('The library changed. Review the pad before deleting it.');
+                  return;
+                }
                 const pads = state.pads.filter((p) => p.id !== pad.id);
                 const activePadId = state.activePadId === pad.id ? pads[0].id : state.activePadId;
                 if (await save({ ...state, pads, activePadId })) {
                   setSelectedPadId(activePadId);
-                  setConfirmDelete(false);
+                  setConfirmDelete(null);
                   notify('Pad deleted');
                 }
               }}
@@ -959,15 +1021,19 @@ function ButtonActionDialog({
 }
 function PadDialog({
   pad,
+  revision,
   onClose,
   onSave,
   busy,
 }: {
   pad?: Pad;
+  revision: number;
   onClose: () => void;
   onSave: (values: Pick<Pad, 'name' | 'description' | 'icon'>) => void;
   busy: boolean;
 }) {
+  const [baseRevision] = useState(revision);
+  const [validation, setValidation] = useState('');
   const [name, setName] = useState(pad?.name ?? ''),
     [description, setDescription] = useState(pad?.description ?? ''),
     [icon, setIcon] = useState<Pad['icon']>(pad?.icon ?? 'grid');
@@ -976,9 +1042,18 @@ function PadDialog({
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (revision !== baseRevision) {
+            setValidation('The library changed. Close and reopen this dialog before saving.');
+            return;
+          }
           if (name.trim()) onSave({ name: name.trim(), description, icon });
         }}
       >
+        {validation && (
+          <p className="inline-error" role="alert">
+            {validation}
+          </p>
+        )}
         <label className="field-label" htmlFor="pad-name">
           Pad name
         </label>
@@ -1041,17 +1116,24 @@ function PadDialog({
 }
 function ButtonEditor({
   pad,
+  revision,
+  deviceTarget,
+  desktop,
   slot,
   onClose,
   onSave,
   busy,
 }: {
   pad: Pad;
+  revision: number;
   slot: number;
   onClose: () => void;
-  onSave: (p: Pad) => void;
+  onSave: (p: Pad, target?: TargetUpdate) => void;
+  deviceTarget?: string;
+  desktop: boolean;
   busy: boolean;
 }) {
+  const [baseRevision] = useState(revision);
   const existing = pad.buttons.find((b) => b.slot === slot);
   const [button, setButton] = useState<MacroButton>(
     existing ?? {
@@ -1065,9 +1147,17 @@ function ButtonEditor({
       slot,
     },
   );
+  const [localTarget, setLocalTarget] = useState<string | null>(deviceTarget ?? null);
+  const [targetChanged, setTargetChanged] = useState(false);
   const [validation, setValidation] = useState(''),
     [deleting, setDeleting] = useState(false);
-  const change = (patch: Partial<MacroButton>) => setButton((b) => ({ ...b, ...patch }));
+  const change = (patch: Partial<MacroButton>) => {
+    if ('target' in patch || 'type' in patch) {
+      setLocalTarget(null);
+      setTargetChanged(false);
+    }
+    setButton((b) => ({ ...b, ...patch }));
+  };
   const pick = async (image = false) => {
     try {
       const result = await unwrap(image ? api.pickImage() : api.pickPath(button.type));
@@ -1077,12 +1167,23 @@ function ButtonEditor({
     }
   };
   const save = () => {
+    if (revision !== baseRevision) {
+      setValidation(
+        'The library changed while this dialog was open. Your draft has not been saved. Close and reopen the button to review the latest version.',
+      );
+      return;
+    }
     const parsed = ButtonSchema.safeParse(button);
     if (!parsed.success) {
       setValidation(parsed.error.issues[0].message);
       return;
     }
-    onSave(placeButton(pad, parsed.data, slot));
+    onSave(
+      placeButton(pad, parsed.data, slot),
+      targetChanged && ['file', 'folder', 'app'].includes(button.type)
+        ? { padId: pad.id, buttonId: button.id, target: localTarget }
+        : undefined,
+    );
   };
   return (
     <Modal title={existing ? 'Edit button' : 'New button'} onClose={onClose} wide>
@@ -1173,6 +1274,54 @@ function ButtonEditor({
                 )}
               </div>
             )}
+            {desktop && ['file', 'folder', 'app'].includes(button.type) && (
+              <>
+                <label className="field-label" htmlFor="device-target">
+                  This device <span>optional</span>
+                </label>
+                <div className="input-with-button">
+                  <input
+                    id="device-target"
+                    readOnly
+                    value={localTarget ?? ''}
+                    placeholder="Use the shared destination"
+                  />
+                  <button
+                    className="secondary"
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const value = await unwrap(api.pickPath(button.type));
+                        if (value) {
+                          setLocalTarget(value);
+                          setTargetChanged(true);
+                        }
+                      } catch (error) {
+                        setValidation((error as Error).message);
+                      }
+                    }}
+                  >
+                    Choose…
+                  </button>
+                </div>
+                <p className="field-hint">
+                  Use a different file or application on this computer. This destination does not
+                  sync.
+                </p>
+                {localTarget && (
+                  <button
+                    className="text-button"
+                    type="button"
+                    onClick={() => {
+                      setLocalTarget(null);
+                      setTargetChanged(true);
+                    }}
+                  >
+                    Use shared destination
+                  </button>
+                )}
+              </>
+            )}
             <label className="field-label" htmlFor="button-tip">
               Hover hint <span>optional</span>
             </label>
@@ -1257,9 +1406,15 @@ function ButtonEditor({
                 <button
                   className="danger-text text-button"
                   disabled={busy}
-                  onClick={() =>
-                    onSave({ ...pad, buttons: pad.buttons.filter((b) => b.id !== existing.id) })
-                  }
+                  onClick={() => {
+                    if (revision !== baseRevision) {
+                      setValidation(
+                        'The library changed. Close and reopen this button before removing it.',
+                      );
+                      return;
+                    }
+                    onSave({ ...pad, buttons: pad.buttons.filter((b) => b.id !== existing.id) });
+                  }}
                 >
                   Yes, remove
                 </button>
@@ -1290,6 +1445,7 @@ function ButtonEditor({
 }
 function SettingsPage({
   state,
+  syncStatus,
   info,
   save,
   notify,
@@ -1298,6 +1454,7 @@ function SettingsPage({
 }: {
   state: State;
   info: Snapshot['info'];
+  syncStatus?: SyncStatus;
   save: (s: State) => Promise<boolean>;
   notify: (s: string) => void;
   onError: (s: string) => void;
@@ -1419,6 +1576,7 @@ function SettingsPage({
           />
         </div>
       </section>
+      <SyncSettings status={syncStatus} desktop={info.desktop} onError={onError} />
       <section className="settings-card">
         <h2>Backup</h2>
         <p className="settings-copy">Imports add pads without replacing existing ones.</p>
@@ -1453,7 +1611,10 @@ function SettingsPage({
       </section>
       <details className="permissions-details">
         <summary>Storage and permissions</summary>
-        <p>Pads and images are stored on this device. No account or analytics.</p>
+        <p>
+          Pads are stored locally. If synchronization is enabled, shared library data is also
+          written to your chosen folder. No KeePad account or analytics.
+        </p>
         <p>
           {info.platform === 'darwin'
             ? 'macOS may request access when opening a protected folder. Manage access in System Settings → Privacy & Security → Files and Folders. Accessibility and screen-recording permissions are not required.'

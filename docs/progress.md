@@ -2,15 +2,16 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest feature work adds global launcher search and automatic search focus, based on `abc4ec7`. Its source, guides, and native validation are recorded below on 2026-09-23; earlier documentation-audit evidence applies to its named revision.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest feature work adds optional folder synchronization and per-device destinations, based on `cde727e`. Its source, guides, and validation are recorded below on 2026-09-24; earlier documentation-audit evidence applies to its named revision.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
-| macOS Apple Silicon | Locally built and exercised | Latest production build, native desktop suite, and unsigned unpacked app rebuild/reopen recorded on 2026-09-23 |
-| Windows | Implemented; full validation pending | Initial hosted run passed build/model checks but not the complete desktop suite; local native/installer checks remain |
-| User data | Local validated JSON and backups | Fifteen model/placement/button/search/store tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
+| macOS Apple Silicon | Locally built and exercised | See the latest dated validation entry for production build, native suite, and project-bundle results |
+| Windows | Implemented; full validation pending | Unsigned Windows x64 cross-build passed on macOS; native Windows and installer checks remain |
+| User data | Local validated JSON and backups | Model/placement/button/search/store and synchronization tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
+| Synchronization | Opt-in shared-folder implementation | Common Mac/Windows protocol, durable local outbox, pad-level conflicts, device destinations; native Windows and real provider end-to-end checks pending |
 | Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, and focus regressions covered |
-| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, nine ADRs, generated reference, six sample-data screenshots, and local checks |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, ten ADRs, generated reference, seven sample-data screenshots, and local checks |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
@@ -105,13 +106,22 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Regenerated six sample-data screenshot views and reviewed the updated launcher/search captures; generated reference remained unchanged. Formatting, documentation/impact checks against starting revision `abc4ec7`, and the full desktop suite passed. Rebuilt and reopened the unsigned macOS Apple Silicon project bundle (`app.keepad.desktop`); no separate installed copy was replaced.
 - Updated current README, architecture, UX/data/testing/troubleshooting, contributor guidance, ADR index, and screenshot provenance together. Search scans only saved names/descriptions: file contents, destinations, clipboard payloads, pad names, and fuzzy matching are outside scope. No new dependency, permission, network service, or stored search history was added.
 
+### 2026-09-24 — Optional shared-folder synchronization
+
+- Added opt-in synchronization through a user-selected directory with a native picker, confirmation, backup-before-switch, local folder status, immediate/manual checks, and disconnect retaining the local library. Local-only remains the default. The provider/shared filesystem transports files; KeePad does not authenticate to Dropbox/OneDrive or claim cloud delivery.
+- Implemented a platform-neutral immutable change history with hashes, per-pad causal parents, explicit deletion records, strict validation/resource limits, and a durable outbox saved atomically with local state. Different pads combine; concurrent same-pad edits/deletions are preserved for review or keep-both resolution. Local settings and active selection never enter the protocol. Incomplete/invalid history retains the local cache rather than resetting it.
+- Added action-bound This device destinations for files/folders/apps, allowing Mac and Windows to use different real paths. A footer link surfaces paused synchronization/conflicts, and pad deletion explains its shared scope. Incoming state invalidates stale editor saves; removal closes the corresponding draft. File-open permission errors now use platform-specific guidance. [ADR 0010](adr/0010-optional-folder-synchronization.md) records format compatibility, recovery, and tradeoffs; [the sync guide](synchronization.md) covers setup and limitations.
+- Validation: all 24 unit tests and the full native macOS desktop suite passed. Sync fixtures cover simulated Mac/Windows convergence, conflicts, tombstones, offline restart, delayed/missing history, record integrity, provider-duplicate/invalid files, destination isolation, and recovery. Native checks cover opt-in/cancel, incoming UI updates, local destination dispatch, stale-draft rejection, blocked conflict execution, review/keep-both, and disconnect. An earlier full-suite attempt timed out in an existing position-picker keyboard check; failure screenshot/dialog diagnostics were added, and the subsequent complete suite passed.
+- Refreshed and reviewed seven sample-data documentation screenshots, including device-specific destinations, and inspected conflict controls/review at the minimum editor size. Production and unsigned Mac Apple Silicon/Windows x64 unpacked builds passed; Windows executable resource editing/signing was skipped in the Mac-hosted build. A successful cross-build does not verify native Windows or actual Dropbox/OneDrive delivery; both remain manual release checks.
+- Rebuilt and reopened the unsigned macOS project bundle (`app.keepad.desktop`), leaving the separate installed application unchanged. Formatting, generated-reference, all 29 Markdown documents, and source-impact checks passed against the refreshed `origin/main`/starting revision `cde727e`. GitHub remains private source storage with no CI/CD.
+
 ## Next work / unresolved decisions
 
 1. Run local Windows tests and complete manual Windows tray, startup, file/app, permission, and installer checks when preparing that platform for release.
 2. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
-3. Improve platform-specific file-error wording; currently a shared error mentions macOS privacy settings on Windows.
+3. Validate synchronization on actual Mac/Windows devices through Dropbox/OneDrive, including offline conflicts, provider hydration, and permissions.
 4. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.
-5. Design migrations before changing persisted schema version. Image aspect-ratio editing, shell commands, key injection, cloud sync, and plugins are not implemented commitments.
+5. Design migrations before changing persisted schema version. History compaction, per-field merging, automatic path mapping, direct provider APIs, image aspect-ratio editing, shell commands, key injection, and plugins are not implemented commitments.
 
 ## Handoff rule
 

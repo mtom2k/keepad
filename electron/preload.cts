@@ -2,7 +2,14 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron';
 const invoke = (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args);
 contextBridge.exposeInMainWorld('keepad', {
   load: () => invoke('state:load'),
-  save: (s: unknown) => invoke('state:save', s),
+  save: (s: unknown, target?: unknown) => invoke('state:save', s, target),
+  chooseSyncFolder: () => invoke('sync:choose'),
+  connectSync: (token: string) => invoke('sync:connect', token),
+  disconnectSync: () => invoke('sync:disconnect'),
+  refreshSync: () => invoke('sync:refresh'),
+  previewSync: (padId: string, versionId: string) => invoke('sync:preview', padId, versionId),
+  resolveSync: (padId: string, heads: string[], choice: string) =>
+    invoke('sync:resolve', padId, heads, choice),
   run: (p: string, b: string) => invoke('action:run', p, b),
   pickPath: (t: string) => invoke('dialog:path', t),
   pickImage: () => invoke('dialog:image'),

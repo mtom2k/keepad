@@ -9,7 +9,7 @@ const output = path.resolve('docs/screenshots');
 await mkdir(output, { recursive: true });
 const sample = makeDefaultState({ home: userData, downloads: userData, documents: userData });
 sample.settings.theme = 'light';
-// Use sample destinations inside the disposable profile, never the user's real data.
+// Use disposable destinations initially and explicit Sample paths in the device-destination view; never execute them or read user data.
 await writeFile(path.join(userData, 'keepad.json'), JSON.stringify(sample));
 let app;
 async function capture(page, name) {
@@ -60,9 +60,25 @@ try {
   await editor.getByLabel('Theme', { exact: true }).selectOption('dark');
   await editor.waitForFunction(() => document.documentElement.dataset.appearance === 'dark');
   await capture(editor, 'settings-dark');
+  await editor.getByRole('button', { name: 'Everyday ACTIVE', exact: true }).click();
+  await editor.evaluate(async () => {
+    const state = (await window.keepad.load()).value.state;
+    const button = state.pads
+      .find((p) => p.id === 'everyday')
+      .buttons.find((b) => b.label === 'Downloads');
+    button.target = 'C:\\Users\\Sample\\Downloads';
+    const result = await window.keepad.save(state, {
+      padId: 'everyday',
+      buttonId: button.id,
+      target: '/Users/Sample/Downloads',
+    });
+    if (!result.ok) throw Error(result.error);
+  });
+  await editor.getByRole('button', { name: 'Edit Downloads', exact: true }).click();
+  await capture(editor, 'device-destination');
 
   console.log(
-    'Captured sample-data editor, button menu, launcher, search, button editor, and Dark settings in docs/screenshots. Review them before committing.',
+    'Captured sample-data editor, button menu, launcher, search, button editor, Dark settings, and a sample device destination in docs/screenshots. Review them before committing.',
   );
 } finally {
   if (app) await app.close();

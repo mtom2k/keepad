@@ -1,3 +1,4 @@
+import type { SyncStatus, SyncChoice, TargetUpdate } from './sync.js';
 import { z } from 'zod';
 export const themes = ['paper', 'graphite', 'sage', 'sand', 'midnight', 'contrast'] as const;
 export const appThemes = ['light', 'dark', 'system'] as const;
@@ -127,12 +128,24 @@ export type Info = {
   desktop: boolean;
   packaged: boolean;
 };
-export type Snapshot = { state: State; info: Info; launcherPadId?: string };
+export type Snapshot = {
+  state: State;
+  info: Info;
+  launcherPadId?: string;
+  sync?: SyncStatus;
+  deviceTargets?: TargetUpdate[];
+};
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 export type FileBinding = Pick<MacroButton, 'label' | 'target' | 'type' | 'icon'>;
 export interface KeePadAPI {
   load(): Promise<Result<Snapshot>>;
-  save(state: State): Promise<Result<Snapshot>>;
+  save(state: State, target?: TargetUpdate): Promise<Result<Snapshot>>;
+  chooseSyncFolder(): Promise<Result<SyncChoice | null>>;
+  connectSync(token: string): Promise<Result<Snapshot>>;
+  disconnectSync(): Promise<Result<Snapshot>>;
+  refreshSync(): Promise<Result<Snapshot>>;
+  previewSync(padId: string, versionId: string): Promise<Result<Pad | null>>;
+  resolveSync(padId: string, heads: string[], choice: string): Promise<Result<Snapshot>>;
   run(padId: string, buttonId: string): Promise<Result<string>>;
   pickPath(type: string): Promise<Result<string | null>>;
   pickImage(): Promise<Result<string | null>>;

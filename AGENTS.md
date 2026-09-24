@@ -21,6 +21,7 @@ These instructions apply to the entire repository, including work performed by c
 - Preserve saved actions when resizing; do not silently truncate buttons. Keep keyboard focus visible, but do not restore stale launcher-button focus on reopen.
 - Editor drag/drop and the mini position picker move or swap without losing actions. Launcher buttons do not rearrange. Pad icons may be None; action buttons retain their icon/image representation.
 - Keep Settings Theme (Light/Dark/System) independent from Pad Theme. Preserve the default for legacy files and document compatibility before extending stored data.
+- Synchronization is opt-in and provider-managed. Preserve immutable history, causal parents, tombstones, durable local outboxes, device-local preferences/destinations, and explicit conflict review. Never claim a local folder check proves cloud delivery; see docs/synchronization.md and ADR 0010.
 - Respect existing user data. Use temporary profiles for tests and documentation screenshots. Do not modify another installed KeePad copy just because its name matches; verify its bundle identity and path.
 
 ## Engineering rules

@@ -16,6 +16,8 @@ The host architecture is the default. Validate every architecture you intend to 
 
 `package:dir` builds an unpacked app locally for verification. It is not a signed release installer; copied raw app directories may also lose executable/symlink metadata. Produce the proper DMG/ZIP/NSIS output for distribution. GitHub has no build or deployment workflow.
 
+For a Mac-hosted Windows packaging smoke check, after `npm run build` use `CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win --x64 --dir -c.win.signAndEditExecutable=false`. This produces `release/win-unpacked` and intentionally skips executable resource editing/signing. It proves packaging only; run native tests and normal installer packaging on Windows before release.
+
 ## Release checklist
 
 1. Confirm completed work and open issues in progress; select a version in `package.json` and update the lockfile. Also align the browser preview's current literal version in `src/api.ts`. Data schema version is separate from app version.

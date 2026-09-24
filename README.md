@@ -58,7 +58,8 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 - **Right-click a button** to edit, duplicate, move it to another pad, or delete it. This works in the editor and the compact pad.
 - **Drop a file onto the editor grid** to make an open-file button. Folders and applications work too. Drop one item at a time; replacing an existing action asks for confirmation.
 - **Preview before activating.** The eye button shows a pad without changing your active choice.
-- **Keep your setup locally**, with backup export and import. No account or cloud sync required.
+- **Keep your setup locally**, with backup export and import.
+- **Optionally sync pads between Mac and Windows** through a Dropbox, OneDrive, or other synchronized folder. Preferences stay on each device; competing pad edits are preserved for review. [Setup and limits](docs/synchronization.md).
 
 ## 🧭 Using KeePad
 
@@ -81,6 +82,21 @@ To bind a file quickly, drag it from Finder or File Explorer onto an empty **+**
 
 Single-clicking a pad selects it for editing. The **eye**, **pencil**, **copy**, and **trash** toolbar buttons preview, edit, duplicate, and delete it. Hover over an icon for help. Settings lets you choose Light/Dark/System appearance, change the shortcut, choose whether the pad hides after an action, and manage backups.
 
+## 🔄 Share pads between computers
+
+Open **Settings → Synchronization → Choose sync folder…**. On your first computer, choose a dedicated folder inside Dropbox, OneDrive, or another sync provider and create a shared library. After that folder downloads on the second computer, choose it there and use the shared library. KeePad backs up the previous local library before switching.
+
+Both installations use the same library format. Keep the folder available offline. A regular local folder does not sync by itself; your provider transports changes. KeePad keeps local copies and retries queued changes when the folder returns.
+
+For files/apps in different locations, edit the button and set **This device** to the destination on that computer. This does not change the destination on your other devices. Sync shares button definitions and images, not the files or applications they open. [Conflict handling, recovery, and current limits](docs/synchronization.md).
+
+<details>
+<summary>Use different destinations on Mac and Windows</summary>
+
+![A Windows shared folder destination with a separate Mac destination for this device](docs/screenshots/device-destination.png)
+
+</details>
+
 ## 🚀 Try the development build
 
 There is no one-click installer release yet. If you are comfortable running a few terminal commands:
@@ -102,7 +118,7 @@ To create an application bundle or installer locally, see [packaging instruction
 
 ## 🔒 Your data and permissions
 
-Pads, images, and snippets are stored on your computer. Backups include your images, file paths, and copied text, so keep them somewhere private. Imported file paths may need updating on another computer.
+Pads, images, and snippets are stored on your computer. If you enable synchronization, their shared library and version history also live in your chosen folder and may be uploaded by its provider. Backups include your images, file paths, and copied text, so keep them somewhere private. Imported/shared file paths may need a **This device** destination on another computer.
 
 macOS may ask before opening a protected folder. KeePad does not require Accessibility, screen-recording, or Full Disk Access for its current actions. Launch at login is available after installing the packaged app.
 

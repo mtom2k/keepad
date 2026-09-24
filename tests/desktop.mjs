@@ -1,5 +1,6 @@
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
+import { checkSync } from './sync-desktop.mjs';
 import { checkLauncherSearch } from './launcher-search.mjs';
 import { checkButtonInteractions } from './button-interactions.mjs';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
@@ -32,6 +33,7 @@ try {
   const errors = [];
   window.on('pageerror', (e) => errors.push(e.message));
   await window.getByRole('heading', { name: 'Everyday', exact: true }).waitFor();
+  await checkSync(app, window, userData);
   await checkButtonInteractions(app, window, userData);
   const setLayoutStep = async (label, columns, rows) => {
     await window.getByRole('button', { name: label, exact: true }).click();
@@ -467,8 +469,20 @@ try {
   assert.equal(await reopened.locator('.pad-heading-icon').count(), 0, 'No icon survives restart');
   assert.deepEqual(errors, []);
   console.log(
-    'Desktop checks passed: global launcher search, button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
+    'Desktop checks passed: folder synchronization, device destinations, conflict review, stale dialog protection, global launcher search, button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
   );
+} catch (error) {
+  if (app) {
+    const page = await app.firstWindow();
+    await page.screenshot({ path: 'test-results/desktop-failure.png' }).catch(() => {});
+    console.error(
+      await page
+        .locator('dialog[open]')
+        .innerText()
+        .catch(() => 'No open dialog'),
+    );
+  }
+  throw error;
 } finally {
   if (app) {
     if (originalClipboard)

@@ -44,6 +44,14 @@ Right-click an occupied button in the editor or launcher for Edit…, Duplicate,
 
 Shift+F10 or the context-menu key opens the menu for a focused key. Up/Down, Home/End, and Enter operate it; Escape or Tab dismisses it and restores focus to the originating key. Outside clicks, window blur/resize, or state changes dismiss it. Menus stay within the window and suppress underlying tooltips. Right-click does not run the action. A stale move/delete confirmation or file replacement is rejected instead of overwriting newer changes.
 
+## Synchronization settings
+
+Synchronization is off by default. Settings offers Choose sync folder, a confirmation with the existing/new library and pad count, local status, Check folder, and Disconnect. Existing-library confirmation explains replacement and the automatic local backup. Keep app appearance, shortcut/startup/hide preferences, active selection, and device destinations local. Label folder checks truthfully; do not claim cloud delivery.
+
+Conflict versions show name, button count, source platform, and timestamp. Review displays saved actions without running them. Keep a version/deletion or keep each nondeleted version as a separate pad. A compact warning links to Settings when synchronization needs attention. Unresolved pads cannot be edited or run; unaffected pads/preferences remain usable. Disconnect confirms retention of local pads and remote-folder contents.
+
+File/folder/app button dialogs add an optional This device destination selected through the native picker. It saves with the button, is canceled with the dialog, and never changes the shared target. Use shared destination clears it on Save. A library revision changing during a pad/button dialog blocks saving/removing from that stale draft. Removed pads close their editor dialogs. See [synchronization](synchronization.md).
+
 ## Accessibility and feedback
 
 Provide accessible names for icon controls, visible keyboard focus, native modal focus containment, and clear error messages. Floating UI flips/shifts custom tooltips within the viewport; dialogs use a portal inside their top layer. Stepper counts use live outputs. Preserve existing values when a save or native operation fails.

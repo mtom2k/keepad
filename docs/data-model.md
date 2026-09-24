@@ -33,9 +33,17 @@ Button duplication copies all action/appearance fields with a fresh ID into the 
 
 The file is `keepad.json` under Electron's `app.getPath('userData')`, normally `~/Library/Application Support/KeePad/` on macOS and `%APPDATA%/KeePad/` on Windows. Do not assume paths for tests; use a temporary profile.
 
-A save validates first, writes `keepad.json.tmp`, then renames it over the destination. The in-memory state changes only after the write succeeds. Files request owner-only permissions where supported. There is no encryption, database, fsync-based power-loss guarantee, or cloud replication.
+A save validates first, writes `keepad.json.tmp`, then renames it over the destination. The in-memory state changes only after the write succeeds. Files request owner-only permissions where supported. There is no encryption, database, or fsync-based power-loss guarantee. Optional folder synchronization transports the shared library through a user-managed provider; this local file itself must not be synchronized.
 
 Missing state creates starter pads. Unreadable/invalid existing state is copied to a timestamped recovery file before defaults are written. If the recovery copy fails, startup fails instead of overwriting the original. The missing-appearance default described above is supported within version 1; there is no general schema migration framework. Introducing schema version 2 requires an explicit migration/recovery design, not a blind reset.
+
+## Local device envelope and shared protocol
+
+The local JSON file also contains an optional validated `device` envelope, version 1: random device UUID, selected folder, known per-pad head hashes, durable pending change records, and action-bound local destination overrides. `StateSchema` still represents pads/preferences at schema version 1 and strips this envelope from renderer saves and ordinary exports/imports. The store validates it separately and writes it atomically with state. Legacy files without it remain local-only. Invalid metadata is copied for recovery while valid pads are retained and sync is disconnected. Older builds can discard this envelope on save: disconnect/export before downgrading.
+
+Shared `keepad-library/format.json` declares protocol version 1; `changes/<hash>.json` records hold complete pads or tombstones, parent hashes, ordering hints, nonces, device/platform provenance and timestamps. Settings, active selection, sync configuration, and device destinations never enter these records. Content hashes deduplicate provider copies and detect modified records; parents establish concurrency without trusting clocks. Pending records commit locally before being published, and a restart retries them. No automatic history compaction occurs. Limits and recovery procedures are in [synchronization](synchronization.md) and [ADR 0010](adr/0010-optional-folder-synchronization.md).
+
+A local override is keyed by pad/button ID and the original shared action type/target. It only applies while that shared action matches; otherwise it is ignored and removed on an ordinary save. Device destinations survive disconnect and local restarts but are not part of portable exports. Selecting a different shared action destination clears the editor's draft override so it cannot accidentally carry over.
 
 ## Concurrency
 

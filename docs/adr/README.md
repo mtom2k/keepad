@@ -13,5 +13,6 @@ Accepted records describe the current implementation. Initial records were writt
 | [0007](0007-application-appearance-and-optional-pad-icons.md) | App appearance independent of pad themes; optional pad icons and additive defaults | Accepted |
 | [0008](0008-button-menus-and-native-file-drops.md) | Button context menus and explicit native file binding without execution | Accepted |
 | [0009](0009-global-launcher-search.md) | Global launcher search with automatic focus and unchanged activation | Accepted |
+| [0010](0010-optional-folder-synchronization.md) | Optional Mac/Windows folder synchronization with immutable pad history and local destinations | Accepted |
 
 Use [the template](template.md) for the next consequential decision. Update this index and the affected guides. Supersede an accepted decision with a new record rather than erasing its rationale.

@@ -21,6 +21,8 @@ flowchart LR
 | --- | --- | --- |
 | Main process | [electron/main.ts](../electron/main.ts) | Lifecycle, tray menus, windows, shortcuts, native actions, serialized mutations |
 | Bridge | [electron/preload.cts](../electron/preload.cts) | Explicit API methods and event subscriptions; compiled to CommonJS for sandbox compatibility |
+| Folder synchronization | [electron/sync.ts](../electron/sync.ts), [shared/sync.ts](../shared/sync.ts) | Immutable pad history, validation, local outbox, conflicts, and device paths |
+| Sync settings | [src/sync-settings.tsx](../src/sync-settings.tsx) | Opt-in folder confirmation, status, version review/resolution, disconnect |
 | Store | [electron/store.ts](../electron/store.ts) | Validation, temporary-file replacement, corruption recovery |
 | Shared contract | [shared/model.ts](../shared/model.ts) | Zod schemas, types, starter state, import merge |
 | Renderer | [src/main.tsx](../src/main.tsx) | Editor, launcher, dialogs, settings, local edit selection |
@@ -75,6 +77,14 @@ External file drops are separate from internal rearrangement. The editor passes 
 
 The input uses combobox/listbox semantics with an active descendant. Arrow keys change selection; composition and repeated Enter events do not run actions. Escape capture clears the query only when no modal/menu is open, allowing those components to dismiss first. Search results scroll independently beneath a fixed search field. The centered window allows an additional search row and remains constrained to the display work area.
 
+## Optional synchronization
+
+The local store remains authoritative for the current cache and device preferences. A validated optional `device` envelope commits the cache and pending outgoing records together; renderer saves cannot replace this metadata. Main initializes `SyncEngine`, polls every five seconds, and requests a check after local saves. Checks and all local mutations share the existing serialization queue. Applying incoming pads increments the local revision so stale renderer writes fail. Pad/button dialogs additionally retain their opening revision, and deleting a pad closes its open editor draft.
+
+The folder contains immutable whole-pad or deletion records linked by causal parent hashes. The engine validates format, hashes, parent availability, and resource limits before materializing records. Files arriving out of order or malformed never reset local pads. Multiple heads per pad are preserved and exposed as conflicts; independent pads combine. The shared format, ordering, and file naming are platform-neutral. Settings, active selection, and device overrides stay local. Full protocol/recovery rationale: [ADR 0010](adr/0010-optional-folder-synchronization.md); user setup/limits: [synchronization](synchronization.md).
+
+New IPC methods are narrow: native folder selection returns a confirmation token, connection reinspects the chosen folder, refresh runs the engine, preview returns a stored conflict version without execution, resolve validates reviewed head IDs, and disconnect retains a backed-up local copy. `state:save` optionally carries one validated device-destination update, stored atomically with the state. Action execution resolves that device override only while its original shared type/target still match, validates host-native syntax, then follows the existing path opener. Invalid foreign paths explain how to set a local destination.
+
 ## Application appearance
 
 Application appearance is stored in `settings.theme` separately from `Pad.theme`. Main applies Electron `nativeTheme.themeSource` after persistence and at startup. The renderer resolves System with a live `prefers-color-scheme` listener and sets an attribute on the document root so portaled dialogs/tooltips share editor appearance. CSS tokens handle application surfaces; existing pad color variables remain independent. See [ADR 0007](adr/0007-application-appearance-and-optional-pad-icons.md).
@@ -85,6 +95,6 @@ Requests return `Result<T>` (`ok/value` or `ok/error`). The API contract lists a
 
 The main process checks known web contents, the main frame, and the exact local file/dev origin for each request. Both windows have sandboxing, context isolation, and no Node integration. Navigation and new windows are blocked. The HTML CSP limits scripts to local assets and images to local/data sources. The development server is accepted only at the explicitly configured loopback URL and is ignored in packaged builds.
 
-Only HTTP(S) website actions and supported inline raster images are accepted. File/folder/app destinations can be typed, chosen with Browse, or bound by dropping a local item in the editor; schema validation requires absolute paths and execution checks access/existence. Button images are selected through the native image dialog. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or cloud storage is implemented.
+Only HTTP(S) website actions and supported inline raster images are accepted. File/folder/app destinations can be typed, chosen with Browse, or bound by dropping a local item in the editor; schema validation requires absolute paths and execution checks access/existence. Button images are selected through the native image dialog. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or direct cloud-provider API is implemented. Optional shared-folder data may be transported by the user’s sync provider.
 
 The browser adapter stores a separate preview state in localStorage and can copy text, but cannot bind dropped native files or validate native lifecycle or OS actions. Its displayed version is currently a literal in `src/api.ts`; keep it aligned with package version during release preparation.
