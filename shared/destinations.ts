@@ -16,8 +16,6 @@ export type DestinationIssue = {
   buttonName: string;
   type: PathAction;
   target: string;
-  local: boolean;
-  conflicted: boolean;
   status: Exclude<DestinationStatus, 'available'>;
 };
 export type DestinationReport = {

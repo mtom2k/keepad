@@ -21,8 +21,8 @@ import {
 import type { IpcMainInvokeEvent } from 'electron';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
-import { readFile, writeFile, stat } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
+import { readFile, writeFile, stat } from 'node:fs/promises';
 import {
   StateSchema,
   makeDefaultState,
@@ -32,8 +32,7 @@ import {
 } from '../shared/model.js';
 import { Store } from './store.js';
 import { describeFile } from './file-binding.js';
-import { SyncEngine, destination } from './sync.js';
-import type { TargetUpdate } from '../shared/sync.js';
+import { nativePath } from './paths.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const devUrl = app.isPackaged ? undefined : process.env.KEEPAD_DEV_URL;
 if (devUrl && devUrl !== 'http://127.0.0.1:5173') throw Error('Unexpected development server.');
@@ -46,10 +45,6 @@ let tray: Tray,
   quitting = false,
   shortcutRegistered = false;
 let store: Store;
-let sync: SyncEngine;
-let syncTimer: ReturnType<typeof setInterval> | undefined;
-let syncQueued = false;
-let syncChoice: { token: string; folder: string; fingerprint: string } | undefined;
 // Preview selection is transient; tray/hotkey invocation always uses the active pad.
 let previewPadId: string | undefined;
 let mutation: Promise<unknown> = Promise.resolve();
@@ -60,18 +55,6 @@ function serial<T>(fn: () => Promise<T>): Promise<T> {
 }
 const snapshot = (): Snapshot => ({
   state: store.state,
-  sync: sync?.status(),
-  deviceTargets: store.device.targets
-    .filter((t) =>
-      store.state.pads.some(
-        (p) =>
-          p.id === t.padId &&
-          p.buttons.some(
-            (b) => b.id === t.buttonId && b.type === t.type && b.target === t.original,
-          ),
-      ),
-    )
-    .map((t) => ({ padId: t.padId, buttonId: t.buttonId, target: t.target })),
   launcherPadId: previewPadId ?? store.state.activePadId,
   info: {
     platform: process.platform,
@@ -179,7 +162,7 @@ function registerShortcut(value: string) {
     return false;
   }
 }
-async function commit(raw: unknown, target?: TargetUpdate) {
+async function commit(raw: unknown) {
   const next = StateSchema.parse(raw),
     previous = store.state;
   if (next.revision !== previous.revision)
@@ -198,7 +181,7 @@ async function commit(raw: unknown, target?: TargetUpdate) {
       app.setLoginItemSettings({ openAtLogin: next.settings.launchAtLogin });
       loginApplied = true;
     }
-    await sync.save({ ...next, revision: previous.revision + 1 }, target);
+    await store.write({ ...next, revision: previous.revision + 1 });
   } catch (e) {
     if (changed) globalShortcut.unregister(next.settings.shortcut);
     if (loginApplied) {
@@ -219,23 +202,7 @@ async function commit(raw: unknown, target?: TargetUpdate) {
   if (next.activePadId !== previous.activePadId || !next.pads.some((p) => p.id === previewPadId))
     previewPadId = undefined;
   broadcast();
-  requestSync();
   return snapshot();
-}
-function requestSync() {
-  if (!sync || !store.device.folder || syncQueued) return;
-  syncQueued = true;
-  void serial(async () => {
-    await sync.tick();
-    if (!store.state.pads.some((p) => p.id === previewPadId)) previewPadId = undefined;
-    broadcast();
-  })
-    .catch((error) => {
-      store.warning = String(error);
-    })
-    .finally(() => {
-      syncQueued = false;
-    });
 }
 function trayMenu() {
   return Menu.buildFromTemplate([
@@ -295,72 +262,10 @@ function handle(channel: string, fn: (event: IpcMainInvokeEvent, ...args: any[])
 }
 function setupIPC() {
   handle('state:load', () => snapshot());
-  handle('state:save', (_e, raw, target) => serial(() => commit(raw, target)));
-  handle('sync:choose', async (e) => {
-    const result = await dialog.showOpenDialog(BrowserWindow.fromWebContents(e.sender)!, {
-      title: 'Choose a KeePad synchronization folder',
-      properties: ['openDirectory', 'createDirectory'],
-    });
-    if (result.canceled) return null;
-    return serial(async () => {
-      const folder = result.filePaths[0],
-        inspection = await sync.inspect(folder);
-      const token = randomUUID();
-      syncChoice = { token, folder, fingerprint: inspection.fingerprint };
-      return { token, folder, existing: inspection.existing, pads: inspection.pads };
-    });
-  });
-  handle('sync:connect', (_e, token) =>
-    serial(async () => {
-      if (typeof token !== 'string' || !syncChoice || syncChoice.token !== token)
-        throw Error('Choose the synchronization folder again.');
-      const chosen = syncChoice;
-      syncChoice = undefined;
-      await sync.connect(chosen.folder, chosen.fingerprint);
-      previewPadId = undefined;
-      broadcast();
-      return snapshot();
-    }),
-  );
-  handle('sync:disconnect', () =>
-    serial(async () => {
-      await sync.disconnect();
-      broadcast();
-      return snapshot();
-    }),
-  );
-  handle('sync:refresh', () =>
-    serial(async () => {
-      await sync.tick();
-      broadcast();
-      return snapshot();
-    }),
-  );
-  handle('sync:preview', (_e, padId, versionId) => {
-    if (typeof padId !== 'string' || typeof versionId !== 'string') throw Error('Invalid version.');
-    return sync.preview(padId, versionId);
-  });
-  handle('sync:resolve', (_e, padId, heads, choice) =>
-    serial(async () => {
-      if (
-        typeof padId !== 'string' ||
-        typeof choice !== 'string' ||
-        !Array.isArray(heads) ||
-        heads.length > 2000 ||
-        !heads.every((id) => typeof id === 'string' && /^[a-f0-9]{64}$/.test(id))
-      )
-        throw Error('Invalid conflict selection.');
-      await sync.resolve(padId, heads, choice);
-      broadcast();
-      return snapshot();
-    }),
-  );
+  handle('state:save', (_e, raw) => serial(() => commit(raw)));
   let checking: ReturnType<typeof checkDestinations> | undefined;
   handle('destinations:check', () => {
-    checking ??= checkDestinations(
-      structuredClone(store.state),
-      structuredClone(store.device),
-    ).finally(() => {
+    checking ??= checkDestinations(structuredClone(store.state)).finally(() => {
       checking = undefined;
     });
     return checking;
@@ -375,16 +280,11 @@ function setupIPC() {
         ?.buttons.find((b) => b.id === request.buttonId);
       if (!button || !['file', 'folder', 'app'].includes(button.type))
         throw Error('This button no longer has a file destination.');
-      if (
-        store.device.folder &&
-        (store.device.heads.find((h) => h.padId === request.padId)?.ids.length ?? 0) > 1
-      )
-        throw Error('Resolve this pad’s conflicting versions before repairing its destinations.');
       return button;
     };
     const button = current();
     const result = await dialog.showOpenDialog(BrowserWindow.fromWebContents(e.sender)!, {
-      title: `Repair ${button.label} on this device`,
+      title: `Repair ${button.label}`,
       buttonLabel: 'Use destination',
       properties: [button.type === 'folder' ? 'openDirectory' : 'openFile'],
       ...(button.type === 'app' && process.platform === 'win32'
@@ -400,7 +300,17 @@ function setupIPC() {
       );
     return serial(async () => {
       current();
-      return commit(store.state, { padId: request.padId, buttonId: request.buttonId, target });
+      return commit({
+        ...store.state,
+        pads: store.state.pads.map((p) =>
+          p.id === request.padId
+            ? {
+                ...p,
+                buttons: p.buttons.map((b) => (b.id === request.buttonId ? { ...b, target } : b)),
+              }
+            : p,
+        ),
+      });
     });
   });
   handle('file:describe', (_e, target) => describeFile(target));
@@ -420,13 +330,6 @@ function setupIPC() {
   });
   handle('window:hide', (e) => BrowserWindow.fromWebContents(e.sender)?.hide());
   handle('action:run', async (_e, padId, buttonId) => {
-    if (
-      store.device.folder &&
-      (store.device.heads.find((head) => head.padId === padId)?.ids.length ?? 0) > 1
-    )
-      throw Error(
-        'Resolve this pad’s conflicting versions in Settings → Synchronization before running its buttons.',
-      );
     const button = store.state.pads
       .find((p) => p.id === padId)
       ?.buttons.find((b) => b.id === buttonId);
@@ -434,13 +337,17 @@ function setupIPC() {
     if (button.type === 'text') await clipboard.writeText(button.target);
     else if (button.type === 'url') await shell.openExternal(button.target);
     else {
-      const target = destination(store.device, padId, button);
+      const target = button.target;
+      if (!nativePath(target))
+        throw Error(
+          'This path is for another operating system. Edit the button and choose a local destination.',
+        );
       let details;
       try {
         details = await stat(target);
       } catch {
         throw Error(
-          `This destination is missing or cannot be accessed. Edit the button and choose a destination for this device.${process.platform === 'darwin' ? ' If macOS asks for access, allow access to that folder in System Settings → Privacy & Security → Files and Folders.' : ' Check its permissions in File Explorer.'}`,
+          `This destination is missing or cannot be accessed. Edit the button and choose a local destination.${process.platform === 'darwin' ? ' If macOS asks for access, allow access to that folder in System Settings → Privacy & Security → Files and Folders.' : ' Check its permissions in File Explorer.'}`,
         );
       }
       if (button.type === 'folder' && !details.isDirectory())
@@ -549,8 +456,6 @@ if (!app.requestSingleInstanceLock()) {
         }),
       );
       await store.load();
-      sync = new SyncEngine(store);
-      syncTimer = setInterval(requestSync, 5000);
       nativeTheme.themeSource = store.state.settings.theme;
       setupIPC();
       const icon = nativeImage.createFromPath(
@@ -565,7 +470,6 @@ if (!app.requestSingleInstanceLock()) {
       if (firstRun || !shortcutRegistered || store.warning || process.argv.includes('--editor'))
         showEditor();
       app.on('activate', () => showLauncher());
-      requestSync();
     })
     .catch((error) => {
       showError(error);
@@ -575,7 +479,6 @@ if (!app.requestSingleInstanceLock()) {
 app.on('window-all-closed', () => {});
 app.on('before-quit', () => {
   quitting = true;
-  clearInterval(syncTimer);
 });
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();

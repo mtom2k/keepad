@@ -58,7 +58,7 @@ export function DestinationSettings({
             (item) => item.padId !== issue.padId || item.buttonId !== issue.buttonId,
           ),
         });
-        setNotice(`“${issue.buttonName}” repaired for this device.`);
+        setNotice(`“${issue.buttonName}” repaired.`);
       }
     } catch (e) {
       setError((e as Error).message);
@@ -84,7 +84,7 @@ export function DestinationSettings({
           }}
         >
           <p className="field-hint">
-            Checks this device’s destinations without opening them. Repairs stay on this device.
+            Checks destinations without opening them. Repair updates the button’s destination.
           </p>
           {checking && <p role="status">Checking destinations…</p>}
           {report && (
@@ -111,18 +111,12 @@ export function DestinationSettings({
                         {issue.padName} · {actionNames[issue.type]}
                       </p>
                       <p className="destination-path">{issue.target}</p>
-                      <p>
-                        {destinationMessages[issue.status]}
-                        {issue.local ? ' · This device' : ''}
-                      </p>
-                      {issue.conflicted && (
-                        <p>Resolve this pad’s conflict in Synchronization first.</p>
-                      )}
+                      <p>{destinationMessages[issue.status]}</p>
                     </div>
-                    <Tip text="Choose a replacement destination for this device. The shared button is unchanged.">
+                    <Tip text="Choose a replacement destination for this button.">
                       <button
                         className="secondary small"
-                        disabled={busy || stale || issue.conflicted}
+                        disabled={busy || stale}
                         aria-label={`Repair ${issue.buttonName} on ${issue.padName}`}
                         onClick={() => void repair(issue)}
                       >

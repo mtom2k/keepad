@@ -10,7 +10,7 @@ await mkdir(output, { recursive: true });
 await mkdir('test-results', { recursive: true });
 const sample = makeDefaultState({ home: userData, downloads: userData, documents: userData });
 sample.settings.theme = 'light';
-// Use disposable destinations initially and explicit Sample paths in the device-destination view; never execute them or read user data.
+// Use disposable destinations initially and explicit Sample paths in the destination checker; never execute them or read user data.
 await writeFile(path.join(userData, 'keepad.json'), JSON.stringify(sample));
 let app;
 async function capture(page, name) {
@@ -61,23 +61,6 @@ try {
   await editor.getByLabel('Theme', { exact: true }).selectOption('dark');
   await editor.waitForFunction(() => document.documentElement.dataset.appearance === 'dark');
   await capture(editor, 'settings-dark');
-  await editor.getByRole('button', { name: 'Everyday ACTIVE', exact: true }).click();
-  await editor.evaluate(async () => {
-    const state = (await window.keepad.load()).value.state;
-    const button = state.pads
-      .find((p) => p.id === 'everyday')
-      .buttons.find((b) => b.label === 'Downloads');
-    button.target = 'C:\\Users\\Sample\\Downloads';
-    const result = await window.keepad.save(state, {
-      padId: 'everyday',
-      buttonId: button.id,
-      target: '/Users/Sample/Downloads',
-    });
-    if (!result.ok) throw Error(result.error);
-  });
-  await editor.getByRole('button', { name: 'Edit Downloads', exact: true }).click();
-  await capture(editor, 'device-destination');
-  await editor.getByRole('button', { name: 'Cancel', exact: true }).click();
   await editor.evaluate(async () => {
     const state = (await window.keepad.load()).value.state;
     const button = state.pads.find((p) => p.id === 'focus').buttons[0];
@@ -91,7 +74,6 @@ try {
     const result = await window.keepad.save(state);
     if (!result.ok) throw Error(result.error);
   });
-  await editor.getByRole('button', { name: 'Settings', exact: true }).click();
   await editor.getByRole('button', { name: 'Check destinations', exact: true }).click();
   await editor
     .getByRole('button', { name: 'Repair Project brief on Deep work', exact: true })
@@ -106,7 +88,7 @@ try {
   await editor.screenshot({ path: 'test-results/destination-check-minimum.png', scale: 'css' });
 
   console.log(
-    'Captured sample-data editor, button menu, launcher, search, button editor, Dark settings, a sample device destination, and the destination checker in docs/screenshots. Review them before committing.',
+    'Captured sample-data editor, button menu, launcher, search, button editor, Dark settings, the destination checker in docs/screenshots. Review them before committing.',
   );
 } finally {
   if (app) await app.close();

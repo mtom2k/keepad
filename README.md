@@ -58,9 +58,8 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 - **Right-click a button** to edit, duplicate, move it to another pad, or delete it. This works in the editor and the compact pad.
 - **Drop a file onto the editor grid** to make an open-file button. Folders and applications work too. Drop one item at a time; replacing an existing action asks for confirmation.
 - **Preview before activating.** The eye button shows a pad without changing your active choice.
-- **Find broken destinations:** Settings → Destinations → Check destinations checks file, folder, and app buttons across all pads. Repair chooses a replacement for this device without changing shared paths.
+- **Find broken destinations:** Settings → Destinations → Check destinations checks file, folder, and app buttons across all pads. Repair updates the button’s local destination.
 - **Keep your setup locally**, with backup export and import.
-- **Optionally sync pads between Mac and Windows** through a Dropbox, OneDrive, or other synchronized folder. Preferences stay on each device; competing pad edits are preserved for review. [Setup and limits](docs/synchronization.md).
 
 ## 🧭 Using KeePad
 
@@ -87,29 +86,20 @@ Single-clicking a pad selects it for editing. The **eye**, **pencil**, **copy**,
 
 Open **Settings → Destinations → Check destinations**. KeePad lists paths that need attention and identifies missing items, access problems, and paths from another operating system. Click **Repair…** and select the replacement. Cancel leaves the button unchanged.
 
-Repairs use **This device** destinations, so they do not alter your other computers. Checks never open files or run buttons. Network/cloud items may be temporarily unavailable; reconnect them and use **Check again**. An available path does not guarantee an app will launch or that a Windows shortcut's target exists.
+Repairs update the button’s saved destination on this computer. Checks never open files or run buttons. Network/cloud items may be temporarily unavailable; reconnect them and use **Check again**. An available path does not guarantee an app will launch or that a Windows shortcut's target exists.
 
 <details>
 <summary>See the destination checker</summary>
 
-![KeePad checking sample destinations and offering device-local repairs](docs/screenshots/destination-check.png)
+![KeePad checking sample destinations and offering local repairs](docs/screenshots/destination-check.png)
 
 </details>
 
-## 🔄 Share pads between computers
+## 💾 Local storage and backups
 
-Open **Settings → Synchronization → Choose sync folder…**. On your first computer, choose a dedicated folder inside Dropbox, OneDrive, or another sync provider and create a shared library. After that folder downloads on the second computer, choose it there and use the shared library. KeePad backs up the previous local library before switching.
+KeePad keeps pads and preferences on this computer. Use **Settings → Backup → Export backup** to save a copy, and **Import pads** to restore or transfer pads manually. Imports add pads without replacing existing ones. Files and applications are not included; use **Check destinations** after transferring a backup.
 
-Both installations use the same library format. Keep the folder available offline. A regular local folder does not sync by itself; your provider transports changes. KeePad keeps local copies and retries queued changes when the folder returns.
-
-For files/apps in different locations, edit the button and set **This device** to the destination on that computer. This does not change the destination on your other devices. Sync shares button definitions and images, not the files or applications they open. [Conflict handling, recovery, and current limits](docs/synchronization.md).
-
-<details>
-<summary>Use different destinations on Mac and Windows</summary>
-
-![A Windows shared folder destination with a separate Mac destination for this device](docs/screenshots/device-destination.png)
-
-</details>
+Upgrading from a build with synchronization? KeePad preserves the locally stored pads and their device-specific destinations, saves a recovery copy, and leaves former shared folders untouched. [Upgrade and recovery details](docs/synchronization.md).
 
 ## 🚀 Try the development build
 
@@ -132,7 +122,7 @@ To create an application bundle or installer locally, see [packaging instruction
 
 ## 🔒 Your data and permissions
 
-Pads, images, and snippets are stored on your computer. If you enable synchronization, their shared library and version history also live in your chosen folder and may be uploaded by its provider. Backups include your images, file paths, and copied text, so keep them somewhere private. Imported/shared file paths may need a **This device** destination on another computer.
+Pads, images, preferences, and snippets are stored on your computer. KeePad does not synchronize with other devices. Backups include images, file paths, and copied text, so keep them somewhere private. Imported paths may need updating on another computer.
 
 macOS may ask before opening a protected folder. KeePad does not require Accessibility, screen-recording, or Full Disk Access for its current actions. Launch at login is available after installing the packaged app.
 

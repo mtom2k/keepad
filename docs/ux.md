@@ -44,13 +44,11 @@ Right-click an occupied button in the editor or launcher for Edit…, Duplicate,
 
 Shift+F10 or the context-menu key opens the menu for a focused key. Up/Down, Home/End, and Enter operate it; Escape or Tab dismisses it and restores focus to the originating key. Outside clicks, window blur/resize, or state changes dismiss it. Menus stay within the window and suppress underlying tooltips. Right-click does not run the action. A stale move/delete confirmation or file replacement is rejected instead of overwriting newer changes.
 
-## Synchronization settings
+## Local storage
 
-Synchronization is off by default. Settings offers Choose sync folder, a confirmation with the existing/new library and pad count, local status, Check folder, and Disconnect. Existing-library confirmation explains replacement and the automatic local backup. Keep app appearance, shortcut/startup/hide preferences, active selection, and device destinations local. Label folder checks truthfully; do not claim cloud delivery.
+Settings offers backup export/import and destination checking. There is no synchronization section or status indicator. File/folder/app dialogs have one Destination field with Browse. A library revision changing during a pad/button dialog blocks stale saves/removal; removed pads close their editor dialogs.
 
-Conflict versions show name, button count, source platform, and timestamp. Review displays saved actions without running them. Keep a version/deletion or keep each nondeleted version as a separate pad. A compact warning links to Settings when synchronization needs attention. Unresolved pads cannot be edited or run; unaffected pads/preferences remain usable. Disconnect confirms retention of local pads and remote-folder contents.
-
-File/folder/app button dialogs add an optional This device destination selected through the native picker. It saves with the button, is canceled with the dialog, and never changes the shared target. Use shared destination clears it on Save. A library revision changing during a pad/button dialog blocks saving/removing from that stale draft. Removed pads close their editor dialogs. See [synchronization](synchronization.md).
+Upgrades with legacy device metadata show a one-time storage notice describing local conversion and the recovery-copy path. Conversion failure prevents startup rather than showing replacement starter pads. See [upgrade recovery](synchronization.md).
 
 ## Accessibility and feedback
 
@@ -62,6 +60,6 @@ Review [screenshots](screenshots/README.md) after visible changes, including edg
 
 ## Checking destinations
 
-Settings → Destinations offers an explicit Check destinations action. The dialog reports an available count and issues across all pads, with button name, pad, action type, effective path, and reason. Check applicable local overrides before shared paths; skip text/URL buttons. Repair opens the native picker and saves immediately after a valid choice, for this device only. Cancel changes nothing. Explain local repair scope, transient availability, and the limits of app/shortcut validation.
+Settings → Destinations offers an explicit Check destinations action. The dialog reports an available count and issues across all pads, with button name, pad, action type, effective path, and reason. Check saved local paths; skip text/URL buttons. Repair opens the native picker and saves immediately after a valid choice, updating the button’s ordinary target. Cancel changes nothing. Explain local repair scope, transient availability, and the limits of app/shortcut validation.
 
-A changed library revision marks the report stale and disables repairs until Check again. Unresolved pad conflicts disable repair and point to Synchronization. Keep long paths wrapped/selectable, results scrollable, footer controls reachable at minimum size, and repair tooltips within the modal. Checking never runs actions or searches for replacement files automatically.
+A changed library revision marks the report stale and disables repairs until Check again. Keep long paths wrapped/selectable, results scrollable, footer controls reachable at minimum size, and repair tooltips within the modal. Checking never runs actions or searches for replacement files automatically.

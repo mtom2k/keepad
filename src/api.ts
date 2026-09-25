@@ -55,12 +55,6 @@ const preview: KeePadAPI = {
     }
     return unavailable();
   },
-  chooseSyncFolder: unavailable,
-  connectSync: unavailable,
-  disconnectSync: unavailable,
-  refreshSync: unavailable,
-  previewSync: unavailable,
-  resolveSync: unavailable,
   pickPath: unavailable,
   checkDestinations: unavailable,
   repairDestination: unavailable,

@@ -21,21 +21,19 @@ flowchart LR
 | --- | --- | --- |
 | Main process | [electron/main.ts](../electron/main.ts) | Lifecycle, tray menus, windows, shortcuts, native actions, serialized mutations |
 | Bridge | [electron/preload.cts](../electron/preload.cts) | Explicit API methods and event subscriptions; compiled to CommonJS for sandbox compatibility |
-| Folder synchronization | [electron/sync.ts](../electron/sync.ts), [shared/sync.ts](../shared/sync.ts) | Immutable pad history, validation, local outbox, conflicts, and device paths |
-| Sync settings | [src/sync-settings.tsx](../src/sync-settings.tsx) | Opt-in folder confirmation, status, version review/resolution, disconnect |
-| Store | [electron/store.ts](../electron/store.ts) | Validation, temporary-file replacement, corruption recovery |
+| Store | [electron/store.ts](../electron/store.ts) | Validation, temporary-file replacement, corruption recovery, one-time legacy destination conversion |
 | Shared contract | [shared/model.ts](../shared/model.ts) | Zod schemas, types, starter state, import merge |
 | Renderer | [src/main.tsx](../src/main.tsx) | Editor, launcher, dialogs, settings, local edit selection |
 | UI primitives | [src/components.tsx](../src/components.tsx) | Optional pad glyphs, tooltips, modal dialogs, macro keys, number steppers, visual position picker, keyboard-accessible button menu |
 | Launcher search | [src/launcher-search.tsx](../src/launcher-search.tsx), [src/search.ts](../src/search.ts) | Transient query/focus, accessible result navigation, pure cross-pad ranking |
 | Button placement | [src/pad-layout.ts](../src/pad-layout.ts) | Shared immutable move/swap operation for drag-and-drop, dialog saves, and position preview |
 | Button duplication/moves | [src/button-actions.ts](../src/button-actions.ts) | Immutable first-free-slot copy/move; full-pad rejection and ID collision handling |
-| Destination checks | [electron/destinations.ts](../electron/destinations.ts), [shared/destinations.ts](../shared/destinations.ts), [src/destination-settings.tsx](../src/destination-settings.tsx) | Explicit bounded metadata scans and device-local repair UI |
+| Destination checks | [electron/destinations.ts](../electron/destinations.ts), [shared/destinations.ts](../shared/destinations.ts), [src/destination-settings.tsx](../src/destination-settings.tsx) | Explicit bounded metadata scans and local destination repair UI |
 | Dropped destinations | [electron/file-binding.ts](../electron/file-binding.ts) | Validate native absolute path and inspect file metadata to describe a binding |
 | Native / preview adapter | [src/api.ts](../src/api.ts) | Electron bridge or explicitly limited browser preview |
 | Styling | [src/styles.css](../src/styles.css) | Traditional utility layout and per-pad themes |
 
-Vite builds the renderer into `dist/`. TypeScript emits main/preload/shared modules into `dist-electron/`. electron-builder includes both plus assets in `app.asar`. The app identity is defined in `package.json`, not inferred from an installed app's display name.
+Vite builds the renderer into `dist/`. `build:electron` cleans `dist-electron/` before TypeScript emits main/preload/shared modules, preventing deleted source modules from surviving in packages. electron-builder includes both plus assets in `app.asar`. The app identity is defined in `package.json`, not inferred from an installed app's display name.
 
 ## Window lifecycle
 
@@ -78,19 +76,19 @@ External file drops are separate from internal rearrangement. The editor passes 
 
 The input uses combobox/listbox semantics with an active descendant. Arrow keys change selection; composition and repeated Enter events do not run actions. Escape capture clears the query only when no modal/menu is open, allowing those components to dismiss first. Search results scroll independently beneath a fixed search field. The centered window allows an additional search row and remains constrained to the display work area.
 
-## Optional synchronization
+## Local-only storage
 
-The local store remains authoritative for the current cache and device preferences. A validated optional `device` envelope commits the cache and pending outgoing records together; renderer saves cannot replace this metadata. Main initializes `SyncEngine`, polls every five seconds, and requests a check after local saves. Checks and all local mutations share the existing serialization queue. Applying incoming pads increments the local revision so stale renderer writes fail. Pad/button dialogs additionally retain their opening revision, and deleting a pad closes its open editor draft.
+Pads and settings are persisted only in the local store. There is no folder engine, polling, outgoing queue, sync IPC, conflict review, or device override in the runtime contract. `state:save` accepts only state. Native path validation in `electron/paths.ts` still rejects paths for another operating system.
 
-The folder contains immutable whole-pad or deletion records linked by causal parent hashes. The engine validates format, hashes, parent availability, and resource limits before materializing records. Files arriving out of order or malformed never reset local pads. Multiple heads per pad are preserved and exposed as conflicts; independent pads combine. The shared format, ordering, and file naming are platform-neutral. Settings, active selection, and device overrides stay local. Full protocol/recovery rationale: [ADR 0010](adr/0010-optional-folder-synchronization.md); user setup/limits: [synchronization](synchronization.md).
+At startup, the store detects a legacy `device` envelope, saves a unique full recovery copy, folds matching device destinations into ordinary button targets, increments the revision, and atomically writes plain state. It never accesses the old shared folder. Invalid conversion metadata or failed backup/write stops migration without replacing valid pads with defaults. Current cached pads are retained; remote-only versions are not imported. See [ADR 0012](adr/0012-local-only-storage.md) and [upgrade recovery](synchronization.md).
 
-New IPC methods are narrow: native folder selection returns a confirmation token, connection reinspects the chosen folder, refresh runs the engine, preview returns a stored conflict version without execution, resolve validates reviewed head IDs, and disconnect retains a backed-up local copy. `state:save` optionally carries one validated device-destination update, stored atomically with the state. Action execution resolves that device override only while its original shared type/target still match, validates host-native syntax, then follows the existing path opener. Invalid foreign paths explain how to set a local destination.
+Pad/button dialogs retain their opening revision; changes from another window reject stale drafts. Deleting a pad closes its open draft.
 
 ## Destination checks and repair
 
-`destinations:check` snapshots validated state and device metadata, resolves applicable local overrides, and inspects file/folder/app actions across pads outside the serialized mutation queue. Concurrent requests share the same scan. A module-wide cap keeps at most four native probes outstanding, including calls that exceeded the 2.5-second UI wait. Workers stop starting checks after ten seconds and report remaining entries as unchecked. No file contents, directory enumeration, macro execution, or URL requests are involved.
+`destinations:check` snapshots validated local state and inspects file/folder/app actions across pads outside the serialized mutation queue. Concurrent requests share the same scan. A module-wide cap keeps at most four native probes outstanding, including calls that exceeded the 2.5-second UI wait. Workers stop starting checks after ten seconds and report remaining entries as unchecked. No file contents, directory enumeration, macro execution, or URL requests are involved.
 
-`destinations:repair` validates IDs/revision, rejects unresolved pad conflicts, opens the native picker, and validates the selected path's kind/access. It rechecks identity/revision/conflicts inside the serialized commit after all awaits. The existing `state:save` implementation atomically saves a device override without changing shared pad definitions. Reports become stale when the revision changes; successful repair updates its report revision and available count. See [ADR 0011](adr/0011-device-destination-checks.md).
+`destinations:repair` validates IDs/revision, opens the native picker, and validates the selected path's kind/access. It rechecks identity/revision inside the serialized commit after all awaits. The existing commit path atomically replaces only the button’s target in local state. Reports become stale when the revision changes; successful repair updates its report revision and available count. See [ADR 0011](adr/0011-device-destination-checks.md), with local target semantics superseded by [ADR 0012](adr/0012-local-only-storage.md).
 
 ## Application appearance
 
@@ -102,6 +100,6 @@ Requests return `Result<T>` (`ok/value` or `ok/error`). The API contract lists a
 
 The main process checks known web contents, the main frame, and the exact local file/dev origin for each request. Both windows have sandboxing, context isolation, and no Node integration. Navigation and new windows are blocked. The HTML CSP limits scripts to local assets and images to local/data sources. The development server is accepted only at the explicitly configured loopback URL and is ignored in packaged builds.
 
-Only HTTP(S) website actions and supported inline raster images are accepted. File/folder/app destinations can be typed, chosen with Browse, or bound by dropping a local item in the editor; schema validation requires absolute paths and execution checks access/existence. Button images are selected through the native image dialog. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or direct cloud-provider API is implemented. Optional shared-folder data may be transported by the user’s sync provider.
+Only HTTP(S) website actions and supported inline raster images are accepted. File/folder/app destinations can be typed, chosen with Browse, or bound by dropping a local item in the editor; schema validation requires absolute paths and execution checks access/existence. Button images are selected through the native image dialog. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or direct cloud-provider API is implemented. No synchronization engine or cloud-provider integration is present.
 
 The browser adapter stores a separate preview state in localStorage and can copy text, but cannot bind dropped native files or validate native lifecycle or OS actions. Its displayed version is currently a literal in `src/api.ts`; keep it aligned with package version during release preparation.

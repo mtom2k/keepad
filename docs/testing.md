@@ -9,24 +9,24 @@ Run validation locally. GitHub hosts the private source repository and does not 
 | Command | Purpose | Limits |
 | --- | --- | --- |
 | `npm run build` | Strict TypeScript checks and production renderer/main builds | Does not prove native behavior |
-| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, immutable placement/copy/move, native destination metadata, cross-pad search ranking, and folder-sync consistency/recovery | Does not exercise OS permissions |
+| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, immutable placement/copy/move, native destination metadata, cross-pad search ranking, and legacy local conversion/recovery | Does not exercise OS permissions |
 | `npm run test:desktop` | Playwright driving actual Electron with temporary data | Requires a graphical macOS/Windows session |
 | `npm run format:check` | Source/test formatting | Not a semantic test |
 | `npm run docs:check` | Local docs, links, generated reference, screenshots | Does not prove prose correctness |
 | `npm run docs:check -- --base <ref>` | Source-to-documentation impact checks | Requires a valid Git base and human review |
 | `npm run docs:screenshots` | Rebuild and capture curated native UI with sample data | Review images; not a substitute for interaction tests |
 
-## Synchronization coverage
+## Local-only conversion coverage
 
-[Sync engine tests](../tests/sync.test.ts) use independent temporary stores with Mac/Windows platform fixtures and replicated directories. They verify independent-pad convergence, preferences/active selection staying local, concurrent-version preservation, keep-both resolution, edit/delete tombstones, out-of-order delivery, offline outbox restart, invalid/future/provider-duplicate files, changed-record integrity and missing known heads, device destinations/foreign paths, join/disconnect recovery, and malformed local sync metadata preserving pads. These fixtures test the common protocol and path rules on the host filesystem, not a native Windows installation or cloud provider.
+[Migration tests](../tests/local-migration.test.ts) use temporary profiles to verify Mac/Windows destination preservation, cached edits/preferences/IDs, full recovery copies, unchanged external-folder sentinels, one-time restart behavior, ignored outdated overrides, unsupported metadata and invalid-path failures, backup failure, and write-failure retry. Windows path fixtures run on the host; native Windows filesystem behavior still needs testing.
 
-[Native sync checks](../tests/sync-desktop.mjs) run within the desktop suite with a simulated Windows engine peer. They cover folder-picker confirmation/cancel, token validation, incoming UI updates, device-only destination execution with a stubbed opener, stale-draft rejection, conflict review/keep-both, blocked execution of unresolved pads, and disconnect. The conflict controls and review dialog are captured at the minimum editor size for visual inspection. Providers do not receive test data; filesystem profiles are disposable.
+The desktop suite checks that the preload exposes no synchronization API, repaired targets are saved in ordinary state, and saved JSON has no device envelope. The Electron build clears generated output before compiling so removed modules cannot leak into packages.
 
 ## Destination-check coverage
 
-[Destination tests](../tests/destinations.test.ts) use temporary files/directories to cover available, missing, wrong-type, foreign paths, dangling symlinks, Unix access denial when not running as root, matching versus outdated local overrides, cross-pad coverage, URL/text exclusion, and scan immutability. A controlled slow-probe test verifies bounded waits, deduplication, retained concurrency slots after timeout, and resumed checks after settlement. Mac application-bundle structure is simulated; this does not launch an app.
+[Destination tests](../tests/destinations.test.ts) use temporary files/directories to cover available, missing, wrong-type, foreign paths, dangling symlinks, Unix access denial when not running as root, cross-pad coverage, URL/text exclusion, and scan immutability. A controlled slow-probe test verifies bounded waits, deduplication, retained concurrency slots after timeout, and resumed checks after settlement. Mac application-bundle structure is simulated; this does not launch an app.
 
-[Native repair checks](../tests/destinations-desktop.mjs) run in the desktop suite with stubbed pickers and openers. They check reporting, picker cancel, rejected wrong-type replacements, local-only repair, unchanged activation/shared targets, stale revisions before/during the native picker, sync-conflict blocking, refreshing reports, and repair-tooltip bounds at minimum window size. Native Windows permission behavior, network/provider timeouts/hydration, and real application/shortcut validity remain manual release checks.
+[Native repair checks](../tests/destinations-desktop.mjs) run in the desktop suite with stubbed pickers and openers. They check reporting, picker cancel, rejected wrong-type replacements, local-only repair, unchanged activation and saved replacement targets, stale revisions before/during the native picker, refreshing reports, and repair-tooltip bounds at minimum window size. Native Windows permission behavior, network/provider timeouts/hydration, and real application/shortcut validity remain manual release checks.
 
 ## Native suite coverage
 
@@ -63,14 +63,14 @@ The suite does **not** click the native tray menu, verify real shell-launched ap
 - Search with duplicate labels, long descriptions, large result lists, screen readers, and real IME composition; verify search focus on actual tray/shortcut summon.
 - All themes and layout bounds; dialog keyboard navigation; tooltips near each window edge; text scaling and minimum editor size.
 - Backup round-trip between operating systems and clear path-repair guidance.
-- On a real Mac and Windows pair: select corresponding Dropbox/OneDrive folders, keep them downloaded, edit independently/simultaneously/offline, restart, resolve conflicts, test provider-renamed files and device destinations, disconnect, and inspect recovery copies. Confirm platform preferences never transfer. Exercise permissions, UNC paths, file-provider hydration, and provider delays.
+- On both target platforms, upgrade a disposable legacy profile with local destinations and verify recovery copies, effective paths, unchanged old folders, and restart. Exercise native permissions, UNC paths, unavailable drives, and provider-backed file hydration for ordinary file actions.
 - Installer/uninstaller behavior, signatures, and a clean machine without developer dependencies.
 
 Record the OS, architecture, commands, date, and result in progress/release notes. “Build configured” and “tested” are different claims.
 
 ## Screenshots
 
-Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, launcher search, button editor, Dark Settings (including local-default synchronization), a device-destination example, and the checker using fictional Mac/Windows Sample paths, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings and the destination examples; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
+Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, launcher search, button editor, Dark Settings and the checker using fictional Mac/Windows Sample paths, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings and destination checking; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
 
 Review all generated files in [screenshots](screenshots/README.md) before committing. UI changes require refreshed relevant images; documentation-only changes do not.
 

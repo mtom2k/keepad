@@ -93,7 +93,9 @@ export async function checkDestinationRepair(app, editor, profile) {
     await picker(null);
     await repair.click();
     await editor.waitForFunction(
-      async () => (await window.keepad.load()).value.deviceTargets.length === 0,
+      async (target) =>
+        (await window.keepad.load()).value.state.pads[0].buttons[0].target === target,
+      originalTarget,
     );
     await editor.waitForFunction(
       () =>
@@ -106,8 +108,9 @@ export async function checkDestinationRepair(app, editor, profile) {
     await repair.click();
     await editor.getByText('2 of 2 destinations available.', { exact: true }).waitFor();
     const after = await editor.evaluate(async () => (await window.keepad.load()).value);
-    assert.equal(after.state.pads[0].buttons[0].target, originalTarget);
-    assert.equal(after.deviceTargets[0].target, file);
+    assert.equal(after.state.pads[0].buttons[0].target, file);
+    assert.equal(after.deviceTargets, undefined);
+    assert.equal(after.sync, undefined);
     assert.equal(after.state.activePadId, initial.activePadId);
     assert.equal(await app.evaluate(() => globalThis.destinationOpenCalls), 0);
     // Old scan revisions and deleted/changed actions cannot be repaired silently.

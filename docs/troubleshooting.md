@@ -14,12 +14,10 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | Search finds a button on another pad | Expected: search spans all pads and shows each result's source pad. Running a result does not activate that pad. |
 | Search misses a destination or snippet | Search covers button names and descriptions (Hover hint) only. Add useful terms there; targets/file contents are not indexed and typo matching is not implemented. |
 | Escape did not hide KeePad | It dismisses an open menu/dialog or clears a search first. Press it again with an empty search to hide. |
-| Shared pads have not reached another computer | KeePad checks local folders. Verify both installations chose corresponding provider folders, the provider has delivered all files, and the folder is available offline. Check folder does not force cloud delivery. |
-| Synchronization needs attention | Review Settings for competing versions or incomplete/invalid history. Local data is retained. Do not remove change records; see [sync recovery](synchronization.md). |
 | Destination check says unavailable or not checked | Reconnect the drive/provider and try Check again. Slow native calls have bounded UI waits and concurrency; they may still be pending in the OS. No buttons are executed during checks. |
 | A repair says the pads changed | The report or native picker was based on an older revision. Check again and choose the replacement; the stale repair was not saved. |
-| A shared Mac/Windows file action cannot run | Edit button → This device → Choose… and save the local destination. Shared definitions do not install applications, copy files, or translate paths. |
-| A dialog says the library changed | Incoming state made its draft stale. Review/copy the draft if needed, close it, and reopen the current button/pad before saving. |
+| An imported file action cannot run | Edit button → Destination → Browse…, or use Settings → Destinations → Check destinations → Repair…. Backups do not copy files or translate paths. |
+| A dialog says the library changed | Another local edit made its draft stale. Review/copy the draft if needed, close it, and reopen the current button/pad before saving. |
 | Moving a key displaces another key | Expected swap behavior. Drag in the editor or use the mini Position picker; the launcher does not rearrange keys. Dialog positioning saves only when Save button is pressed. |
 | Dropping a file does nothing | Drop one local item from Finder/File Explorer onto a grid position in the desktop editor. The compact launcher and browser preview do not bind files. Check for a missing/inaccessible destination or a stale-state error. |
 | Dropped file kept the old button name/image | Expected for occupied positions. Confirmation replaces only the action. Edit the button to change its name or image. |
@@ -29,6 +27,7 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | A protected folder cannot be opened on macOS | Use the normal OS prompt and Files and Folders privacy settings for that folder. Broad Accessibility or Full Disk Access is not part of this app's design. |
 | Last-used Settings/X appears focused on summon | Regressed launcher focus reset. Check `launcher:shown` events, search-field focus scheduling, and the desktop regression test. Keep Tab focus styling intact. |
 | Changes rejected after another window saved | Optimistic revision conflict. The UI refreshes; reapply the edit. Do not bypass revision validation. |
+| Legacy conversion failed at startup | The original file is retained. Keep the recovery copy and follow [local conversion recovery](synchronization.md); do not delete your profile. |
 | Settings reset with a recovery warning | Inspect the timestamped recovery copy next to `keepad.json`. Failed backup creation must stop startup rather than overwrite the original. |
 | An older build cannot load icon-free pads | Older validators do not recognize `none`. Use a pre-change backup to downgrade; keep the recovery copy. Missing app-theme settings alone are supported by the current build and default to System. |
 | App still looks old after pulling code | An existing packaged process can be older than the checkout. Rebuild the intended project bundle, identify it by path and bundle ID, and restart that copy. Do not overwrite another installed KeePad by display name alone. |
@@ -39,7 +38,7 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 ## Known boundaries to preserve in handoffs
 
 - Windows support is implemented; complete validation still requires local Windows testing and manual checks. Hosted automation is not configured. See progress for historical onboarding test results and remaining gaps.
-- Native file errors now use platform-specific permission guidance and device-destination instructions. Windows native permission behavior still needs manual validation.
+- Native file errors now use platform-specific permission guidance and local destination instructions. Windows native permission behavior still needs manual validation.
 - Images are resized to square thumbnails; cropping/aspect-ratio controls are not implemented.
 - Multiple monitors, unusual screen sizes, native blur behavior, reserved shortcuts, and non-QWERTY layouts require real device verification.
 - Startup preferences are written via Electron but do not prove a successful next login; verify after installation.

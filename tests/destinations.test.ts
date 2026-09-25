@@ -9,7 +9,6 @@ import {
   createDestinationInspector,
 } from '../electron/destinations.js';
 import { makeDefaultState } from '../shared/model.js';
-import { Store } from '../electron/store.js';
 
 test('destination inspection distinguishes missing, wrong-type, and foreign paths without opening them', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'keepad-destinations-'));
@@ -46,7 +45,7 @@ test('destination inspection distinguishes missing, wrong-type, and foreign path
   }
 });
 
-test('scan spans pads, uses only matching device overrides, skips text/URLs, and does not modify data', async () => {
+test('scan spans pads, uses local button targets, skips text/URLs, and does not modify data', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'keepad-destinations-'));
   try {
     const file = path.join(root, 'report.txt');
@@ -54,39 +53,20 @@ test('scan spans pads, uses only matching device overrides, skips text/URLs, and
     const state = makeDefaultState();
     const first = state.pads[0].buttons[0];
     first.type = 'file';
-    first.target = path.join(root, 'old');
+    first.target = file;
     const second = state.pads[1].buttons[0];
     second.type = 'folder';
     second.target = path.join(root, 'missing');
-    const store = new Store(path.join(root, 'keepad.json'), state);
-    store.device.targets = [
-      {
-        padId: state.pads[0].id,
-        buttonId: first.id,
-        type: 'file',
-        original: first.target,
-        target: file,
-      },
-      {
-        padId: state.pads[1].id,
-        buttonId: second.id,
-        type: 'folder',
-        original: 'outdated',
-        target: root,
-      },
-    ];
-    const before = JSON.stringify({ state, device: store.device });
-    const report = await checkDestinations(state, store.device);
+    const before = JSON.stringify(state);
+    const report = await checkDestinations(state);
     assert.equal(report.total, 2);
     assert.equal(report.available, 1);
     assert.equal(report.issues[0].buttonId, second.id);
     assert.equal(report.issues[0].status, 'missing');
-    assert.equal(report.issues[0].local, false);
-    assert.equal(JSON.stringify({ state, device: store.device }), before);
+    assert.equal(JSON.stringify(state), before);
     await rm(file);
-    const missingOverride = await checkDestinations(state, store.device);
-    assert.equal(missingOverride.issues[0].local, true);
-    assert.equal(missingOverride.issues[0].target, file);
+    const missingFile = await checkDestinations(state);
+    assert.equal(missingFile.issues[0].target, file);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

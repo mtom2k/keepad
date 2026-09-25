@@ -18,7 +18,7 @@ Documentation is maintained in the same change as implementation, not in a later
 | --- | --- |
 | User-visible interactions or visual design | README as relevant, UX, progress; refresh screenshots if pictured |
 | Main process, preload, IPC, lifecycle, privileged actions | Architecture, relevant ADR/data model/testing, progress |
-| Sync protocol, provider-folder behavior, device destinations, conflicts | Synchronization guide, ADR, architecture/data model, testing, progress |
+| Local storage, legacy conversion, destination repair | Local conversion/recovery guide, ADR, architecture/data model, testing, progress |
 | Persisted models, constraints, imports, defaults | Data model, architecture as relevant, generated reference, tests, progress |
 | Package scripts, dependencies, app version/identity | Generated reference, setup/release guides as relevant, progress |
 | Tests, screenshot tooling, or local build configuration | Testing/releasing guides as relevant, progress |

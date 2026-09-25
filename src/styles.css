@@ -1248,67 +1248,6 @@ button {
   position: relative;
 }
 
-.sync-path {
-  font-size: 12px;
-  overflow-wrap: anywhere;
-  color: var(--muted);
-}
-.sync-error {
-  font-size: 12px;
-  color: var(--error-text);
-  background: var(--error-bg);
-  padding: 10px;
-  border: 1px solid var(--error-border);
-  border-radius: 4px;
-  overflow-wrap: anywhere;
-}
-.sync-conflict {
-  margin-top: 16px;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-}
-.sync-version {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 12px 0;
-  font-size: 12px;
-}
-.sync-version small {
-  display: block;
-  color: var(--muted);
-  margin-top: 4px;
-}
-.sync-attention {
-  background: var(--warning-bg);
-  color: var(--warning-text);
-  border: 1px solid var(--warning-border);
-  border-radius: 4px;
-  padding: 7px;
-  font-size: 12px;
-}
-
-.sync-review {
-  max-height: 50vh;
-  overflow: auto;
-}
-.sync-review > div {
-  border-top: 1px solid var(--border);
-  padding: 10px 0;
-}
-.sync-review p {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  font-size: 12px;
-  color: var(--muted);
-}
-.sync-version > span {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
 .destination-results {
   max-height: 45vh;
   overflow-y: auto;

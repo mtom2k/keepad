@@ -1,6 +1,6 @@
 # Screenshot provenance
 
-These images are generated from the actual Electron renderer using starter/sample data, not a live user profile. The device-destination and destination-check views use fictional `Sample` paths and never open them.
+These images are generated from the actual Electron renderer using starter/sample data, not a live user profile. The destination-check view uses fictional `Sample` paths and never opens them.
 
 | File | View |
 | --- | --- |
@@ -11,9 +11,8 @@ These images are generated from the actual Electron renderer using starter/sampl
 | [button-editor.png](button-editor.png) | Editing a sample text-copy action |
 | [settings-dark.png](settings-dark.png) | App-wide Theme control in Dark mode |
 | [destination-check.png](destination-check.png) | Sample missing/foreign destinations with Repair controls |
-| [device-destination.png](device-destination.png) | A sample Windows shared path with a Mac destination for this device |
 
-The sample profile explicitly uses Light for the first five views and Dark for Settings, device destinations, and checking destinations, making capture independent of the host's current appearance.
+The sample profile explicitly uses Light for the first five views and Dark for Settings and checking destinations, making capture independent of the host's current appearance.
 
 Regenerate on a graphical desktop with `npm run docs:screenshots`. The script builds the current code, creates a temporary profile, captures these views, and cleans up. It does not execute macros or read/alter the real user's pads. Images show the application content, not OS window decorations; platform fonts and shortcuts can differ.
 

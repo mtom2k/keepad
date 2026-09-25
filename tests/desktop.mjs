@@ -1,7 +1,6 @@
 import { checkDestinationRepair } from './destinations-desktop.mjs';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
-import { checkSync } from './sync-desktop.mjs';
 import { checkLauncherHover } from './launcher-hover.mjs';
 import { checkLauncherSearch } from './launcher-search.mjs';
 import { checkButtonInteractions } from './button-interactions.mjs';
@@ -35,8 +34,15 @@ try {
   const errors = [];
   window.on('pageerror', (e) => errors.push(e.message));
   await window.getByRole('heading', { name: 'Everyday', exact: true }).waitFor();
+  assert.deepEqual(
+    await window.evaluate(() => Object.keys(window.keepad).filter((k) => /sync/i.test(k))),
+    [],
+  );
   await checkDestinationRepair(app, window, userData);
-  await checkSync(app, window, userData);
+  assert.equal(
+    JSON.parse(await readFile(path.join(userData, 'keepad.json'), 'utf8')).device,
+    undefined,
+  );
   await checkButtonInteractions(app, window, userData);
   const setLayoutStep = async (label, columns, rows) => {
     await window.getByRole('button', { name: label, exact: true }).click();
@@ -473,7 +479,7 @@ try {
   assert.equal(await reopened.locator('.pad-heading-icon').count(), 0, 'No icon survives restart');
   assert.deepEqual(errors, []);
   console.log(
-    'Desktop checks passed: destination checks and local repair, folder synchronization, device destinations, conflict review, stale dialog protection, global launcher search, button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
+    'Desktop checks passed: destination checks and local repair, stale dialog protection, global launcher search, button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
   );
 } catch (error) {
   if (app) {

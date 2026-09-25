@@ -1,9 +1,8 @@
 import { stat, access } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import type { State } from '../shared/model.js';
-import type { Device } from '../shared/sync.js';
 import type { DestinationReport, DestinationStatus, PathAction } from '../shared/destinations.js';
-import { nativePath } from './sync.js';
+import { nativePath } from './paths.js';
 
 type Probe = (
   target: string,
@@ -76,17 +75,10 @@ export function createDestinationInspector(probe: Probe = probePath, waitMs = 25
 }
 export const inspectDestination = createDestinationInspector();
 
-export async function checkDestinations(state: State, device: Device): Promise<DestinationReport> {
+export async function checkDestinations(state: State): Promise<DestinationReport> {
   const entries = state.pads.flatMap((pad) =>
     pad.buttons.flatMap((button) => {
       if (!['file', 'folder', 'app'].includes(button.type)) return [];
-      const local = device.targets.find(
-        (t) =>
-          t.padId === pad.id &&
-          t.buttonId === button.id &&
-          t.type === button.type &&
-          t.original === button.target,
-      );
       return [
         {
           padId: pad.id,
@@ -94,10 +86,7 @@ export async function checkDestinations(state: State, device: Device): Promise<D
           padName: pad.name,
           buttonName: button.label,
           type: button.type as PathAction,
-          target: local?.target ?? button.target,
-          local: !!local,
-          conflicted:
-            !!device.folder && (device.heads.find((h) => h.padId === pad.id)?.ids.length ?? 0) > 1,
+          target: button.target,
         },
       ];
     }),

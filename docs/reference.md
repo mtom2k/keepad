@@ -19,7 +19,7 @@ Run `npm run docs:generate` after changing package metadata, commands, dependenc
 | --- | --- |
 | dev | `npm run build:electron && concurrently -k "vite --host 127.0.0.1" "wait-on http://127.0.0.1:5173 && cross-env KEEPAD_DEV_URL=http://127.0.0.1:5173 electron ."` |
 | dev:web | `vite --host 127.0.0.1` |
-| build:electron | `tsc -p tsconfig.electron.json` |
+| build:electron | `node scripts/clean-electron.mjs && tsc -p tsconfig.electron.json` |
 | build | `tsc --noEmit -p tsconfig.json && npm run build:electron && vite build` |
 | start | `electron .` |
 | test | `node --import tsx --test tests/*.test.ts` |

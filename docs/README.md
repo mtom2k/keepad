@@ -12,7 +12,7 @@ Documentation and implementation are delivered together. Authors maintain the af
 | [Handoff procedure](handoff.md) | Taking over, completing, and transferring unfinished work |
 | [Progress](progress.md) | Current state, completed milestones, evidence, and next work |
 | [Architecture](architecture.md) | Process boundaries, runtime flows, and code map |
-| [Synchronization](synchronization.md) | Optional shared folders, device destinations, conflicts, and recovery |
+| [Retired synchronization](synchronization.md) | Local-only upgrade, preserved destinations, recovery, and former folders |
 | [Data model](data-model.md) | State, limits, persistence, and backup behavior |
 | [UX rules](ux.md) | Intended interaction and visual behavior |
 | [ADRs](adr/README.md) | Accepted architectural decisions and their rationale |

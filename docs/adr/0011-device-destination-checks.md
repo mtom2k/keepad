@@ -1,6 +1,6 @@
 # ADR 0011: Explicit destination checks and device-local repair
 
-- Status: Accepted
+- Status: Accepted for explicit checking; device-override and sync-conflict portions superseded by [0012](0012-local-only-storage.md).
 - Date: 2026-09-24
 - Extends: [0010](0010-optional-folder-synchronization.md)
 

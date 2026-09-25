@@ -1,6 +1,6 @@
 # ADR 0010: Optional folder synchronization with immutable pad history
 
-- Status: Accepted
+- Status: Superseded by [0012](0012-local-only-storage.md). This record describes the retired implementation.
 - Date: 2026-09-24
 - Extends: [0002](0002-local-state-and-backups.md). Validated local storage, revisions, and additive backup import remain; optional synchronization is now explicitly requested by the owner.
 

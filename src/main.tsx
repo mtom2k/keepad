@@ -47,8 +47,6 @@ import {
 import { placeButton } from './pad-layout';
 import { emptySlot, copyOrMoveButton } from './button-actions';
 import { LauncherSearch } from './launcher-search';
-import { SyncSettings } from './sync-settings';
-import type { TargetUpdate, SyncStatus } from '../shared/sync';
 import './styles.css';
 const themeNames = {
   paper: 'Paper',
@@ -211,10 +209,10 @@ function App() {
       setError(e instanceof Error ? e.message : String(e));
     }
   }
-  async function save(next: State, target?: TargetUpdate) {
+  async function save(next: State) {
     setBusy(true);
     try {
-      const result = await unwrap(api.save(next, target));
+      const result = await unwrap(api.save(next));
       setSnapshot(result);
       return true;
     } catch (e) {
@@ -253,17 +251,6 @@ function App() {
     location.hash = next;
     setPage(next);
   };
-  const syncNotice = (snapshot.sync?.error || !!snapshot.sync?.conflicts.length) && (
-    <button
-      className="sync-attention"
-      onClick={() => {
-        if (isLauncher) void perform(() => unwrap(api.showEditor('settings')));
-        else navigate('settings');
-      }}
-    >
-      Sync needs attention
-    </button>
-  );
   const run = async (button: MacroButton) =>
     perform(async () => notify(await unwrap(api.run(pad.id, button.id))));
   const cycle = (delta: number) => {
@@ -491,7 +478,7 @@ function App() {
             <span>
               <Shortcut value={state.settings.shortcut} mac={mac} />
             </span>
-            {syncNotice || <span>Esc to clear / close</span>}
+            <span>Esc to clear / close</span>
           </footer>
         </>
       ) : (
@@ -553,7 +540,6 @@ function App() {
               )}
               {page === 'settings' ? (
                 <SettingsPage
-                  syncStatus={snapshot.sync}
                   state={state}
                   info={info}
                   save={save}
@@ -712,7 +698,6 @@ function App() {
                         ? 'Saving…'
                         : `${pad.buttons.length} / ${pad.columns * pad.rows} buttons`}
                     </span>
-                    {syncNotice}
                     <Tip text="Show or hide KeePad. Change this shortcut in Settings.">
                       <button
                         className="shortcut-link"
@@ -868,24 +853,13 @@ function App() {
         <ButtonEditor
           key={`${pad.id}-${editSlot}`}
           pad={pad}
-          deviceTarget={
-            snapshot.deviceTargets?.find(
-              (t) =>
-                t.padId === pad.id &&
-                t.buttonId === pad.buttons.find((b) => b.slot === editSlot)?.id,
-            )?.target ?? undefined
-          }
-          desktop={info.desktop}
           revision={state.revision}
           slot={editSlot}
           busy={busy}
           onClose={() => setEditSlot(null)}
-          onSave={async (next, target) => {
+          onSave={async (next) => {
             if (
-              await save(
-                { ...state, pads: state.pads.map((p) => (p.id === next.id ? next : p)) },
-                target,
-              )
+              await save({ ...state, pads: state.pads.map((p) => (p.id === next.id ? next : p)) })
             ) {
               setEditSlot(null);
               notify('Button saved');
@@ -925,9 +899,8 @@ function App() {
       {confirmDelete && (
         <Modal title={`Delete ${confirmDelete.name}?`} onClose={() => setConfirmDelete(null)}>
           <p className="modal-description">
-            This removes the pad and its {confirmDelete.count} buttons from{' '}
-            {snapshot.sync?.folder ? 'the shared library on all connected devices' : 'this device'}.
-            This cannot be undone.
+            This removes the pad and its {confirmDelete.count} buttons from this device. This cannot
+            be undone.
           </p>
           <div className="modal-actions">
             <button className="secondary" onClick={() => setConfirmDelete(null)}>
@@ -1118,8 +1091,6 @@ function PadDialog({
 function ButtonEditor({
   pad,
   revision,
-  deviceTarget,
-  desktop,
   slot,
   onClose,
   onSave,
@@ -1129,9 +1100,7 @@ function ButtonEditor({
   revision: number;
   slot: number;
   onClose: () => void;
-  onSave: (p: Pad, target?: TargetUpdate) => void;
-  deviceTarget?: string;
-  desktop: boolean;
+  onSave: (p: Pad) => void;
   busy: boolean;
 }) {
   const [baseRevision] = useState(revision);
@@ -1148,15 +1117,9 @@ function ButtonEditor({
       slot,
     },
   );
-  const [localTarget, setLocalTarget] = useState<string | null>(deviceTarget ?? null);
-  const [targetChanged, setTargetChanged] = useState(false);
   const [validation, setValidation] = useState(''),
     [deleting, setDeleting] = useState(false);
   const change = (patch: Partial<MacroButton>) => {
-    if ('target' in patch || 'type' in patch) {
-      setLocalTarget(null);
-      setTargetChanged(false);
-    }
     setButton((b) => ({ ...b, ...patch }));
   };
   const pick = async (image = false) => {
@@ -1179,12 +1142,7 @@ function ButtonEditor({
       setValidation(parsed.error.issues[0].message);
       return;
     }
-    onSave(
-      placeButton(pad, parsed.data, slot),
-      targetChanged && ['file', 'folder', 'app'].includes(button.type)
-        ? { padId: pad.id, buttonId: button.id, target: localTarget }
-        : undefined,
-    );
+    onSave(placeButton(pad, parsed.data, slot));
   };
   return (
     <Modal title={existing ? 'Edit button' : 'New button'} onClose={onClose} wide>
@@ -1274,54 +1232,6 @@ function ButtonEditor({
                   </button>
                 )}
               </div>
-            )}
-            {desktop && ['file', 'folder', 'app'].includes(button.type) && (
-              <>
-                <label className="field-label" htmlFor="device-target">
-                  This device <span>optional</span>
-                </label>
-                <div className="input-with-button">
-                  <input
-                    id="device-target"
-                    readOnly
-                    value={localTarget ?? ''}
-                    placeholder="Use the shared destination"
-                  />
-                  <button
-                    className="secondary"
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        const value = await unwrap(api.pickPath(button.type));
-                        if (value) {
-                          setLocalTarget(value);
-                          setTargetChanged(true);
-                        }
-                      } catch (error) {
-                        setValidation((error as Error).message);
-                      }
-                    }}
-                  >
-                    Choose…
-                  </button>
-                </div>
-                <p className="field-hint">
-                  Use a different file or application on this computer. This destination does not
-                  sync.
-                </p>
-                {localTarget && (
-                  <button
-                    className="text-button"
-                    type="button"
-                    onClick={() => {
-                      setLocalTarget(null);
-                      setTargetChanged(true);
-                    }}
-                  >
-                    Use shared destination
-                  </button>
-                )}
-              </>
             )}
             <label className="field-label" htmlFor="button-tip">
               Hover hint <span>optional</span>
@@ -1446,7 +1356,6 @@ function ButtonEditor({
 }
 function SettingsPage({
   state,
-  syncStatus,
   info,
   save,
   notify,
@@ -1455,7 +1364,6 @@ function SettingsPage({
 }: {
   state: State;
   info: Snapshot['info'];
-  syncStatus?: SyncStatus;
   save: (s: State) => Promise<boolean>;
   notify: (s: string) => void;
   onError: (s: string) => void;
@@ -1577,7 +1485,6 @@ function SettingsPage({
           />
         </div>
       </section>
-      <SyncSettings status={syncStatus} desktop={info.desktop} onError={onError} />
       <DestinationSettings
         revision={state.revision}
         desktop={info.desktop}
@@ -1617,10 +1524,7 @@ function SettingsPage({
       </section>
       <details className="permissions-details">
         <summary>Storage and permissions</summary>
-        <p>
-          Pads are stored locally. If synchronization is enabled, shared library data is also
-          written to your chosen folder. No KeePad account or analytics.
-        </p>
+        <p>Pads and preferences are stored on this computer. No KeePad account or analytics.</p>
         <p>
           {info.platform === 'darwin'
             ? 'macOS may request access when opening a protected folder. Manage access in System Settings → Privacy & Security → Files and Folders. Accessibility and screen-recording permissions are not required.'
