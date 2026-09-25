@@ -16,6 +16,8 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | Escape did not hide KeePad | It dismisses an open menu/dialog or clears a search first. Press it again with an empty search to hide. |
 | Shared pads have not reached another computer | KeePad checks local folders. Verify both installations chose corresponding provider folders, the provider has delivered all files, and the folder is available offline. Check folder does not force cloud delivery. |
 | Synchronization needs attention | Review Settings for competing versions or incomplete/invalid history. Local data is retained. Do not remove change records; see [sync recovery](synchronization.md). |
+| Destination check says unavailable or not checked | Reconnect the drive/provider and try Check again. Slow native calls have bounded UI waits and concurrency; they may still be pending in the OS. No buttons are executed during checks. |
+| A repair says the pads changed | The report or native picker was based on an older revision. Check again and choose the replacement; the stale repair was not saved. |
 | A shared Mac/Windows file action cannot run | Edit button → This device → Choose… and save the local destination. Shared definitions do not install applications, copy files, or translate paths. |
 | A dialog says the library changed | Incoming state made its draft stale. Review/copy the draft if needed, close it, and reopen the current button/pad before saving. |
 | Moving a key displaces another key | Expected swap behavior. Drag in the editor or use the mini Position picker; the launcher does not rearrange keys. Dialog positioning saves only when Save button is pressed. |

@@ -45,6 +45,8 @@ Shared `keepad-library/format.json` declares protocol version 1; `changes/<hash>
 
 A local override is keyed by pad/button ID and the original shared action type/target. It only applies while that shared action matches; otherwise it is ignored and removed on an ordinary save. Device destinations survive disconnect and local restarts but are not part of portable exports. Selecting a different shared action destination clears the editor's draft override so it cannot accidentally carry over.
 
+The destination checker adds only transient report/IPC types. Repair writes an existing action-bound local override through the same atomic save; pads, button targets, settings, schema version, and exports retain their formats. Device-local repairs remain outside portable backups, as with overrides set through the button editor.
+
 ## Concurrency
 
 Main-process save/import mutations use a promise queue. Saves must match the current revision, which increments after a successful commit. Stale writers receive an error and a refresh; unsaved drafts are not merged. Shortcut changes reserve the replacement before removing the old shortcut, and roll back that registration on write failure.

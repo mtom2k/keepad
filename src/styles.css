@@ -1308,3 +1308,31 @@ button {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.destination-results {
+  max-height: 45vh;
+  overflow-y: auto;
+}
+.destination-issue {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.destination-info {
+  flex: 1;
+  min-width: 0;
+}
+.destination-info p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.destination-info strong {
+  overflow-wrap: anywhere;
+}
+.destination-path {
+  user-select: text;
+}

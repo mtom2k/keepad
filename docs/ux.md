@@ -59,3 +59,9 @@ Provide accessible names for icon controls, visible keyboard focus, native modal
 Pad themes apply to the pad. Current pad themes are Paper, Graphite, Sage, Sand, Midnight, and High contrast. Settings → General → Theme controls KeePad's editor, dialogs, tooltips, and native appearance independently: Light, Dark, or System (default). System follows OS appearance changes without restarting. The High contrast pad theme is not a claim of a completed accessibility audit.
 
 Review [screenshots](screenshots/README.md) after visible changes, including edge tooltips, dialogs, and the editor's minimum size. Update these behavior rules and the affected user instructions in the same change; record actual visual/test evidence and remaining gaps in progress. A theme or icon change should include both Light and Dark review without assuming pad colors follow the app appearance.
+
+## Checking destinations
+
+Settings → Destinations offers an explicit Check destinations action. The dialog reports an available count and issues across all pads, with button name, pad, action type, effective path, and reason. Check applicable local overrides before shared paths; skip text/URL buttons. Repair opens the native picker and saves immediately after a valid choice, for this device only. Cancel changes nothing. Explain local repair scope, transient availability, and the limits of app/shortcut validation.
+
+A changed library revision marks the report stale and disables repairs until Check again. Unresolved pad conflicts disable repair and point to Synchronization. Keep long paths wrapped/selectable, results scrollable, footer controls reachable at minimum size, and repair tooltips within the modal. Checking never runs actions or searches for replacement files automatically.

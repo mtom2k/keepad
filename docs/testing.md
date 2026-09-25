@@ -22,6 +22,12 @@ Run validation locally. GitHub hosts the private source repository and does not 
 
 [Native sync checks](../tests/sync-desktop.mjs) run within the desktop suite with a simulated Windows engine peer. They cover folder-picker confirmation/cancel, token validation, incoming UI updates, device-only destination execution with a stubbed opener, stale-draft rejection, conflict review/keep-both, blocked execution of unresolved pads, and disconnect. The conflict controls and review dialog are captured at the minimum editor size for visual inspection. Providers do not receive test data; filesystem profiles are disposable.
 
+## Destination-check coverage
+
+[Destination tests](../tests/destinations.test.ts) use temporary files/directories to cover available, missing, wrong-type, foreign paths, dangling symlinks, Unix access denial when not running as root, matching versus outdated local overrides, cross-pad coverage, URL/text exclusion, and scan immutability. A controlled slow-probe test verifies bounded waits, deduplication, retained concurrency slots after timeout, and resumed checks after settlement. Mac application-bundle structure is simulated; this does not launch an app.
+
+[Native repair checks](../tests/destinations-desktop.mjs) run in the desktop suite with stubbed pickers and openers. They check reporting, picker cancel, rejected wrong-type replacements, local-only repair, unchanged activation/shared targets, stale revisions before/during the native picker, sync-conflict blocking, refreshing reports, and repair-tooltip bounds at minimum window size. Native Windows permission behavior, network/provider timeouts/hydration, and real application/shortcut validity remain manual release checks.
+
 ## Native suite coverage
 
 [Launcher hover checks](../tests/launcher-hover.mjs) reproduce cached mouse hover on an already-visible summon, assert that Settings/Hide backgrounds and the Settings tooltip clear, and exercise mouse-click → hide/close editor → reopen. Fresh pointer movement must restore hover/tooltips; search must accept immediate typing and Tab must retain a visible focus indicator. The regression fails against the pre-fix build; it checks native Electron input state separately from existing keyboard-focus assertions. Actual tray mouse gestures and Windows native input remain manual checks.
@@ -64,7 +70,7 @@ Record the OS, architecture, commands, date, and result in progress/release note
 
 ## Screenshots
 
-Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, launcher search, button editor, Dark Settings (including local-default synchronization), and a device-destination example using fictional Mac/Windows Sample paths, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings and the destination example; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
+Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, launcher search, button editor, Dark Settings (including local-default synchronization), a device-destination example, and the checker using fictional Mac/Windows Sample paths, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings and the destination examples; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
 
 Review all generated files in [screenshots](screenshots/README.md) before committing. UI changes require refreshed relevant images; documentation-only changes do not.
 

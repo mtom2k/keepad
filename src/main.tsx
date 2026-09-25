@@ -1,3 +1,4 @@
+import { DestinationSettings } from './destination-settings';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createPortal } from 'react-dom';
@@ -1577,6 +1578,11 @@ function SettingsPage({
         </div>
       </section>
       <SyncSettings status={syncStatus} desktop={info.desktop} onError={onError} />
+      <DestinationSettings
+        revision={state.revision}
+        desktop={info.desktop}
+        platform={info.platform}
+      />
       <section className="settings-card">
         <h2>Backup</h2>
         <p className="settings-copy">Imports add pads without replacing existing ones.</p>

@@ -12,6 +12,9 @@ contextBridge.exposeInMainWorld('keepad', {
     invoke('sync:resolve', padId, heads, choice),
   run: (p: string, b: string) => invoke('action:run', p, b),
   pickPath: (t: string) => invoke('dialog:path', t),
+  checkDestinations: () => invoke('destinations:check'),
+  repairDestination: (padId: string, buttonId: string, revision: number) =>
+    invoke('destinations:repair', { padId, buttonId, revision }),
   pickImage: () => invoke('dialog:image'),
   describeFile: async (file: File) => {
     try {

@@ -30,6 +30,7 @@ flowchart LR
 | Launcher search | [src/launcher-search.tsx](../src/launcher-search.tsx), [src/search.ts](../src/search.ts) | Transient query/focus, accessible result navigation, pure cross-pad ranking |
 | Button placement | [src/pad-layout.ts](../src/pad-layout.ts) | Shared immutable move/swap operation for drag-and-drop, dialog saves, and position preview |
 | Button duplication/moves | [src/button-actions.ts](../src/button-actions.ts) | Immutable first-free-slot copy/move; full-pad rejection and ID collision handling |
+| Destination checks | [electron/destinations.ts](../electron/destinations.ts), [shared/destinations.ts](../shared/destinations.ts), [src/destination-settings.tsx](../src/destination-settings.tsx) | Explicit bounded metadata scans and device-local repair UI |
 | Dropped destinations | [electron/file-binding.ts](../electron/file-binding.ts) | Validate native absolute path and inspect file metadata to describe a binding |
 | Native / preview adapter | [src/api.ts](../src/api.ts) | Electron bridge or explicitly limited browser preview |
 | Styling | [src/styles.css](../src/styles.css) | Traditional utility layout and per-pad themes |
@@ -84,6 +85,12 @@ The local store remains authoritative for the current cache and device preferenc
 The folder contains immutable whole-pad or deletion records linked by causal parent hashes. The engine validates format, hashes, parent availability, and resource limits before materializing records. Files arriving out of order or malformed never reset local pads. Multiple heads per pad are preserved and exposed as conflicts; independent pads combine. The shared format, ordering, and file naming are platform-neutral. Settings, active selection, and device overrides stay local. Full protocol/recovery rationale: [ADR 0010](adr/0010-optional-folder-synchronization.md); user setup/limits: [synchronization](synchronization.md).
 
 New IPC methods are narrow: native folder selection returns a confirmation token, connection reinspects the chosen folder, refresh runs the engine, preview returns a stored conflict version without execution, resolve validates reviewed head IDs, and disconnect retains a backed-up local copy. `state:save` optionally carries one validated device-destination update, stored atomically with the state. Action execution resolves that device override only while its original shared type/target still match, validates host-native syntax, then follows the existing path opener. Invalid foreign paths explain how to set a local destination.
+
+## Destination checks and repair
+
+`destinations:check` snapshots validated state and device metadata, resolves applicable local overrides, and inspects file/folder/app actions across pads outside the serialized mutation queue. Concurrent requests share the same scan. A module-wide cap keeps at most four native probes outstanding, including calls that exceeded the 2.5-second UI wait. Workers stop starting checks after ten seconds and report remaining entries as unchecked. No file contents, directory enumeration, macro execution, or URL requests are involved.
+
+`destinations:repair` validates IDs/revision, rejects unresolved pad conflicts, opens the native picker, and validates the selected path's kind/access. It rechecks identity/revision/conflicts inside the serialized commit after all awaits. The existing `state:save` implementation atomically saves a device override without changing shared pad definitions. Reports become stale when the revision changes; successful repair updates its report revision and available count. See [ADR 0011](adr/0011-device-destination-checks.md).
 
 ## Application appearance
 

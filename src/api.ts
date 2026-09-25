@@ -62,6 +62,8 @@ const preview: KeePadAPI = {
   previewSync: unavailable,
   resolveSync: unavailable,
   pickPath: unavailable,
+  checkDestinations: unavailable,
+  repairDestination: unavailable,
   pickImage: unavailable,
   describeFile: unavailable,
   editButton: async (padId, buttonId) => {

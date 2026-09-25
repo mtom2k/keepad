@@ -1,3 +1,4 @@
+import type { DestinationReport } from './destinations.js';
 import type { SyncStatus, SyncChoice, TargetUpdate } from './sync.js';
 import { z } from 'zod';
 export const themes = ['paper', 'graphite', 'sage', 'sand', 'midnight', 'contrast'] as const;
@@ -148,6 +149,12 @@ export interface KeePadAPI {
   resolveSync(padId: string, heads: string[], choice: string): Promise<Result<Snapshot>>;
   run(padId: string, buttonId: string): Promise<Result<string>>;
   pickPath(type: string): Promise<Result<string | null>>;
+  checkDestinations(): Promise<Result<DestinationReport>>;
+  repairDestination(
+    padId: string,
+    buttonId: string,
+    revision: number,
+  ): Promise<Result<Snapshot | null>>;
   pickImage(): Promise<Result<string | null>>;
   describeFile(file: File): Promise<Result<FileBinding>>;
   editButton(padId: string, buttonId: string): Promise<Result<void>>;

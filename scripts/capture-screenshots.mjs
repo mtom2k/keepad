@@ -7,6 +7,7 @@ import { makeDefaultState } from '../dist-electron/shared/model.js';
 const userData = await mkdtemp(path.join(os.tmpdir(), 'keepad-docs-'));
 const output = path.resolve('docs/screenshots');
 await mkdir(output, { recursive: true });
+await mkdir('test-results', { recursive: true });
 const sample = makeDefaultState({ home: userData, downloads: userData, documents: userData });
 sample.settings.theme = 'light';
 // Use disposable destinations initially and explicit Sample paths in the device-destination view; never execute them or read user data.
@@ -76,9 +77,36 @@ try {
   });
   await editor.getByRole('button', { name: 'Edit Downloads', exact: true }).click();
   await capture(editor, 'device-destination');
+  await editor.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await editor.evaluate(async () => {
+    const state = (await window.keepad.load()).value.state;
+    const button = state.pads.find((p) => p.id === 'focus').buttons[0];
+    button.label = 'Project brief';
+    button.type = 'file';
+    button.target = '/Users/Sample/Documents/Project brief.pdf';
+    const app = state.pads.find((p) => p.id === 'creative').buttons[0];
+    app.label = 'Design app';
+    app.type = 'app';
+    app.target = 'C:\\Program Files\\Sample\\Design.exe';
+    const result = await window.keepad.save(state);
+    if (!result.ok) throw Error(result.error);
+  });
+  await editor.getByRole('button', { name: 'Settings', exact: true }).click();
+  await editor.getByRole('button', { name: 'Check destinations', exact: true }).click();
+  await editor
+    .getByRole('button', { name: 'Repair Project brief on Deep work', exact: true })
+    .waitFor();
+  await capture(editor, 'destination-check');
+  await app.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()
+      .find((w) => w.webContents.getURL().includes('mode=editor'))
+      .setSize(820, 600);
+  });
+  await editor.getByRole('button', { name: 'Check again', exact: true }).scrollIntoViewIfNeeded();
+  await editor.screenshot({ path: 'test-results/destination-check-minimum.png', scale: 'css' });
 
   console.log(
-    'Captured sample-data editor, button menu, launcher, search, button editor, Dark settings, and a sample device destination in docs/screenshots. Review them before committing.',
+    'Captured sample-data editor, button menu, launcher, search, button editor, Dark settings, a sample device destination, and the destination checker in docs/screenshots. Review them before committing.',
   );
 } finally {
   if (app) await app.close();

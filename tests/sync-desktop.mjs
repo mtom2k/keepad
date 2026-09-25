@@ -150,6 +150,12 @@ export async function checkSync(app, editor, profile) {
     );
     assert.equal(blocked.ok, false);
     assert.match(blocked.error, /conflicting versions/);
+    const blockedRepair = await editor.evaluate(async (buttonId) => {
+      const state = (await window.keepad.load()).value.state;
+      return window.keepad.repairDestination('everyday', buttonId, state.revision);
+    }, button.id);
+    assert.equal(blockedRepair.ok, false);
+    assert.match(blockedRepair.error, /conflicting versions/);
     const bounds = await app.evaluate(({ BrowserWindow }) => {
       const window = BrowserWindow.getAllWindows().find((w) =>
         w.webContents.getURL().includes('mode=editor'),

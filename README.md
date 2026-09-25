@@ -58,6 +58,7 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 - **Right-click a button** to edit, duplicate, move it to another pad, or delete it. This works in the editor and the compact pad.
 - **Drop a file onto the editor grid** to make an open-file button. Folders and applications work too. Drop one item at a time; replacing an existing action asks for confirmation.
 - **Preview before activating.** The eye button shows a pad without changing your active choice.
+- **Find broken destinations:** Settings → Destinations → Check destinations checks file, folder, and app buttons across all pads. Repair chooses a replacement for this device without changing shared paths.
 - **Keep your setup locally**, with backup export and import.
 - **Optionally sync pads between Mac and Windows** through a Dropbox, OneDrive, or other synchronized folder. Preferences stay on each device; competing pad edits are preserved for review. [Setup and limits](docs/synchronization.md).
 
@@ -81,6 +82,19 @@ Search ignores case and accents and matches all the words you type in button nam
 To bind a file quickly, drag it from Finder or File Explorer onto an empty **+** position in the editor. Dropping onto an existing button replaces only its action after confirmation; its name and image stay the same. Files stay in their original location.
 
 Single-clicking a pad selects it for editing. The **eye**, **pencil**, **copy**, and **trash** toolbar buttons preview, edit, duplicate, and delete it. Hover over an icon for help. Settings lets you choose Light/Dark/System appearance, change the shortcut, choose whether the pad hides after an action, and manage backups.
+
+## 🔧 Repair a missing file or app
+
+Open **Settings → Destinations → Check destinations**. KeePad lists paths that need attention and identifies missing items, access problems, and paths from another operating system. Click **Repair…** and select the replacement. Cancel leaves the button unchanged.
+
+Repairs use **This device** destinations, so they do not alter your other computers. Checks never open files or run buttons. Network/cloud items may be temporarily unavailable; reconnect them and use **Check again**. An available path does not guarantee an app will launch or that a Windows shortcut's target exists.
+
+<details>
+<summary>See the destination checker</summary>
+
+![KeePad checking sample destinations and offering device-local repairs](docs/screenshots/destination-check.png)
+
+</details>
 
 ## 🔄 Share pads between computers
 

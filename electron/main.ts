@@ -1,3 +1,9 @@
+import { checkDestinations, inspectDestination } from './destinations.js';
+import {
+  RepairDestinationSchema,
+  destinationMessages,
+  type PathAction,
+} from '../shared/destinations.js';
 import {
   app,
   BrowserWindow,
@@ -349,6 +355,54 @@ function setupIPC() {
       return snapshot();
     }),
   );
+  let checking: ReturnType<typeof checkDestinations> | undefined;
+  handle('destinations:check', () => {
+    checking ??= checkDestinations(
+      structuredClone(store.state),
+      structuredClone(store.device),
+    ).finally(() => {
+      checking = undefined;
+    });
+    return checking;
+  });
+  handle('destinations:repair', async (e, raw) => {
+    const request = RepairDestinationSchema.parse(raw);
+    const current = () => {
+      if (store.state.revision !== request.revision)
+        throw Error('Your pads changed. Check destinations again before repairing.');
+      const button = store.state.pads
+        .find((p) => p.id === request.padId)
+        ?.buttons.find((b) => b.id === request.buttonId);
+      if (!button || !['file', 'folder', 'app'].includes(button.type))
+        throw Error('This button no longer has a file destination.');
+      if (
+        store.device.folder &&
+        (store.device.heads.find((h) => h.padId === request.padId)?.ids.length ?? 0) > 1
+      )
+        throw Error('Resolve this pad’s conflicting versions before repairing its destinations.');
+      return button;
+    };
+    const button = current();
+    const result = await dialog.showOpenDialog(BrowserWindow.fromWebContents(e.sender)!, {
+      title: `Repair ${button.label} on this device`,
+      buttonLabel: 'Use destination',
+      properties: [button.type === 'folder' ? 'openDirectory' : 'openFile'],
+      ...(button.type === 'app' && process.platform === 'win32'
+        ? { filters: [{ name: 'Applications', extensions: ['exe', 'lnk'] }] }
+        : {}),
+    });
+    if (result.canceled || !result.filePaths[0]) return null;
+    const target = result.filePaths[0];
+    const status = await inspectDestination(target, button.type as PathAction);
+    if (status !== 'available')
+      throw Error(
+        `${destinationMessages[status]}. Choose another destination or check its permissions.`,
+      );
+    return serial(async () => {
+      current();
+      return commit(store.state, { padId: request.padId, buttonId: request.buttonId, target });
+    });
+  });
   handle('file:describe', (_e, target) => describeFile(target));
   handle('window:edit-button', (_e, padId, buttonId) => {
     if (

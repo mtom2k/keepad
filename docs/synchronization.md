@@ -29,6 +29,8 @@ Web addresses and text-copy actions normally work unchanged. A file or applicati
 
 For example, one shared button can use `/Applications/Example.app` on a Mac and `C:\Program Files\Example\Example.exe` on Windows. Choose each installation's real destination; KeePad does not translate paths or install applications. A foreign-style path is rejected at execution with guidance to choose a device destination. Editing the shared action type or destination invalidates an older device override; ordinary name/image changes do not.
 
+Settings → Destinations → Check destinations can find broken paths across the library and repair them using the same **This device** overrides. Repairs do not publish pad changes; resolve an affected pad’s sync conflict before repairing it.
+
 ## Incoming changes, offline work, and conflicts
 
 KeePad checks the chosen local folder every five seconds and after local saves. **Check folder** requests a check immediately. **Watching the library folder** and **Last checked** describe local file checks, not confirmation that Dropbox/OneDrive delivered a change to another computer.

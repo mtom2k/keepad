@@ -2,7 +2,7 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest fix clears retained launcher hover highlighting on summon, based on `36c488a`. Folder synchronization is unchanged. Source, guides, and validation are recorded below on 2026-09-24; earlier documentation-audit evidence applies to its named revision.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest feature adds explicit destination checks and device-local repair, based on `85d147c`. Shared library definitions and synchronization behavior are unchanged. Source, guides, and validation are recorded below on 2026-09-24; earlier documentation-audit evidence applies to its named revision.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
@@ -10,8 +10,9 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Windows | Implemented; full validation pending | Unsigned Windows x64 cross-build passed on macOS; native Windows and installer checks remain |
 | User data | Local validated JSON and backups | Model/placement/button/search/store and synchronization tests and native import/export checks passed; legacy appearance defaults supported within schema 1; no general migration framework |
 | Synchronization | Opt-in shared-folder implementation | Common Mac/Windows protocol, durable local outbox, pad-level conflicts, device destinations; native Windows and real provider end-to-end checks pending |
+| Destination repair | Implemented and exercised on macOS | Explicit metadata/access checks, local-only replacements, bounded slow probes, cancellation and stale/conflict protection; native Windows/provider behavior unverified |
 | Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, keyboard focus, and stale pointer-hover reset covered |
-| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, ten ADRs, generated reference, seven sample-data screenshots, and local checks |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, eleven ADRs, generated reference, eight sample-data screenshots, and local checks |
 | Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
@@ -121,6 +122,14 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Added a native regression for Settings/Hide hover reset, Settings tooltip dismissal, actual control clicks followed by close/reopen, immediate search typing, and visible Tab focus. It failed against the pre-fix build as expected. During test development, corrected an assumption that Hide also has a tooltip and allowed native show/focus events to settle before pointer assertions. The complete native desktop suite then passed on macOS Apple Silicon.
 - Production build, formatting, and documentation checks passed. Regenerated all seven sample screenshots; inspected the hover-reset capture and changed Settings image. The other documentation images remain byte-identical, preserving their prior visual review. No schema/default/package changes require a new reference or ADR; this restores the established summon behavior. Actual tray gestures and native Windows input remain manual validation gaps.
 - Unsigned Mac Apple Silicon and Windows x64 unpacked packages rebuilt successfully (Windows executable resource editing/signing skipped). Reopened the verified project macOS bundle, leaving other installed copies untouched. Source-impact comparison uses starting revision `36c488a`; the private main-branch commit carries implementation, regression, and guides together.
+
+### 2026-09-24 — Destination checking and repair
+
+- Starting revision `85d147c`, initially clean main branch. Added explicit checks across saved file/folder/application buttons and revision-guarded native-picker repairs through existing device overrides. URLs/text are excluded; no actions execute. Shared definitions/activation/preferences remain unchanged.
+- Production build, all 27 unit tests, and the full native desktop suite pass locally on macOS. The checks include temporary missing/wrong-type/denied/foreign paths, local override matching, exclusions, scan immutability, slow-probe timeout/deduplication/concurrency recovery, canceled/rejected/repaired selections, unchanged shared targets and activation, stale reports/picker races, and sync-conflict blocking. The targeted native repair suite also passed minimum-size tooltip bounds and stale-picker checks. Guides and ADR 0011 document boundaries and cross-platform limitations. No schema/dependency change.
+- Regenerated eight sample-data screenshots; reviewed the new checker at normal/minimum size and updated Settings view. The other six documentation views are unchanged. Regenerated reference (no changes), and formatting/documentation checks passed. Updated README, architecture/data/UX/testing/troubleshooting/sync guides, contributor rules, and ADR index.
+- Unsigned Mac Apple Silicon and Windows x64 unpacked packages built successfully (Windows executable resource editing/signing skipped). Native Windows, live network/provider behavior, OS permission prompts, and actual app launches remain unverified; an available path is not a launch guarantee.
+- Reopened the verified project macOS bundle (`app.keepad.desktop`), leaving other installed copies untouched. Documentation/source-impact review uses starting revision `85d147c` and the refreshed remote base. Code, tests, screenshots, and guides are delivered together to private `main`; no CI/CD was added.
 
 ## Next work / unresolved decisions
 
