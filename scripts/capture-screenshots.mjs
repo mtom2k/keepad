@@ -30,6 +30,12 @@ try {
   });
   const editor = await app.firstWindow();
   await editor.getByRole('heading', { name: 'Everyday', exact: true }).waitFor();
+  // Window frames differ by OS; fix the content area so captures match on every host.
+  await app.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()
+      .find((w) => w.webContents.getURL().includes('mode=editor'))
+      .setContentSize(980, 700);
+  });
   const snapshot = await editor.evaluate(() => window.keepad.load());
   if (!snapshot.ok) throw Error(snapshot.error);
   if (!snapshot.value.info.shortcutRegistered)

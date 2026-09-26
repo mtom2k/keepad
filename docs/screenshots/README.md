@@ -14,6 +14,8 @@ These images are generated from the actual Electron renderer using starter/sampl
 
 The sample profile explicitly uses Light for the first five views and Dark for Settings and checking destinations, making capture independent of the host's current appearance.
 
-Regenerate on a graphical desktop with `npm run docs:screenshots`. The script builds the current code, creates a temporary profile, captures these views, and cleans up. It does not execute macros or read/alter the real user's pads. Images show the application content, not OS window decorations; platform fonts and shortcuts can differ.
+Regenerate on a graphical desktop with `npm run docs:screenshots`. The script builds the current code, creates a temporary profile, captures these views, and cleans up. It does not execute macros or read/alter the real user's pads. Images show the application content, not OS window decorations. The script sets the editor's content area to 980×700 so captures are the same size on every host, but platform fonts, scrollbars, shortcut labels, and destination statuses still differ.
+
+The current set was captured on Windows 11 for version 0.2.0 (2026-09-25). It shows `Ctrl Shift Space`, Segoe UI, and the fictional Windows sample path as **Not found** next to a Mac path for **another operating system**. The Settings footer shows the app version, so recapture after each version bump.
 
 Review every image for readable labels, stale controls, clipping, unexpected warnings, and personal data before committing. Refresh affected screenshots in the same change as the interface they show. Avoid adding dates directly to image filenames, so README links remain stable.

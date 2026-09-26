@@ -44,7 +44,7 @@ Open your compact pad from the menu bar, notification area, or keyboard shortcut
 
 </details>
 
-Screenshots use sample data from the actual app. [How they are made](docs/screenshots/README.md).
+Screenshots use sample data from the actual app, captured on Windows 11; on a Mac, shortcuts read **⌘ ⇧ Space** instead of **Ctrl Shift Space**. [How they are made](docs/screenshots/README.md).
 
 ## ✨ What you can do
 

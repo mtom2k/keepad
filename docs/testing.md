@@ -27,7 +27,7 @@ All suites run natively on Windows. Host-specific cases:
 
 For packaged builds, drive `release/win-unpacked/KeePad.exe` (or an installed copy) with Playwright's `executablePath` and `--user-data-dir=<temporary folder>`. Packaged builds ignore `KEEPAD_TEST_DATA`. To check launch at login, simulate the portable wrapper by setting `PORTABLE_EXECUTABLE_FILE`.
 
-Regenerating documentation screenshots on Windows changes host-dependent content: `Ctrl Shift` labels instead of `⌘ ⇧`, Segoe UI instead of SF, and the checker reports the fictional Windows sample path as missing instead of foreign. Recapture on the platform used for the committed images unless the change intends to switch them.
+Documentation screenshots contain host-dependent content: shortcut labels (`Ctrl Shift` versus `⌘ ⇧`), system font, scrollbars, and whether the fictional sample paths show as missing or foreign. The capture script fixes the editor content area at 980×700 so the image size matches across hosts. The committed set is from Windows 11 (see [provenance](screenshots/README.md)). Recapture on one platform for the whole set, and after version bumps, because the Settings footer shows the version.
 
 ## Local-only conversion coverage
 
@@ -83,7 +83,7 @@ Record the OS, architecture, commands, date, and result in progress/release note
 
 ## Screenshots
 
-Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, captures the editor, button context menu, launcher, launcher search, button editor, Dark Settings and the checker using fictional Mac/Windows Sample paths, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings and destination checking; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
+Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary profile with starter pads, fixes the editor content area at 980×700, captures the editor, button context menu, launcher, launcher search, button editor, Dark Settings and the checker using fictional Mac/Windows Sample paths, and removes the profile. App appearance is explicitly Light for the first five views and Dark for Settings and destination checking; captures wait for transient toasts/tooltips to disappear. It does not execute macro actions or read the real settings file. Quit other copies using the default shortcut if the script reports a conflict. Do not silently hide errors to obtain a clean screenshot.
 
 Review all generated files in [screenshots](screenshots/README.md) before committing. UI changes require refreshed relevant images; documentation-only changes do not.
 

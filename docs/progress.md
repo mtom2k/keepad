@@ -2,7 +2,7 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest change (based on `8474c36`) is the first native Windows validation, with Windows fixes and installer/portable packaging. Pads and preferences are local-only. See the latest dated entry for validation and remaining platform limits.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. Version 0.2.0 (bumped from 0.1.0 on 2026-09-25, based on `6ff7188`) follows the first native Windows validation, with Windows fixes and installer/portable packaging. Pads and preferences are local-only. See the latest dated entry for validation and remaining platform limits.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Storage scope | Local-only; synchronization removed | Engine, IPC, UI, polling, conflict handling and runtime overrides deleted; full recovery copy before converting legacy destinations; former external folders untouched |
 | Destination repair | Implemented and exercised on macOS and Windows | Explicit metadata/access checks, local-only replacements, bounded slow probes, cancellation and stale-write protection; network filesystem behavior unverified |
 | Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, keyboard focus, and stale pointer-hover reset covered |
-| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, thirteen ADRs, generated reference, seven sample-data screenshots (macOS captures), and local checks |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, thirteen ADRs, generated reference, seven sample-data screenshots (Windows 11 captures of 0.2.0), and local checks |
 | Distribution | Development only | Windows NSIS installer and portable exe build locally (unsigned). Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
@@ -204,6 +204,18 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Documentation: ADR 0013; architecture, data model, UX, testing, releasing, troubleshooting, maintenance, README, and this entry. Moved the misplaced 2026-09-24 entry above the next-work section, unchanged. Replaced the stale synchronization item in next work. The reference generator now lists electron-builder targets and artifact names, so the package change appears in the regenerated [reference](reference.md).
 - Screenshots are unchanged: macOS labels and layout are unaffected, and regenerating on this Windows host would change host-dependent content (see [testing](testing.md)).
 - Handoff: delivered as a direct commit on private `main` after `8474c36`, with the source-impact comparison against that base passing. The installed test copy remains on the validation machine: `%LOCALAPPDATA%\Programs\KeePad`, identity `app.keepad.desktop`. Its sample-data profile was set aside as `keepad.json.windows-test-2026-09-25`, so the next launch is a first run.
+
+### 2026-09-25 — Version 0.2.0
+
+- Starting revision `6ff7188`. Bumped the app from 0.1.0 to 0.2.0: a minor bump for new Windows packaging and behavior changes, with no schema change (schema version remains 1). Updated `package.json`, `package-lock.json`, the browser-preview literal in `src/api.ts`, the generated reference, and the README screenshot note. No Git tag or GitHub release was created; builds remain unsigned development builds.
+- Regenerated all seven screenshots on Windows 11, because the Settings footer showed 0.1.0. The capture script now fixes the editor content area at 980×700: a first Windows capture at the default window size clipped the version footer under a scrollbar. Reviewed every image for sample-only data, clipping, and version text. Updated [screenshot provenance](screenshots/README.md) and [testing](testing.md).
+- Built `KeePad-Setup-0.2.0.exe` and `KeePad-Portable-0.2.0.exe` with `npm run package:win` on the same Windows 11 x64 host. Both have stamped version resources (0.2.0.0) and report `NotSigned`. SHA-256 for this local build:
+  - Setup `7AB3EE8AA13F0742343429590F3EF07A4D435E99EB67A236686FDEDD8BFFF787`
+  - Portable `4B9085E01FF13E1C3760EDBA5B95740F738753A2A3FBC4B883A0CF31A7A1D641`
+- Silent upgrade of the installed copy to 0.2.0 succeeded; Apps & features shows "KeePad 0.2.0". The installed sample-data profile was renamed to `keepad.json.windows-test-2026-09-25`, so the next launch is a genuine first run.
+- Playwright smoke tests used throwaway `--user-data-dir` profiles. The installed build reported 0.2.0, packaged, shortcut registered, no application menu, and Settings footer "Version 0.2.0". The portable exe ran from `%TEMP%` at version 0.2.0.0, honored `--user-data-dir`, and left the real profile untouched.
+- Build, 26 unit tests, and formatting pass. Documentation and source-impact checks pass against `6ff7188`. The full desktop suite last passed on the identical application source in `6ff7188`; this change only alters version literals and the screenshot script.
+- Handoff: delivered as a direct commit on private `main` and pushed with `6ff7188`.
 
 ## Next work / unresolved decisions
 

@@ -8,7 +8,7 @@ Run `npm run docs:generate` after changing package metadata, commands, dependenc
 
 | Property | Value |
 | --- | --- |
-| Version | 0.1.0 |
+| Version | 0.2.0 |
 | Product | KeePad |
 | Bundle / application ID | app.keepad.desktop |
 | State schema version | 1 |
