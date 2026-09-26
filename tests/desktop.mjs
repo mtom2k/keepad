@@ -379,14 +379,14 @@ try {
   );
   const recordedFrom = await window.evaluate(async () => (await window.keepad.load()).value.state);
   await window.getByRole('button', { name: 'Save', exact: true }).click();
-  await window.waitForFunction(
-    async (previous) => (await window.keepad.load()).value.state.settings.shortcut !== previous,
-    recordedFrom.settings.shortcut,
-  );
-  assert.equal(
-    (await window.evaluate(async () => (await window.keepad.load()).value.state)).settings.shortcut,
-    'CommandOrControl+Alt+K',
-  );
+  // Poll from Node: waitForFunction does not re-check async predicates.
+  const savedShortcut = () =>
+    window.evaluate(async () => (await window.keepad.load()).value.state.settings.shortcut);
+  for (let tries = 0; (await savedShortcut()) === recordedFrom.settings.shortcut; tries++) {
+    assert.ok(tries < 100, 'Recorded shortcut was not saved');
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  assert.equal(await savedShortcut(), 'CommandOrControl+Alt+K');
   assert.equal(
     (
       await window.evaluate(async (shortcut) => {

@@ -7,12 +7,12 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
 | macOS Apple Silicon | Locally built and exercised through 2026-09-24 | 2026-09-25 recorder/menu/tray changes still need a macOS desktop-suite rerun |
-| Windows 11 x64 | Natively tested; unsigned installer and portable built and exercised | Unit + full desktop suites pass; installed-build checks by hand on 2026-09-25. Open: tray right-click menu and Explorer drags under automation, real sign-in startup, multi-monitor/DPI, IME, UNC, signing, ARM |
+| Windows 11 x64 | Natively tested; unsigned installer and portable built and exercised | Unit + full desktop suites pass; installed-build checks by hand on 2026-09-25; startup setting follows Task Manager/Run state (packaged check). Open: tray right-click menu and Explorer drags under automation, real sign-in startup, multi-monitor/DPI, IME, UNC, signing, ARM |
 | User data | Local validated JSON and backups | Local store/migration tests and native import/export checks; schema 1 with legacy appearance defaults and one-time device-envelope conversion; no general migration framework |
 | Storage scope | Local-only; synchronization removed | Engine, IPC, UI, polling, conflict handling and runtime overrides deleted; full recovery copy before converting legacy destinations; former external folders untouched |
 | Destination repair | Implemented and exercised on macOS and Windows | Explicit metadata/access checks, local-only replacements, bounded slow probes, cancellation and stale-write protection; network filesystem behavior unverified |
 | Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, keyboard focus, and stale pointer-hover reset covered |
-| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, thirteen ADRs, generated reference, seven sample-data screenshots (Windows 11 captures of 0.2.0), and local checks |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, fourteen ADRs, generated reference, seven sample-data screenshots (Windows 11 captures of 0.2.0), and local checks |
 | Distribution | Development only | Windows NSIS installer and portable exe build locally (unsigned). Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
@@ -217,13 +217,23 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Build, 26 unit tests, and formatting pass. Documentation and source-impact checks pass against `6ff7188`. The full desktop suite last passed on the identical application source in `6ff7188`; this change only alters version literals and the screenshot script.
 - Handoff: delivered as a direct commit on private `main` and pushed with `6ff7188`.
 
+### 2026-09-25 — Windows startup setting follows the OS
+
+- Starting revision `b05aed7` (0.2.0). Fixed the drift noted in handoff: on Windows, disabling KeePad in Task Manager or Settings, removing its Run entry, or another KeePad copy taking the entry left "Start with your computer" checked. Packaged Windows builds now reconcile `settings.launchAtLogin` with `getLoginItemSettings().executableWillLaunchAtLogin` (portable builds query their stable path). This happens at startup and on editor focus, as a serialized, revisioned save. Checking the box re-approves a disabled entry. macOS and development runs are unchanged. [ADR 0014](adr/0014-windows-startup-setting-follows-os.md) records the decision and its limits.
+- Added the packaged [login-item check](../tests/login-item-windows.mjs). It uses a temporary profile, simulates Task Manager's disable flag, and covers enable, disable reconciliation, re-enable, removal at the next start, and adoption. It refuses to run beside a real startup entry and cleans up after itself. It timed out on a build without the fix and passed with it, on Windows 11 x64 using `release/win-unpacked`. The registry was checked clean afterwards.
+- Found while building that check: Playwright's `waitForFunction` does not re-check async predicates. `async () => false` resolved after one evaluation in an Electron check. The new check and the shortcut-recorder wait added earlier today now poll from Node. The older desktop-suite waits using the async form are recorded in next work.
+- Validation on Windows: build, 26 unit tests, formatting, the full `npm run test:desktop` (no regressions), and the packaged login-item check passed. Not verified: a real Task Manager toggle by hand (simulated through the same registry flag), per-machine (HKLM) entries, and sign-in startup. macOS has no equivalent reconciliation yet.
+- Documentation: ADR 0014 and index; architecture, data model, UX, testing, releasing, troubleshooting, and this entry. No package, reference, or screenshot change: the Settings page looks the same, and version 0.2.0 and its installers are unchanged, so they do not include this fix.
+
 ## Next work / unresolved decisions
 
 1. Rerun `npm run test:desktop` on macOS for the recorder and application-menu assertions from 2026-09-25, and review macOS tray-click behavior with the new blur-toggle rule.
 2. Finish Windows release checks by hand: tray right-click menu items, Explorer drag onto editor cells, real sign-in startup, multi-monitor/mixed DPI, IME, UNC/network paths, and signing/SmartScreen.
-3. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
-4. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.
-5. Design migrations before changing persisted schema version. Per-field merging, automatic path mapping, a data-in-folder portable profile, image aspect-ratio editing, shell commands, key injection, and plugins are not implemented commitments.
+3. Replace async `waitForFunction` predicates in the desktop suites (desktop, button-interactions, destinations-desktop) with Node-side polling so saved-state waits actually wait.
+4. Decide whether macOS should mirror Login Items state (including approval pending) like Windows; test on a Mac first.
+5. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
+6. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.
+7. Design migrations before changing persisted schema version. Per-field merging, automatic path mapping, a data-in-folder portable profile, image aspect-ratio editing, shell commands, key injection, and plugins are not implemented commitments.
 
 ## Handoff rule
 

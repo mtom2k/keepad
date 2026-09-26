@@ -24,6 +24,7 @@ The GitHub README is a separate audience: friendly emojis, screenshots, and plai
 
 - Closing the editor hides it. While it is visible on Windows it has a taskbar button, so it can be recovered from behind other windows; the launcher never appears in the taskbar. Windows shows no menu bar; macOS shows no Dock icon.
 - Clicking the tray/notification-area icon toggles the launcher on both platforms. On Windows the second click dismisses it rather than summoning it again.
+- On Windows, "Start with your computer" reflects whether Windows will actually start this KeePad copy. Disabling it in Task Manager or Windows Settings unchecks it when the editor is next focused; checking it again re-enables the startup entry.
 - Windows 11 initially places new notification-area icons in the hidden overflow (^). The README tells users how to pin KeePad next to the clock; the app cannot pin itself.
 - Shortcut labels use native names: `⌘ ⌃ ⌥ ⇧` on macOS, `Ctrl Win Alt Shift` on Windows. Recording keeps Command and Control distinct on macOS, and Ctrl and the Windows key distinct on Windows. Recording requires Command/Control/Option (macOS) or Ctrl/Alt/Windows key (Windows); the error message uses the platform's names.
 

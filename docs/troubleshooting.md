@@ -12,6 +12,7 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | Ctrl+Shift+Space does nothing on Windows | Another app or an input method (some Chinese IMEs toggle full/half-width with it) may own the combination. Choose another shortcut in Settings; KeePad reports conflicts it can detect. |
 | Windows SmartScreen warns about the installer | Development builds are unsigned. Choose More info → Run anyway only for a build you produced or trust; signing is open release work. |
 | Portable KeePad shows the installed copy's pads | Expected: the portable and installed builds share `%APPDATA%\KeePad` and cannot run at the same time. |
+| "Start with your computer" turned itself off on Windows | Expected when Windows will not start this copy: startup was disabled in Task Manager or Settings, the Run entry was removed, or the other KeePad copy (installed or portable) took it over. Check the box again to re-enable it for this copy. |
 | Portable KeePad no longer starts at sign-in | Launch at login points at the portable executable's location. After moving it, turn the setting off and on again. |
 | Save fails on Windows with a permission error | Antivirus, indexing, or backup software may be holding `keepad.json`. KeePad retries for about 1.3 s; if it still fails, exclude the KeePad profile folder from real-time scanning or try again. |
 | Shortcut does nothing | Open Settings from the tray. An occupied/invalid shortcut is rejected, and the previous shortcut is retained where available. Also check competing KeePad copies. |

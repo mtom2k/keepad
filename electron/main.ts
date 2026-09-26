@@ -99,6 +99,8 @@ function windowFor(mode: 'launcher' | 'editor') {
       win.hide();
     }
   });
+  // Returning from Task Manager or Windows Settings refreshes the startup checkbox.
+  if (mode === 'editor') win.on('focus', () => void syncLoginItem());
   if (mode === 'launcher') {
     win.on('blur', () => {
       if (!process.env.KEEPAD_TEST_DATA && store.state.settings.hideAfterAction) {
@@ -167,16 +169,31 @@ function trayToggle() {
   if (!launcher?.isVisible() && Date.now() - launcherBlurHiddenAt < 600) return;
   toggleLauncher();
 }
+// A portable build runs from a temporary extraction folder; register its stable launcher.
+const loginItemPath = () => {
+  const portable = process.env.PORTABLE_EXECUTABLE_FILE;
+  return portable ? { path: portable } : {};
+};
 function setLoginItem(openAtLogin: boolean) {
-  // A portable build runs from a temporary extraction folder; register its stable launcher.
   // Keep the Windows Run value name used before the app set its AppUserModelId, so turning
   // the setting off still removes entries written by earlier builds.
-  const portable = process.env.PORTABLE_EXECUTABLE_FILE;
-  app.setLoginItemSettings({
-    openAtLogin,
-    name: 'electron.app.KeePad',
-    ...(portable ? { path: portable } : {}),
-  });
+  app.setLoginItemSettings({ openAtLogin, name: 'electron.app.KeePad', ...loginItemPath() });
+}
+// Windows users can disable startup in Task Manager or Settings, and another KeePad copy can
+// take over the Run entry. Keep the stored preference matching what Windows will actually do.
+function syncLoginItem() {
+  if (process.platform !== 'win32' || !app.isPackaged) return Promise.resolve();
+  return serial(async () => {
+    const actual = app.getLoginItemSettings(loginItemPath()).executableWillLaunchAtLogin;
+    const current = store.state;
+    if (actual === current.settings.launchAtLogin) return;
+    await store.write({
+      ...current,
+      revision: current.revision + 1,
+      settings: { ...current.settings, launchAtLogin: actual },
+    });
+    broadcast();
+  }).catch(() => {});
 }
 function registerShortcut(value: string) {
   try {
@@ -484,6 +501,7 @@ if (!app.requestSingleInstanceLock()) {
         }),
       );
       await store.load();
+      await syncLoginItem();
       nativeTheme.themeSource = store.state.settings.theme;
       setupIPC();
       const icon = nativeImage.createFromPath(

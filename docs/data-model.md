@@ -17,6 +17,8 @@ Canonical schema: [shared/model.ts](../shared/model.ts). Store implementation: [
 | Image | PNG/JPEG/WebP base64 data URL, ≤1,500,000 characters in persisted state |
 | Settings | Theme (`light`, `dark`, `system`), shortcut string (1–100), hide-after-action boolean, launch-at-login boolean |
 
+On packaged Windows builds, `launchAtLogin` mirrors what Windows will launch. KeePad compares it with the OS state at startup and when the editor gains focus, and saves any difference as a normal revisioned write. It is not only the last value the user chose. See [ADR 0014](adr/0014-windows-startup-setting-follows-os.md).
+
 Shortcuts are Electron accelerators. The recorder stores the platform's primary modifier as `CommandOrControl` (Command on macOS, Ctrl on Windows) and the other one as `Control` (macOS) or `Super` (Windows key), so a stored shortcut keeps its meaning on the platform that recorded it.
 
 Labels/names are trimmed by validation. Allowed choices and startup defaults are listed in [generated reference](reference.md).
