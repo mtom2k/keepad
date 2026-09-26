@@ -9,12 +9,25 @@ Run validation locally. GitHub hosts the private source repository and does not 
 | Command | Purpose | Limits |
 | --- | --- | --- |
 | `npm run build` | Strict TypeScript checks and production renderer/main builds | Does not prove native behavior |
-| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, immutable placement/copy/move, native destination metadata, cross-pad search ranking, and legacy local conversion/recovery | Does not exercise OS permissions |
+| `npm test` | Shared models, legacy appearance defaults, imports, persistence/recovery, immutable placement/copy/move, native destination metadata, cross-pad search ranking, legacy local conversion/recovery, packaged-page sender matching, and locked-file save retry | Does not exercise OS permissions |
 | `npm run test:desktop` | Playwright driving actual Electron with temporary data | Requires a graphical macOS/Windows session |
 | `npm run format:check` | Source/test formatting | Not a semantic test |
 | `npm run docs:check` | Local docs, links, generated reference, screenshots | Does not prove prose correctness |
 | `npm run docs:check -- --base <ref>` | Source-to-documentation impact checks | Requires a valid Git base and human review |
 | `npm run docs:screenshots` | Rebuild and capture curated native UI with sample data | Review images; not a substitute for interaction tests |
+
+## Windows coverage
+
+All suites run natively on Windows. Host-specific cases:
+
+- [Destination tests](../tests/destinations.test.ts) exercise macOS `.app` bundles on POSIX hosts and `.exe`/`.lnk` application files on Windows. Real probes need host-native paths; a Windows temporary path is correctly `foreign` to the darwin rules. Symlink and `chmod` denial cases remain POSIX-only.
+- [Replacement tests](../tests/store-replace.test.ts) check bounded retry of `EPERM`/`EACCES`/`EBUSY`. On Windows they also hold `keepad.json` open through PowerShell (`FileShare.Read`, no delete sharing), first proving that a plain rename fails, then that a store save succeeds once the lock is released.
+- [Path tests](../tests/paths.test.ts) check that the IPC sender matcher accepts the bundled page from folders containing spaces, accents, `[ ]`, `#` and `&` (Chromium leaves brackets unescaped). They also check that it rejects other pages, other schemes, and the file page while the dev server is configured.
+- The desktop suite records shortcuts with the platform's modifiers: Ctrl/Win/Alt/Shift labels and `CommandOrControl`/`Super` on Windows, `⌘⌃⌥⇧` and `CommandOrControl`/`Control` on macOS. It also asserts that only macOS has an application menu.
+
+For packaged builds, drive `release/win-unpacked/KeePad.exe` (or an installed copy) with Playwright's `executablePath` and `--user-data-dir=<temporary folder>`. Packaged builds ignore `KEEPAD_TEST_DATA`. To check launch at login, simulate the portable wrapper by setting `PORTABLE_EXECUTABLE_FILE`.
+
+Regenerating documentation screenshots on Windows changes host-dependent content: `Ctrl Shift` labels instead of `⌘ ⇧`, Segoe UI instead of SF, and the checker reports the fictional Windows sample path as missing instead of foreign. Recapture on the platform used for the committed images unless the change intends to switch them.
 
 ## Local-only conversion coverage
 
@@ -66,7 +79,7 @@ The suite does **not** click the native tray menu, verify real shell-launched ap
 - On both target platforms, upgrade a disposable legacy profile with local destinations and verify recovery copies, effective paths, unchanged old folders, and restart. Exercise native permissions, UNC paths, unavailable drives, and provider-backed file hydration for ordinary file actions.
 - Installer/uninstaller behavior, signatures, and a clean machine without developer dependencies.
 
-Record the OS, architecture, commands, date, and result in progress/release notes. “Build configured” and “tested” are different claims.
+Record the OS, architecture, commands, date, and result in progress/release notes. “Build configured” and “tested” are different claims. The 2026-09-25 progress entry lists which Windows items above were exercised by hand on an installed build and which remain open.
 
 ## Screenshots
 

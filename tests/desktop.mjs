@@ -152,6 +152,11 @@ try {
   await window.screenshot({ path: 'test-results/editor.png' });
   if (process.platform === 'darwin')
     assert.equal(await app.evaluate(({ app }) => app.dock?.isVisible()), false);
+  // macOS keeps a hidden Edit menu for Command shortcuts; Windows must not show a menu bar.
+  assert.equal(
+    await app.evaluate(({ Menu }) => Menu.getApplicationMenu() === null),
+    process.platform !== 'darwin',
+  );
   const status = await window.evaluate(() => window.keepad.load());
   assert.equal(status.ok, true);
   assert.equal(status.value.info.desktop, true);
@@ -354,6 +359,45 @@ try {
   await window.emulateMedia({ colorScheme: null });
   await setAppTheme('dark');
 
+  // The platform's primary modifier records as CommandOrControl; the other physical modifier
+  // stays distinct (Control on macOS, the Windows key elsewhere) and displays native names.
+  const mac = process.platform === 'darwin';
+  const recorder = window.getByRole('button', { name: 'Record summon shortcut', exact: true });
+  const recordKeys = async (keys) => {
+    await recorder.click();
+    await window.keyboard.press(keys);
+    return recorder.locator('kbd').allTextContents();
+  };
+  assert.deepEqual(
+    await recordKeys('Control+Shift+K'),
+    mac ? ['⌃', '⇧', 'K'] : ['Ctrl', 'Shift', 'K'],
+  );
+  if (!mac) assert.deepEqual(await recordKeys('Meta+Alt+K'), ['Win', 'Alt', 'K']);
+  assert.deepEqual(
+    await recordKeys(`${mac ? 'Meta' : 'Control'}+Alt+K`),
+    mac ? ['⌘', '⌥', 'K'] : ['Ctrl', 'Alt', 'K'],
+  );
+  const recordedFrom = await window.evaluate(async () => (await window.keepad.load()).value.state);
+  await window.getByRole('button', { name: 'Save', exact: true }).click();
+  await window.waitForFunction(
+    async (previous) => (await window.keepad.load()).value.state.settings.shortcut !== previous,
+    recordedFrom.settings.shortcut,
+  );
+  assert.equal(
+    (await window.evaluate(async () => (await window.keepad.load()).value.state)).settings.shortcut,
+    'CommandOrControl+Alt+K',
+  );
+  assert.equal(
+    (
+      await window.evaluate(async (shortcut) => {
+        const { state } = (await window.keepad.load()).value;
+        state.settings.shortcut = shortcut;
+        return window.keepad.save(state);
+      }, recordedFrom.settings.shortcut)
+    ).ok,
+    true,
+  );
+
   const before = await window.evaluate(async () => (await window.keepad.load()).value.state);
   await app.evaluate(({ globalShortcut }) =>
     globalShortcut.register('CommandOrControl+Alt+9', () => {}),
@@ -479,7 +523,7 @@ try {
   assert.equal(await reopened.locator('.pad-heading-icon').count(), 0, 'No icon survives restart');
   assert.deepEqual(errors, []);
   console.log(
-    'Desktop checks passed: destination checks and local repair, stale dialog protection, global launcher search, button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
+    'Desktop checks passed: destination checks and local repair, stale dialog protection, global launcher search, button context menus, native file binding and replacement, editor, pad/button creation, theme, layout steppers and resize limits, double-click activation, centered launcher, explicit activation, independent preview, exposed pad controls, launcher focus reset, keyboard focus, platform shortcut recording, application menu, native clipboard, launcher, unclipped tooltip, shortcut conflict, stale writes, unsafe URLs, image upload, backup export/import, native open dispatch, missing-file recovery, and restart persistence.',
   );
 } catch (error) {
   if (app) {

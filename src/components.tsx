@@ -414,25 +414,18 @@ export function PositionPicker({
     </div>
   );
 }
+const shortcutKeys: Record<string, [mac: string, other: string]> = {
+  CommandOrControl: ['⌘', 'Ctrl'],
+  Super: ['⌘', 'Win'],
+  Control: ['⌃', 'Ctrl'],
+  Shift: ['⇧', 'Shift'],
+  Alt: ['⌥', 'Alt'],
+};
 export function Shortcut({ value, mac }: { value: string; mac: boolean }) {
   return (
     <span className="shortcut">
       {value.split('+').map((key, i) => (
-        <kbd key={i}>
-          {key === 'CommandOrControl'
-            ? mac
-              ? '⌘'
-              : 'Ctrl'
-            : key === 'Shift'
-              ? '⇧'
-              : key === 'Alt'
-                ? mac
-                  ? '⌥'
-                  : 'Alt'
-                : key === 'Space'
-                  ? 'Space'
-                  : key}
-        </kbd>
+        <kbd key={i}>{shortcutKeys[key]?.[mac ? 0 : 1] ?? key}</kbd>
       ))}
     </span>
   );

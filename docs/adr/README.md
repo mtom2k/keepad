@@ -16,5 +16,6 @@ Accepted records describe the current implementation. Initial records were writt
 | [0010](0010-optional-folder-synchronization.md) | Optional Mac/Windows folder synchronization with immutable pad history and local destinations | Superseded by 0012 |
 | [0011](0011-device-destination-checks.md) | Explicit metadata checks and revision-guarded device-local repairs | Destination storage/conflict portions superseded by 0012 |
 | [0012](0012-local-only-storage.md) | Local-only storage with safe legacy destination conversion | Accepted |
+| [0013](0013-windows-platform-integration.md) | Windows sender validation, tray toggle, menu/taskbar, shortcut recording, portable packaging, and locked-file saves | Accepted |
 
 Use [the template](template.md) for the next consequential decision. Update this index and the affected guides. Supersede an accepted decision with a new record rather than erasing its rationale.

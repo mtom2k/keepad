@@ -28,7 +28,7 @@ Documentation is maintained in the same change as implementation, not in a later
 
 ## Automated safeguards
 
-- `docs:generate` renders [reference.md](reference.md) from `package.json`, `package-lock.json`, and shared model exports. Do not edit generated content manually.
+- `docs:generate` renders [reference.md](reference.md) from `package.json` (identity, scripts, electron-builder targets and artifact names), `package-lock.json`, and shared model exports. Do not edit generated content manually.
 - Reference choices distinguish application themes, pad themes, pad icons (including `none`), and required action-button icons. Keep these distinctions when extending shared choices.
 - `docs:check` checks required knowledge-base files, Markdown-relative file/image links, screenshot PNGs, and generated-reference freshness.
 - `docs:check -- --base <Git ref>` adds source-impact gates from [documentation-impact.json](documentation-impact.json). Relevant source changes must include progress plus the mapped documentation. UI implementation changes must include UX or README updates. This gate intentionally checks participation, not semantic completeness.

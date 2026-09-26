@@ -21,6 +21,25 @@ const LegacyDestinations = z.object({
     .max(600),
 });
 
+// Windows refuses to replace a file that antivirus, indexing, or backup software briefly holds
+// open. Retry those transient errors; anything else, or a lasting lock, still fails the save.
+export async function replaceFile(
+  from: string,
+  to: string,
+  move: (from: string, to: string) => Promise<void> = rename,
+  delays = [20, 40, 80, 160, 320, 640],
+) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await move(from, to);
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (attempt >= delays.length || !['EPERM', 'EACCES', 'EBUSY'].includes(code ?? ''))
+        throw error;
+      await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+    }
+  }
+}
 export class Store {
   state: State;
   warning: string | undefined;
@@ -83,7 +102,7 @@ export class Store {
     const valid = StateSchema.parse(next);
     const temp = `${this.file}.tmp`;
     await writeFile(temp, JSON.stringify(valid, null, 2), { mode: 0o600 });
-    await rename(temp, this.file);
+    await replaceFile(temp, this.file);
     this.state = valid;
   }
 }

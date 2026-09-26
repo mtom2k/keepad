@@ -1371,6 +1371,7 @@ function SettingsPage({
 }) {
   const [shortcut, setShortcut] = useState(state.settings.shortcut),
     [recording, setRecording] = useState(false);
+  const mac = info.platform === 'darwin';
   useEffect(() => setShortcut(state.settings.shortcut), [state.settings.shortcut]);
   async function update(patch: Partial<State['settings']>) {
     if (await save({ ...state, settings: { ...state.settings, ...patch } }))
@@ -1383,9 +1384,13 @@ function SettingsPage({
       setRecording(false);
       return;
     }
-    if (['Meta', 'Control', 'Shift', 'Alt'].includes(e.key)) return;
+    if (['Meta', 'Control', 'Shift', 'Alt', 'OS'].includes(e.key)) return;
     if (!e.metaKey && !e.ctrlKey && !e.altKey) {
-      onError('Include Command, Control, or Alt with your shortcut.');
+      onError(
+        mac
+          ? 'Include Command, Control, or Option with your shortcut.'
+          : 'Include Ctrl, Alt, or the Windows key with your shortcut.',
+      );
       return;
     }
     const key =
@@ -1398,8 +1403,10 @@ function SettingsPage({
             : e.key.length === 1
               ? e.key.toUpperCase()
               : e.key;
+    // CommandOrControl is Command on macOS and Ctrl on Windows; record the other key separately.
     const parts = [
-      ...(e.metaKey || e.ctrlKey ? ['CommandOrControl'] : []),
+      ...((mac ? e.metaKey : e.ctrlKey) ? ['CommandOrControl'] : []),
+      ...((mac ? e.ctrlKey : e.metaKey) ? [mac ? 'Control' : 'Super'] : []),
       ...(e.altKey ? ['Alt'] : []),
       ...(e.shiftKey ? ['Shift'] : []),
       key,
@@ -1443,11 +1450,7 @@ function SettingsPage({
               onBlur={() => setRecording(false)}
               aria-label="Record summon shortcut"
             >
-              {recording ? (
-                'Press a combination…'
-              ) : (
-                <Shortcut value={shortcut} mac={info.platform === 'darwin'} />
-              )}
+              {recording ? 'Press a combination…' : <Shortcut value={shortcut} mac={mac} />}
             </button>
             <button
               className="primary small"

@@ -39,6 +39,22 @@ ${rows([
 | --- | --- |
 ${rows(Object.entries(pkg.scripts).map(([name, command]) => [name, `\`${command}\``]))}
 
+## Package targets
+
+| Platform | electron-builder targets | Artifact name |
+| --- | --- | --- |
+${rows(
+  (['mac', 'win'] as const).flatMap((platform) =>
+    (pkg.build[platform]?.target ?? []).map((target: string) => [
+      platform === 'mac' ? 'macOS' : 'Windows',
+      target,
+      pkg.build[target]?.artifactName ?? 'electron-builder default',
+    ]),
+  ),
+)}
+
+See [releasing](releasing.md) for install, uninstall, portable profile, and signing behavior.
+
 ## Actions
 
 | Stored type | UI label |

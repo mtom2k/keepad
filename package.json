@@ -72,12 +72,17 @@
     "win": {
       "icon": "assets/icon.png",
       "target": [
-        "nsis"
+        "nsis",
+        "portable"
       ]
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
     },
     "asar": true
   }

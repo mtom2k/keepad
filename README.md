@@ -4,7 +4,7 @@
 
 KeePad gives your everyday actions a button: open a website, file, folder, or app, or copy a text snippet. It waits in your Mac's menu bar or Windows notification area until you need it.
 
-> 🚧 **Development version:** native checks have passed on macOS Apple Silicon. Windows support is implemented, but its validation is tracked separately. Signed, ready-to-install releases are not available yet. See [development status](docs/progress.md).
+> 🚧 **Development version:** automated and hands-on checks have passed on macOS Apple Silicon and Windows 11 x64. Signed, ready-to-install releases are not available yet; locally built Windows installers are unsigned. See [development status](docs/progress.md).
 
 ## 👀 A look inside
 
@@ -74,6 +74,8 @@ Screenshots use sample data from the actual app. [How they are made](docs/screen
 | Mac | **Command + Shift + Space** | Click KeePad in the menu bar |
 | Windows | **Ctrl + Shift + Space** | Click KeePad in the notification area beside the clock |
 
+💡 **Windows 11 tip:** new notification-area icons start out hidden behind the **^** arrow beside the clock. Drag KeePad from there onto the taskbar to keep it in view.
+
 The pad opens in the center of the screen containing your pointer. Click a button to run its action, or type into the automatically focused search box. Use **↑/↓** and **Enter** to run a result; each result shows its pad. Searching and running a result leave your active pad unchanged. **Esc** clears a search first, then hides the pad. Closing a window keeps KeePad running; to exit, right-click its menu-bar/notification icon and choose **Quit KeePad**.
 
 Search ignores case and accents and matches all the words you type in button names or descriptions (the **Hover hint** field). It does not inspect files, paths, URLs, or copied text. Each summon clears the previous search.
@@ -118,7 +120,7 @@ npm run dev
 
 The first two commands download KeePad and enter its folder. `npm ci` downloads the project's dependencies. `npm run dev` starts KeePad and opens its editor on first use. Keep the terminal open while using this development mode.
 
-To create an application bundle or installer locally, see [packaging instructions](docs/releasing.md). Developers can find all commands in the [generated reference](docs/reference.md).
+To create an application bundle or installer locally, see [packaging instructions](docs/releasing.md). On Windows, `npm run package:win` produces an installer (`KeePad-Setup-<version>.exe`) and a single-file portable app (`KeePad-Portable-<version>.exe`) in `release/`. Both are unsigned, so Windows SmartScreen may warn before running them. Developers can find all commands in the [generated reference](docs/reference.md).
 
 ## 🔒 Your data and permissions
 

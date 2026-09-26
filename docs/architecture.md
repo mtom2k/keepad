@@ -21,7 +21,8 @@ flowchart LR
 | --- | --- | --- |
 | Main process | [electron/main.ts](../electron/main.ts) | Lifecycle, tray menus, windows, shortcuts, native actions, serialized mutations |
 | Bridge | [electron/preload.cts](../electron/preload.cts) | Explicit API methods and event subscriptions; compiled to CommonJS for sandbox compatibility |
-| Store | [electron/store.ts](../electron/store.ts) | Validation, temporary-file replacement, corruption recovery, one-time legacy destination conversion |
+| Store | [electron/store.ts](../electron/store.ts) | Validation, temporary-file replacement (with bounded retry of transient Windows sharing errors), corruption recovery, one-time legacy destination conversion |
+| Paths | [electron/paths.ts](../electron/paths.ts) | Host-native absolute path check and packaged-page sender matching |
 | Shared contract | [shared/model.ts](../shared/model.ts) | Zod schemas, types, starter state, import merge |
 | Renderer | [src/main.tsx](../src/main.tsx) | Editor, launcher, dialogs, settings, local edit selection |
 | UI primitives | [src/components.tsx](../src/components.tsx) | Optional pad glyphs, tooltips, modal dialogs, macro keys, number steppers, visual position picker, keyboard-accessible button menu |
@@ -38,11 +39,13 @@ Vite builds the renderer into `dist/`. `build:electron` cleans `dist-electron/` 
 ## Window lifecycle
 
 - The editor uses a native frame; the launcher is a compact frameless, always-on-top window.
-- Both skip the taskbar. macOS uses the accessory activation policy and `LSUIElement` in the bundle.
+- The launcher always skips the taskbar. On Windows the visible editor has a taskbar button (AppUserModelID `app.keepad.desktop`, matching the installer shortcut) so it cannot be lost behind other windows; hidden windows have none. macOS uses the accessory activation policy and `LSUIElement` in the bundle, so neither window has a Dock icon.
+- The application menu is macOS-only: an Edit role menu supplies Command-key clipboard shortcuts but is not shown for an accessory app. Windows has no application menu, so no menu bar appears in the editor; Chromium handles Ctrl clipboard/undo shortcuts in text fields. See [ADR 0013](adr/0013-windows-platform-integration.md).
 - First run, storage recovery warnings, shortcut-registration failure, or `--editor` opens the editor.
 - Close hides a window. The application stays alive with no visible windows. Quit releases the global shortcut and tray.
 - A second process for the same profile yields to the single-instance lock and asks the existing process to show its active launcher; `--editor` is only consulted during normal startup.
-- Tray left-click toggles the launcher. The right-click menu offers opening, pad selection, management, Settings, version, and Quit.
+- Tray left-click toggles the launcher. On Windows, pressing the notification-area icon first blurs (and hides) the launcher; a tray click within 600 ms of that blur-hide counts as the dismissal instead of re-summoning. The right-click menu offers opening, pad selection, management, Settings, version, and Quit.
+- Launch at login uses Electron login items under the Windows Run value `electron.app.KeePad`. A portable build registers the stable `PORTABLE_EXECUTABLE_FILE` rather than its temporary extraction folder.
 - Tray, menu, app activation, and shortcut entry points use the same centering function. It centers within the work area of the display nearest the pointer, with bounds constrained to available space.
 - The hide-after-action setting also controls launcher hiding on blur. The test profile suppresses blur-hiding so automation can inspect it; this is a coverage limitation.
 
@@ -98,7 +101,7 @@ Application appearance is stored in `settings.theme` separately from `Pad.theme`
 
 Requests return `Result<T>` (`ok/value` or `ok/error`). The API contract lists allowed operations; preload exposes no generic `send`, Node.js API, or arbitrary channel invocation. Subscriptions return cleanup functions.
 
-The main process checks known web contents, the main frame, and the exact local file/dev origin for each request. Both windows have sandboxing, context isolation, and no Node integration. Navigation and new windows are blocked. The HTML CSP limits scripts to local assets and images to local/data sources. The development server is accepted only at the explicitly configured loopback URL and is ignored in packaged builds.
+The main process checks known web contents, the main frame, and the exact local file/dev origin for each request. For packaged builds, `isAppPage` in `electron/paths.ts` decodes the sender's `file:` URL and compares its path with the bundled `dist/index.html` (case-insensitively on Windows). It does not compare URL strings, because Chromium and Node escape characters such as `[`/`]` differently; install folders containing them previously made every request fail. Both windows have sandboxing, context isolation, and no Node integration. Navigation and new windows are blocked. The HTML CSP limits scripts to local assets and images to local/data sources. The development server is accepted only at the explicitly configured loopback URL and is ignored in packaged builds.
 
 Only HTTP(S) website actions and supported inline raster images are accepted. File/folder/app destinations can be typed, chosen with Browse, or bound by dropping a local item in the editor; schema validation requires absolute paths and execution checks access/existence. Button images are selected through the native image dialog. This does not make all user-selected files safe: opening a chosen application intentionally executes it via the OS. No command runner, keyboard injection, analytics, or direct cloud-provider API is implemented. No synchronization engine or cloud-provider integration is present.
 

@@ -33,6 +33,17 @@ Run `npm run docs:generate` after changing package metadata, commands, dependenc
 | docs:check | `node scripts/check-docs.mjs` |
 | docs:screenshots | `npm run build && node scripts/capture-screenshots.mjs` |
 
+## Package targets
+
+| Platform | electron-builder targets | Artifact name |
+| --- | --- | --- |
+| macOS | dmg | electron-builder default |
+| macOS | zip | electron-builder default |
+| Windows | nsis | ${productName}-Setup-${version}.${ext} |
+| Windows | portable | ${productName}-Portable-${version}.${ext} |
+
+See [releasing](releasing.md) for install, uninstall, portable profile, and signing behavior.
+
 ## Actions
 
 | Stored type | UI label |

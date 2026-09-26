@@ -17,6 +17,8 @@ Canonical schema: [shared/model.ts](../shared/model.ts). Store implementation: [
 | Image | PNG/JPEG/WebP base64 data URL, ≤1,500,000 characters in persisted state |
 | Settings | Theme (`light`, `dark`, `system`), shortcut string (1–100), hide-after-action boolean, launch-at-login boolean |
 
+Shortcuts are Electron accelerators. The recorder stores the platform's primary modifier as `CommandOrControl` (Command on macOS, Ctrl on Windows) and the other one as `Control` (macOS) or `Super` (Windows key), so a stored shortcut keeps its meaning on the platform that recorded it.
+
 Labels/names are trimmed by validation. Allowed choices and startup defaults are listed in [generated reference](reference.md).
 
 Pad icons additionally accept `none`; button icons do not. Version-1 data missing `settings.theme` parses with `system` without resetting existing data. For files without legacy device metadata, loading does not rewrite the file; the default is persisted by the next ordinary save. Imports retain the receiving device's theme. Builds predating icon-free pads cannot read `none`; retain a pre-change backup for downgrades. See [ADR 0007](adr/0007-application-appearance-and-optional-pad-icons.md) for compatibility and recovery.
@@ -33,7 +35,7 @@ Button duplication copies all action/appearance fields with a fresh ID into the 
 
 The file is `keepad.json` under Electron's `app.getPath('userData')`, normally `~/Library/Application Support/KeePad/` on macOS and `%APPDATA%/KeePad/` on Windows. Do not assume paths for tests; use a temporary profile.
 
-A save validates first, writes `keepad.json.tmp`, then renames it over the destination. The in-memory state changes only after the write succeeds. Files request owner-only permissions where supported. There is no encryption, database, or fsync-based power-loss guarantee. Keep this live file local; use exported backups for manual transfer. Concurrent access through a provider folder is unsupported.
+A save validates first, writes `keepad.json.tmp`, then renames it over the destination. On Windows the rename can fail briefly with `EPERM`/`EACCES`/`EBUSY` while antivirus, indexing, or backup software holds `keepad.json` open without delete sharing. KeePad retries only those errors, with bounded backoff (about 1.3 s in total), then reports the failure as before. The in-memory state changes only after the write succeeds. Files request owner-only permissions where supported. There is no encryption, database, or fsync-based power-loss guarantee. Keep this live file local; use exported backups for manual transfer. Concurrent access through a provider folder is unsupported.
 
 Missing state creates starter pads. Unreadable/invalid existing state is copied to a timestamped recovery file before defaults are written. If the recovery copy fails, startup fails instead of overwriting the original. The missing-appearance default described above is supported within version 1; there is no general schema migration framework. Introducing schema version 2 requires an explicit migration/recovery design, not a blind reset.
 

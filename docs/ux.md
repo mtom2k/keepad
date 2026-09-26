@@ -20,6 +20,13 @@ The GitHub README is a separate audience: friendly emojis, screenshots, and plai
 - Drop one local file, folder, or application from Finder/File Explorer onto an editor position. Empty positions become saved buttons with a filename and generic type icon. Occupied positions ask before replacing only the action type/destination; name, image, color, hint, and position remain unchanged. Cancel leaves the action untouched. Multiple files are rejected with a brief error; drops never execute actions. The compact launcher does not accept file bindings.
 - Macro keys show image/icon and label; action details stay in tooltips/dialogs.
 
+## Platform conventions
+
+- Closing the editor hides it. While it is visible on Windows it has a taskbar button, so it can be recovered from behind other windows; the launcher never appears in the taskbar. Windows shows no menu bar; macOS shows no Dock icon.
+- Clicking the tray/notification-area icon toggles the launcher on both platforms. On Windows the second click dismisses it rather than summoning it again.
+- Windows 11 initially places new notification-area icons in the hidden overflow (^). The README tells users how to pin KeePad next to the clock; the app cannot pin itself.
+- Shortcut labels use native names: `⌘ ⌃ ⌥ ⇧` on macOS, `Ctrl Win Alt Shift` on Windows. Recording keeps Command and Control distinct on macOS, and Ctrl and the Windows key distinct on Windows. Recording requires Command/Control/Option (macOS) or Ctrl/Alt/Windows key (Windows); the error message uses the platform's names.
+
 ## Launcher
 
 - Tray/menu invocation and the global shortcut center the launcher on the pointer's display work area.

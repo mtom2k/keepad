@@ -5,6 +5,15 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | Symptom | Explanation / next step |
 | --- | --- |
 | Window disappeared, process still running | Expected. Close hides KeePad; tray/menu-bar Quit exits. |
+| KeePad icon missing from the Windows notification area | Windows 11 puts new icons in the hidden overflow (^ beside the clock). Open it and drag KeePad onto the taskbar, or turn it on under Settings → Personalization → Taskbar → Other system tray icons. |
+| Windows editor hidden behind other windows | Use its taskbar button (shown while the editor is open), or summon the launcher and choose Manage pads. Builds before 2026-09-25 had no taskbar button. |
+| Every action says "Request rejected." on Windows | Builds before 2026-09-25 rejected all requests when installed in a folder whose path contains characters such as `[` or `]`. Install a current build. |
+| Clicking the Windows tray icon reopens the launcher instead of closing it | Fixed 2026-09-25: a click right after the launcher hides on blur now counts as the dismissal. Clicking the icon again summons it. |
+| Ctrl+Shift+Space does nothing on Windows | Another app or an input method (some Chinese IMEs toggle full/half-width with it) may own the combination. Choose another shortcut in Settings; KeePad reports conflicts it can detect. |
+| Windows SmartScreen warns about the installer | Development builds are unsigned. Choose More info → Run anyway only for a build you produced or trust; signing is open release work. |
+| Portable KeePad shows the installed copy's pads | Expected: the portable and installed builds share `%APPDATA%\KeePad` and cannot run at the same time. |
+| Portable KeePad no longer starts at sign-in | Launch at login points at the portable executable's location. After moving it, turn the setting off and on again. |
+| Save fails on Windows with a permission error | Antivirus, indexing, or backup software may be holding `keepad.json`. KeePad retries for about 1.3 s; if it still fails, exclude the KeePad profile folder from real-time scanning or try again. |
 | Shortcut does nothing | Open Settings from the tray. An occupied/invalid shortcut is rejected, and the previous shortcut is retained where available. Also check competing KeePad copies. |
 | Clicking a sidebar pad does not change the active badge | Expected. Single-click edits; double-click or Make Active activates. |
 | Previewed pad is gone on next summon | Expected. Preview is temporary; normal summon opens the active pad. |
@@ -37,7 +46,8 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 
 ## Known boundaries to preserve in handoffs
 
-- Windows support is implemented; complete validation still requires local Windows testing and manual checks. Hosted automation is not configured. See progress for historical onboarding test results and remaining gaps.
+- Windows 11 x64 has native automated and installed-build evidence (see progress, 2026-09-25). Signing, multi-monitor/mixed-DPI, IME, real Explorer drag gestures, the tray right-click menu under automation, real sign-in startup, and Windows on ARM remain open. Hosted automation is not configured.
+- Desktop automation tools may reserve Escape and cannot always drive Explorer-owned UI (taskbar right-click, drags out of File Explorer). Record such gaps as unverified rather than working around the tool.
 - Native file errors now use platform-specific permission guidance and local destination instructions. Windows native permission behavior still needs manual validation.
 - Images are resized to square thumbnails; cropping/aspect-ratio controls are not implemented.
 - Multiple monitors, unusual screen sizes, native blur behavior, reserved shortcuts, and non-QWERTY layouts require real device verification.

@@ -19,7 +19,7 @@ import {
   screen,
 } from 'electron';
 import type { IpcMainInvokeEvent } from 'electron';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { readFile, writeFile, stat } from 'node:fs/promises';
@@ -32,7 +32,7 @@ import {
 } from '../shared/model.js';
 import { Store } from './store.js';
 import { describeFile } from './file-binding.js';
-import { nativePath } from './paths.js';
+import { isAppPage, nativePath } from './paths.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const devUrl = app.isPackaged ? undefined : process.env.KEEPAD_DEV_URL;
 if (devUrl && devUrl !== 'http://127.0.0.1:5173') throw Error('Unexpected development server.');
@@ -43,7 +43,8 @@ let tray: Tray,
   launcher: BrowserWindow | undefined,
   editor: BrowserWindow | undefined,
   quitting = false,
-  shortcutRegistered = false;
+  shortcutRegistered = false,
+  launcherBlurHiddenAt = 0;
 let store: Store;
 // Preview selection is transient; tray/hotkey invocation always uses the active pad.
 let previewPadId: string | undefined;
@@ -77,7 +78,9 @@ function windowFor(mode: 'launcher' | 'editor') {
     show: false,
     frame: mode === 'editor',
     resizable: mode === 'editor',
-    skipTaskbar: true,
+    // Windows: a visible editor needs a taskbar button so it cannot be lost behind other
+    // windows. Hidden windows have none, and macOS ignores this option (accessory policy).
+    skipTaskbar: mode === 'launcher',
     alwaysOnTop: mode === 'launcher',
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#202124' : '#fafafa',
     title: 'KeePad',
@@ -98,7 +101,10 @@ function windowFor(mode: 'launcher' | 'editor') {
   });
   if (mode === 'launcher') {
     win.on('blur', () => {
-      if (!process.env.KEEPAD_TEST_DATA && store.state.settings.hideAfterAction) win.hide();
+      if (!process.env.KEEPAD_TEST_DATA && store.state.settings.hideAfterAction) {
+        launcherBlurHiddenAt = Date.now();
+        win.hide();
+      }
     });
   }
   if (devUrl) void win.loadURL(`${devUrl}/?mode=${mode}`);
@@ -155,6 +161,23 @@ function toggleLauncher() {
   if (launcher?.isVisible()) launcher.hide();
   else showLauncher();
 }
+// On Windows, pressing the notification-area icon blurs (and hides) the launcher before the
+// click arrives. Treat that click as the dismissal instead of summoning it again.
+function trayToggle() {
+  if (!launcher?.isVisible() && Date.now() - launcherBlurHiddenAt < 600) return;
+  toggleLauncher();
+}
+function setLoginItem(openAtLogin: boolean) {
+  // A portable build runs from a temporary extraction folder; register its stable launcher.
+  // Keep the Windows Run value name used before the app set its AppUserModelId, so turning
+  // the setting off still removes entries written by earlier builds.
+  const portable = process.env.PORTABLE_EXECUTABLE_FILE;
+  app.setLoginItemSettings({
+    openAtLogin,
+    name: 'electron.app.KeePad',
+    ...(portable ? { path: portable } : {}),
+  });
+}
 function registerShortcut(value: string) {
   try {
     return globalShortcut.register(value, () => toggleLauncher());
@@ -178,7 +201,7 @@ async function commit(raw: unknown) {
   let loginApplied = false;
   try {
     if (loginChanged) {
-      app.setLoginItemSettings({ openAtLogin: next.settings.launchAtLogin });
+      setLoginItem(next.settings.launchAtLogin);
       loginApplied = true;
     }
     await store.write({ ...next, revision: previous.revision + 1 });
@@ -186,7 +209,7 @@ async function commit(raw: unknown) {
     if (changed) globalShortcut.unregister(next.settings.shortcut);
     if (loginApplied) {
       try {
-        app.setLoginItemSettings({ openAtLogin: previous.settings.launchAtLogin });
+        setLoginItem(previous.settings.launchAtLogin);
       } catch {
         store.warning =
           'Check Login Items or Startup Apps in system settings; startup preferences could not be restored.';
@@ -235,12 +258,10 @@ function showError(error: unknown) {
 }
 function trust(event: IpcMainInvokeEvent) {
   const allowed = BrowserWindow.getAllWindows().some((w) => w.webContents === event.sender);
-  const url = event.senderFrame?.url ?? '';
-  const expected = devUrl ? `${devUrl}/` : pathToFileURL(path.join(root, 'dist/index.html')).href;
   if (
     !allowed ||
     event.senderFrame !== event.sender.mainFrame ||
-    !(url === expected || url.startsWith(`${expected}?`))
+    !isAppPage(event.senderFrame?.url ?? '', path.join(root, 'dist/index.html'), devUrl)
   )
     throw Error('Request rejected.');
 }
@@ -424,22 +445,29 @@ if (!app.requestSingleInstanceLock()) {
     .whenReady()
     .then(async () => {
       if (process.platform === 'darwin') app.setActivationPolicy('accessory');
+      // macOS needs Edit roles for Command-key clipboard shortcuts; the menu is not shown for an
+      // accessory app. Windows would draw it as a menu bar in the editor, and Chromium already
+      // handles Ctrl clipboard/undo shortcuts in text fields there.
       Menu.setApplicationMenu(
-        Menu.buildFromTemplate([
-          {
-            label: 'Edit',
-            submenu: [
-              { role: 'undo' },
-              { role: 'redo' },
-              { type: 'separator' },
-              { role: 'cut' },
-              { role: 'copy' },
-              { role: 'paste' },
-              { role: 'selectAll' },
-            ],
-          },
-        ]),
+        process.platform === 'darwin'
+          ? Menu.buildFromTemplate([
+              {
+                label: 'Edit',
+                submenu: [
+                  { role: 'undo' },
+                  { role: 'redo' },
+                  { type: 'separator' },
+                  { role: 'cut' },
+                  { role: 'copy' },
+                  { role: 'paste' },
+                  { role: 'selectAll' },
+                ],
+              },
+            ])
+          : null,
       );
+      // Match the installer's shortcut identity so the editor's taskbar button groups correctly.
+      if (process.platform === 'win32') app.setAppUserModelId('app.keepad.desktop');
       const settingsFile = path.join(app.getPath('userData'), 'keepad.json');
       let firstRun = false;
       try {
@@ -464,7 +492,7 @@ if (!app.requestSingleInstanceLock()) {
       if (process.platform === 'darwin') icon.setTemplateImage(true);
       tray = new Tray(icon);
       tray.setToolTip('KeePad');
-      tray.on('click', () => toggleLauncher());
+      tray.on('click', () => trayToggle());
       tray.on('right-click', () => tray.popUpContextMenu(trayMenu()));
       shortcutRegistered = registerShortcut(store.state.settings.shortcut);
       if (firstRun || !shortcutRegistered || store.warning || process.argv.includes('--editor'))

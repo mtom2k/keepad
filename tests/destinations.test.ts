@@ -21,8 +21,21 @@ test('destination inspection distinguishes missing, wrong-type, and foreign path
     assert.equal(await inspectDestination(root, 'folder'), 'available');
     assert.equal(await inspectDestination(file, 'folder'), 'wrong-type');
     assert.equal(await inspectDestination(root, 'file'), 'wrong-type');
-    assert.equal(await inspectDestination(app, 'app', 'darwin'), 'available');
-    assert.equal(await inspectDestination(root, 'app', 'darwin'), 'wrong-type');
+    // Real probes need host-native paths: a Windows temp path is foreign to the darwin rules.
+    if (process.platform === 'win32') {
+      const exe = path.join(root, 'Sample.EXE'),
+        shortcut = path.join(root, 'Sample.lnk');
+      await writeFile(exe, '');
+      await writeFile(shortcut, '');
+      assert.equal(await inspectDestination(exe, 'app', 'win32'), 'available');
+      assert.equal(await inspectDestination(shortcut, 'app', 'win32'), 'available');
+      assert.equal(await inspectDestination(file, 'app', 'win32'), 'wrong-type');
+      assert.equal(await inspectDestination(app, 'app', 'win32'), 'wrong-type');
+      assert.equal(await inspectDestination(app, 'app', 'darwin'), 'foreign');
+    } else {
+      assert.equal(await inspectDestination(app, 'app', 'darwin'), 'available');
+      assert.equal(await inspectDestination(root, 'app', 'darwin'), 'wrong-type');
+    }
     assert.equal(await inspectDestination(path.join(root, 'missing'), 'file'), 'missing');
     assert.equal(await inspectDestination(path.join(file, 'nested'), 'file'), 'missing');
     assert.equal(

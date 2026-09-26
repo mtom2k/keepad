@@ -2,18 +2,18 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest change removes synchronization at the owner’s request, based on `493dc2d`. Pads and preferences are local-only; legacy device destinations are converted safely and destination repair updates ordinary button targets. See the latest dated entry for validation and remaining platform limits.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. The latest change (based on `8474c36`) is the first native Windows validation, with Windows fixes and installer/portable packaging. Pads and preferences are local-only. See the latest dated entry for validation and remaining platform limits.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
-| macOS Apple Silicon | Locally built and exercised | See the latest dated validation entry for production build, native suite, and project-bundle results |
-| Windows | Implemented; full validation pending | Unsigned Windows x64 cross-build passed on macOS; native Windows and installer checks remain |
+| macOS Apple Silicon | Locally built and exercised through 2026-09-24 | 2026-09-25 recorder/menu/tray changes still need a macOS desktop-suite rerun |
+| Windows 11 x64 | Natively tested; unsigned installer and portable built and exercised | Unit + full desktop suites pass; installed-build checks by hand on 2026-09-25. Open: tray right-click menu and Explorer drags under automation, real sign-in startup, multi-monitor/DPI, IME, UNC, signing, ARM |
 | User data | Local validated JSON and backups | Local store/migration tests and native import/export checks; schema 1 with legacy appearance defaults and one-time device-envelope conversion; no general migration framework |
 | Storage scope | Local-only; synchronization removed | Engine, IPC, UI, polling, conflict handling and runtime overrides deleted; full recovery copy before converting legacy destinations; former external folders untouched |
-| Destination repair | Implemented and exercised on macOS | Explicit metadata/access checks, local-only replacements, bounded slow probes, cancellation and stale-write protection; native Windows/network filesystem behavior unverified |
+| Destination repair | Implemented and exercised on macOS and Windows | Explicit metadata/access checks, local-only replacements, bounded slow probes, cancellation and stale-write protection; network filesystem behavior unverified |
 | Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, keyboard focus, and stale pointer-hover reset covered |
-| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, twelve ADRs, generated reference, seven sample-data screenshots, and local checks |
-| Distribution | Development only | Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, thirteen ADRs, generated reference, seven sample-data screenshots (macOS captures), and local checks |
+| Distribution | Development only | Windows NSIS installer and portable exe build locally (unsigned). Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
 ## Completed milestones
@@ -131,17 +131,6 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Unsigned Mac Apple Silicon and Windows x64 unpacked packages built successfully (Windows executable resource editing/signing skipped). Native Windows, live network/provider behavior, OS permission prompts, and actual app launches remain unverified; an available path is not a launch guarantee.
 - Reopened the verified project macOS bundle (`app.keepad.desktop`), leaving other installed copies untouched. Documentation/source-impact review uses starting revision `85d147c` and the refreshed remote base. Code, tests, screenshots, and guides are delivered together to private `main`; no CI/CD was added.
 
-## Next work / unresolved decisions
-
-1. Run local Windows tests and complete manual Windows tray, startup, file/app, permission, and installer checks when preparing that platform for release.
-2. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
-3. Validate synchronization on actual Mac/Windows devices through Dropbox/OneDrive, including offline conflicts, provider hydration, and permissions.
-4. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.
-5. Design migrations before changing persisted schema version. History compaction, per-field merging, automatic path mapping, direct provider APIs, image aspect-ratio editing, shell commands, key injection, and plugins are not implemented commitments.
-
-## Handoff rule
-
-Update current status and add a dated evidence-based entry with each relevant change. Record the tested revision, platform, and local checks; never convert “configured” to “verified” without a result. Preserve historical records, supersede ADRs for changed decisions, and use [maintenance](maintenance.md) and [handoff](handoff.md) before declaring work complete. Historical CI links above describe onboarding only; GitHub automation remains disabled by project policy.
 
 ### 2026-09-24 — Local-only storage; synchronization removed
 
@@ -151,3 +140,79 @@ Update current status and add a dated evidence-based entry with each relevant ch
 - Validation: production build, all 24 unit tests (including six migration cases), and the native Electron regression suite passed on macOS Apple Silicon. Repair checks cover cancellation, wrong-type rejection, ordinary saved targets, no execution, stale picker/report protection, tooltip bounds, and no sync bridge methods/device envelope. Migration fixtures cover Mac/Windows paths and recovery failures on the host filesystem.
 - Regenerated and reviewed all seven sample screenshots, including the checker at minimum window size; removed the obsolete device-destination image. Unsigned macOS ARM64 and Windows x64 unpacked builds passed (Windows resource editing/signing disabled). Inspected both app archives to confirm deleted sync modules and IPC are absent. Rebuilt/reopened the project `release/mac-arm64/KeePad.app` (`app.keepad.desktop`); no unrelated installed copy was replaced.
 - Handoff: change is based on `493dc2d`; final delivery commit identifies this source revision. Formatting, documentation/reference/link checks and the staged source-impact comparison against that base passed. Delivery uses a direct commit/push to private `main`; GitHub remains storage-only. Native Windows, real permission prompts/network filesystems, signing, installation and actual tray clicks remain unverified. No further local-only feature work is planned in this change.
+
+### 2026-09-25 — First native Windows validation, fixes, and Windows packages
+
+- Starting revision `8474c36`, clean `main`. This is the first run on a Windows host: Windows 11 Pro 10.0.26200 x64, Node 24.17, one 2560×1440 display. Before this change, the unmodified code passed the build, formatting, docs checks and the full native desktop suite. `npm test` failed one case because the destinations test probed a Windows temporary path with the darwin rules.
+- Built and installed the unmodified app (NSIS, silent per-user) and drove it by hand with desktop automation. That confirmed or found:
+  - tray clicks re-summoned instead of dismissing (blur-hide then click);
+  - a visible "Edit" menu bar in the editor;
+  - no taskbar button, so an editor covered by another window was lost;
+  - portable builds run from a temporary extraction folder, which launch at login would have registered;
+  - installing to a folder containing `[ ]` (or similar) made every IPC request fail with "Request rejected.", reproduced with a copied `win-unpacked` build.
+  Code review also found shortcut-recorder modifier mapping errors on both platforms and missing locked-file handling for atomic saves on Windows.
+- Fixes ([ADR 0013](adr/0013-windows-platform-integration.md)):
+  - path-based packaged-page sender check (`electron/paths.ts`);
+  - tray click within 600 ms of a blur-hide dismisses;
+  - Edit role menu only on macOS;
+  - taskbar button for the visible Windows editor, with AppUserModelID `app.keepad.desktop`;
+  - platform-correct shortcut recording (`CommandOrControl` plus `Control`/`Super`) and labels (`Ctrl Shift`/`Win` on Windows);
+  - login item at the portable executable, keeping the legacy Run value name `electron.app.KeePad`;
+  - bounded retry of `EPERM`/`EACCES`/`EBUSY` on the final rename.
+  Added a `portable` Windows target and named artifacts `KeePad-Setup-<version>.exe` and `KeePad-Portable-<version>.exe`. No schema, IPC surface, dependency, or permission change.
+- Tests:
+  - new [path-matching](../tests/paths.test.ts) and [replacement-retry](../tests/store-replace.test.ts) unit tests; the latter includes a real PowerShell-held lock and first proves a plain rename fails under it;
+  - the destinations test now uses host-native `.exe`/`.lnk` cases on Windows;
+  - the desktop suite asserts recorder output (including the Windows key) and that only macOS has an application menu.
+- Results on Windows after the fixes:
+  - `npm test`: 26 passed, 1 POSIX-only skip;
+  - full `npm run test:desktop` passed;
+  - `npm run build` and `format:check` passed.
+  macOS was not rerun for this change; the recorder change affects macOS (Control now records as `Control`, not Command). Its desktop assertions for macOS are written but unexecuted.
+- Packaging on Windows: `npm run package:win` produced both artifacts with stamped version resources (product/company "KeePad", 0.1.0.0). All executables report `NotSigned`. SHA-256 of the final build:
+  - Setup `264D6F63EC6E2BFEF88E8845F504E59A29233FDCD82CEACEA123480CCE3E50DA`
+  - Portable `3EFBAD5D897250AC8DE8BBDAAAB0E5CAB01A6702065D7A341D0D5E32C9FE43F3`
+
+  These hashes identify the tested local build only.
+- Installed-build checks, done by hand on the fixed per-user install unless noted (sample data only):
+  - install, upgrade over an existing install with pads kept, silent uninstall/reinstall (the uninstaller removes the program, shortcuts and Apps & features entry and keeps `%APPDATA%\KeePad`);
+  - tray summon, dismiss, and summon again; the icon appears in the Windows 11 overflow;
+  - global shortcut over Notepad with immediate search typing; second launch reusing the running instance and taking focus;
+  - editor taskbar recovery; no menu bar; Ctrl+A/C/X/V/Z in text fields;
+  - double-click activation, Preview versus normal summon, cross-pad search with ↓/Enter;
+  - actions:
+    - copy text (clipboard checked, focus returned to Notepad for the paste);
+    - open a file (path with a space) and a folder;
+    - `.exe` and `.lnk` applications;
+    - a website in the default browser;
+    - missing, other-OS and wrong-type errors with Windows wording;
+  - destination check (5 of 8 → 7 of 8) with native-picker file and folder repairs and picker cancel;
+  - real save/open dialogs for export and additive import;
+  - Browse with the Applications (*.exe; *.lnk) filter from Program Files; native image picker;
+  - OS mouse drag move/swap in the editor; context-menu Duplicate and Move to another pad;
+  - shortcut recording Ctrl+Alt+K (old shortcut released, new one summons) and back;
+  - launch at login:
+    - installed build, before the fixes: Run value checked by hand, pointing at the installed exe;
+    - fixed build (portable wrapper simulated, and a normal packaged run): driven with Playwright, correct value written and removed.
+  The portable exe was launched: it extracted to `%TEMP%`, used the shared profile, and responded to the shortcut. Its screen content was masked from the automation tool.
+- A washed-out editor seen in live Dark-mode captures was a screen-capture artifact; a Playwright capture of Dark app + Paper pad renders correctly.
+- Not verified:
+  - the tray right-click menu and dragging from File Explorer onto the editor (the automation tool is restricted to click-only in Explorer);
+  - Escape handling under automation (reserved by the tool; still covered by the desktop suite);
+  - a real sign-out/sign-in startup; live OS appearance switching; multi-monitor/mixed DPI; IME; screen readers;
+  - UNC/network drives; SmartScreen and signing; Windows on ARM.
+- Documentation: ADR 0013; architecture, data model, UX, testing, releasing, troubleshooting, maintenance, README, and this entry. Moved the misplaced 2026-09-24 entry above the next-work section, unchanged. Replaced the stale synchronization item in next work. The reference generator now lists electron-builder targets and artifact names, so the package change appears in the regenerated [reference](reference.md).
+- Screenshots are unchanged: macOS labels and layout are unaffected, and regenerating on this Windows host would change host-dependent content (see [testing](testing.md)).
+- Handoff: delivered as a direct commit on private `main` after `8474c36`, with the source-impact comparison against that base passing. The installed test copy remains on the validation machine: `%LOCALAPPDATA%\Programs\KeePad`, identity `app.keepad.desktop`. Its sample-data profile was set aside as `keepad.json.windows-test-2026-09-25`, so the next launch is a first run.
+
+## Next work / unresolved decisions
+
+1. Rerun `npm run test:desktop` on macOS for the recorder and application-menu assertions from 2026-09-25, and review macOS tray-click behavior with the new blur-toggle rule.
+2. Finish Windows release checks by hand: tray right-click menu items, Explorer drag onto editor cells, real sign-in startup, multi-monitor/mixed DPI, IME, UNC/network paths, and signing/SmartScreen.
+3. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
+4. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.
+5. Design migrations before changing persisted schema version. Per-field merging, automatic path mapping, a data-in-folder portable profile, image aspect-ratio editing, shell commands, key injection, and plugins are not implemented commitments.
+
+## Handoff rule
+
+Update current status and add a dated evidence-based entry with each relevant change. Record the tested revision, platform, and local checks; never convert “configured” to “verified” without a result. Preserve historical records, supersede ADRs for changed decisions, and use [maintenance](maintenance.md) and [handoff](handoff.md) before declaring work complete. Historical CI links above describe onboarding only; GitHub automation remains disabled by project policy.
