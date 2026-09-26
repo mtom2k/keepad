@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { waitForSaved } from './saved-state.mjs';
 
 export async function checkDestinationRepair(app, editor, profile) {
   const initial = await editor.evaluate(async () => (await window.keepad.load()).value.state);
@@ -92,10 +93,10 @@ export async function checkDestinationRepair(app, editor, profile) {
     );
     await picker(null);
     await repair.click();
-    await editor.waitForFunction(
-      async (target) =>
-        (await window.keepad.load()).value.state.pads[0].buttons[0].target === target,
-      originalTarget,
+    await waitForSaved(
+      editor,
+      (state) => state.pads[0].buttons[0].target === originalTarget,
+      'original destination retained',
     );
     await editor.waitForFunction(
       () =>

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { checkLauncherHover } from './launcher-hover.mjs';
 import { checkLauncherSearch } from './launcher-search.mjs';
 import { checkButtonInteractions } from './button-interactions.mjs';
+import { waitForSaved } from './saved-state.mjs';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -91,12 +92,11 @@ try {
       const state = (await window.keepad.load()).value.state;
       return Object.fromEntries(state.pads[0].buttons.map((button) => [button.label, button.slot]));
     });
-  const waitSlot = async (label, slot) =>
-    window.waitForFunction(
-      async ({ label, slot }) =>
-        (await window.keepad.load()).value.state.pads[0].buttons.find((b) => b.label === label)
-          ?.slot === slot,
-      { label, slot },
+  const waitSlot = (label, slot) =>
+    waitForSaved(
+      window,
+      (state) => state.pads[0].buttons.find((b) => b.label === label)?.slot === slot,
+      `${label} at slot ${slot}`,
     );
   await window
     .getByRole('button', { name: 'Edit Gmail', exact: true })
@@ -197,8 +197,10 @@ try {
   await window
     .getByRole('button', { name: 'Edit Test snippet', exact: true })
     .dragTo(window.getByRole('button', { name: 'Add button 1', exact: true }));
-  await window.waitForFunction(
-    async () => (await window.keepad.load()).value.state.pads.at(-1).buttons[0].slot === 0,
+  await waitForSaved(
+    window,
+    (state) => state.pads.at(-1).buttons[0].slot === 0,
+    'Test snippet dragged to slot 0',
   );
   await window.getByRole('button', { name: 'Edit Test snippet', exact: true }).click();
   await app.evaluate(({ dialog }, imagePath) => {
@@ -317,10 +319,7 @@ try {
       (value) => document.documentElement.dataset.appearance === value,
       resolved,
     );
-    await window.waitForFunction(
-      async (value) => (await window.keepad.load()).value.state.settings.theme === value,
-      theme,
-    );
+    await waitForSaved(window, (state) => state.settings.theme === theme, `theme ${theme}`);
     assert.equal(await app.evaluate(({ nativeTheme }) => nativeTheme.themeSource), theme);
   };
   await setAppTheme('dark');
@@ -379,14 +378,12 @@ try {
   );
   const recordedFrom = await window.evaluate(async () => (await window.keepad.load()).value.state);
   await window.getByRole('button', { name: 'Save', exact: true }).click();
-  // Poll from Node: waitForFunction does not re-check async predicates.
-  const savedShortcut = () =>
-    window.evaluate(async () => (await window.keepad.load()).value.state.settings.shortcut);
-  for (let tries = 0; (await savedShortcut()) === recordedFrom.settings.shortcut; tries++) {
-    assert.ok(tries < 100, 'Recorded shortcut was not saved');
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-  assert.equal(await savedShortcut(), 'CommandOrControl+Alt+K');
+  const recorded = await waitForSaved(
+    window,
+    (state) => state.settings.shortcut !== recordedFrom.settings.shortcut,
+    'recorded shortcut',
+  );
+  assert.equal(recorded.settings.shortcut, 'CommandOrControl+Alt+K');
   assert.equal(
     (
       await window.evaluate(async (shortcut) => {

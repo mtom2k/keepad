@@ -7,6 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { waitForSaved } from './saved-state.mjs';
 
 if (process.platform !== 'win32') {
   console.log('Skipped: Windows login-item check.');
@@ -41,14 +42,6 @@ if (value(run)) {
 const userData = await mkdtemp(path.join(os.tmpdir(), 'keepad-login-'));
 const saved = async () =>
   JSON.parse(await readFile(path.join(userData, 'keepad.json'), 'utf8')).settings.launchAtLogin;
-// Poll from Node: Playwright's waitForFunction does not re-check async predicates.
-const until = async (check, message) => {
-  const end = Date.now() + 10000;
-  while (!(await check())) {
-    if (Date.now() > end) throw Error(`Timed out: ${message}`);
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-};
 const launch = () =>
   electron.launch({ executablePath: exe, args: ['--editor', `--user-data-dir=${userData}`] });
 let app;
@@ -60,11 +53,9 @@ try {
   const checkbox = window.getByLabel('Start with your computer', { exact: true });
   const willLaunch = () =>
     app.evaluate(({ app }) => app.getLoginItemSettings().executableWillLaunchAtLogin);
-  const stored = () =>
-    window.evaluate(async () => (await window.keepad.load()).value.state.settings.launchAtLogin);
 
   await checkbox.click();
-  await until(async () => (await stored()) === true, 'startup preference saved');
+  await waitForSaved(window, (s) => s.settings.launchAtLogin, 'startup preference saved');
   assert.equal(await willLaunch(), true);
   assert.match(value(run), new RegExp(exe.replace(/\\/g, '\\\\'), 'i'));
 
@@ -79,7 +70,7 @@ try {
       .find((w) => w.webContents.getURL().includes('mode=editor'))
       .emit('focus'),
   );
-  await until(async () => (await stored()) === false, 'disabled startup item reconciled');
+  await waitForSaved(window, (s) => !s.settings.launchAtLogin, 'disabled startup item reconciled');
   assert.equal(await checkbox.isChecked(), false, 'checkbox shows the disabled startup item');
   assert.equal(
     await window.evaluate(async () => (await window.keepad.load()).value.state.revision),
@@ -89,7 +80,7 @@ try {
 
   // Turning it back on re-approves the entry for Task Manager/Windows Settings.
   await checkbox.click();
-  await until(async () => (await stored()) === true, 'startup preference saved');
+  await waitForSaved(window, (s) => s.settings.launchAtLogin, 'startup preference saved');
   assert.equal(await willLaunch(), true);
   // Electron re-approves by removing the disabled flag; absent or 02 both mean enabled.
   assert.ok(!value(approved) || /REG_BINARY\s+02/i.test(value(approved)), value(approved));

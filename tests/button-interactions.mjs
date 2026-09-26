@@ -1,15 +1,13 @@
 import assert from 'node:assert/strict';
 import { writeFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { waitForSaved } from './saved-state.mjs';
 
 export async function checkButtonInteractions(app, editor, profile) {
   const initial = await editor.evaluate(async () => (await window.keepad.load()).value.state);
   const load = () => editor.evaluate(async () => (await window.keepad.load()).value.state);
   const waitCount = (count) =>
-    editor.waitForFunction(
-      async (count) => (await window.keepad.load()).value.state.pads[0].buttons.length === count,
-      count,
-    );
+    waitForSaved(editor, (state) => state.pads[0].buttons.length === count, `${count} buttons`);
   const rightClick = (name) =>
     editor.getByRole('button', { name, exact: true }).click({ button: 'right' });
   const choose = (name) => editor.getByRole('menuitem', { name, exact: true }).click();
@@ -135,11 +133,10 @@ export async function checkButtonInteractions(app, editor, profile) {
     assert.equal((await load()).pads[0].buttons.find((b) => b.slot === 11).target, file);
     await drop(other, 'Edit Dropped note.txt');
     await editor.getByRole('button', { name: 'Replace action', exact: true }).click();
-    await editor.waitForFunction(
-      async (target) =>
-        (await window.keepad.load()).value.state.pads[0].buttons.find((b) => b.slot === 11)
-          ?.target === target,
-      other,
+    await waitForSaved(
+      editor,
+      (state) => state.pads[0].buttons.find((b) => b.slot === 11)?.target === other,
+      'replaced dropped destination',
     );
     const saved = JSON.parse(await readFile(path.join(profile, 'keepad.json'), 'utf8'));
     assert.equal(saved.pads[0].buttons.find((b) => b.slot === 11).label, 'Dropped note.txt');

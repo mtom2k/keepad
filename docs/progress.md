@@ -221,19 +221,24 @@ App version and dependency versions are in [generated reference](reference.md). 
 
 - Starting revision `b05aed7` (0.2.0). Fixed the drift noted in handoff: on Windows, disabling KeePad in Task Manager or Settings, removing its Run entry, or another KeePad copy taking the entry left "Start with your computer" checked. Packaged Windows builds now reconcile `settings.launchAtLogin` with `getLoginItemSettings().executableWillLaunchAtLogin` (portable builds query their stable path). This happens at startup and on editor focus, as a serialized, revisioned save. Checking the box re-approves a disabled entry. macOS and development runs are unchanged. [ADR 0014](adr/0014-windows-startup-setting-follows-os.md) records the decision and its limits.
 - Added the packaged [login-item check](../tests/login-item-windows.mjs). It uses a temporary profile, simulates Task Manager's disable flag, and covers enable, disable reconciliation, re-enable, removal at the next start, and adoption. It refuses to run beside a real startup entry and cleans up after itself. It timed out on a build without the fix and passed with it, on Windows 11 x64 using `release/win-unpacked`. The registry was checked clean afterwards.
-- Found while building that check: Playwright's `waitForFunction` does not re-check async predicates. `async () => false` resolved after one evaluation in an Electron check. The new check and the shortcut-recorder wait added earlier today now poll from Node. The older desktop-suite waits using the async form are recorded in next work.
+- Found while building that check: Playwright's `waitForFunction` does not re-check async predicates. `async () => false` resolved after one evaluation in an Electron check. The new check and the shortcut-recorder wait added earlier today now poll from Node. The older desktop-suite waits using the async form were replaced in the next entry.
 - Validation on Windows: build, 26 unit tests, formatting, the full `npm run test:desktop` (no regressions), and the packaged login-item check passed. Not verified: a real Task Manager toggle by hand (simulated through the same registry flag), per-machine (HKLM) entries, and sign-in startup. macOS has no equivalent reconciliation yet.
 - Documentation: ADR 0014 and index; architecture, data model, UX, testing, releasing, troubleshooting, and this entry. No package, reference, or screenshot change: the Settings page looks the same, and version 0.2.0 and its installers are unchanged, so they do not include this fix.
+
+### 2026-09-25 — Desktop-suite waits that actually wait
+
+- Starting revision `3786fb3`. Replaced every saved-state `waitForFunction(async …)` with the shared Node-side `waitForSaved` helper ([saved-state.mjs](../tests/saved-state.mjs)). That covers slot moves, drag placement and theme saves in [desktop.mjs](../tests/desktop.mjs), button counts and dropped-destination replacement in [button-interactions.mjs](../tests/button-interactions.mjs), and cancelled repair in [destinations-desktop.mjs](../tests/destinations-desktop.mjs). The shortcut-recorder wait and the [login-item check](../tests/login-item-windows.mjs) now use the same helper. The remaining `waitForFunction` calls are synchronous DOM conditions.
+- Before this change those waits were single evaluations: `async () => false` resolved after about 39 ms. An Electron check showed that the helper times out on a never-true condition (after 1.5 s) and waits for a save made 700 ms later (observed after 708 ms).
+- Validation on Windows 11 x64: build, 26 unit tests, formatting, the full `npm run test:desktop`, and the packaged login-item check passed with real waits. No application behavior changed; tests and documentation only.
 
 ## Next work / unresolved decisions
 
 1. Rerun `npm run test:desktop` on macOS for the recorder and application-menu assertions from 2026-09-25, and review macOS tray-click behavior with the new blur-toggle rule.
 2. Finish Windows release checks by hand: tray right-click menu items, Explorer drag onto editor cells, real sign-in startup, multi-monitor/mixed DPI, IME, UNC/network paths, and signing/SmartScreen.
-3. Replace async `waitForFunction` predicates in the desktop suites (desktop, button-interactions, destinations-desktop) with Node-side polling so saved-state waits actually wait.
-4. Decide whether macOS should mirror Login Items state (including approval pending) like Windows; test on a Mac first.
-5. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
-6. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.
-7. Design migrations before changing persisted schema version. Per-field merging, automatic path mapping, a data-in-folder portable profile, image aspect-ratio editing, shell commands, key injection, and plugins are not implemented commitments.
+3. Decide whether macOS should mirror Login Items state (including approval pending) like Windows; test on a Mac first.
+4. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
+5. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.
+6. Design migrations before changing persisted schema version. Per-field merging, automatic path mapping, a data-in-folder portable profile, image aspect-ratio editing, shell commands, key injection, and plugins are not implemented commitments.
 
 ## Handoff rule
 
