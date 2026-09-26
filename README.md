@@ -120,7 +120,7 @@ npm run dev
 
 The first two commands download KeePad and enter its folder. `npm ci` downloads the project's dependencies. `npm run dev` starts KeePad and opens its editor on first use. Keep the terminal open while using this development mode.
 
-To create an application bundle or installer locally, see [packaging instructions](docs/releasing.md). On Windows, `npm run package:win` produces an installer (`KeePad-Setup-<version>.exe`) and a single-file portable app (`KeePad-Portable-<version>.exe`) in `release/`. Both are unsigned, so Windows SmartScreen may warn before running them. Developers can find all commands in the [generated reference](docs/reference.md).
+To create an application bundle or installer locally, see [packaging instructions](docs/releasing.md). On Windows, `npm run package:win` produces an installer (`KeePad-Setup-<version>.exe`) and a single-file portable app (`KeePad-Portable-<version>.exe`) in `release/`. Both are unsigned, so Windows SmartScreen may warn before running them. Repository collaborators can also download these Windows files from the latest **draft** [GitHub release](https://github.com/mtom2k/keepad/releases). Developers can find all commands in the [generated reference](docs/reference.md).
 
 ## 🔒 Your data and permissions
 

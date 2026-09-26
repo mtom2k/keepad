@@ -2,7 +2,7 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. Version 0.2.0 (bumped from 0.1.0 on 2026-09-25, based on `6ff7188`) follows the first native Windows validation, with Windows fixes and installer/portable packaging. Pads and preferences are local-only. See the latest dated entry for validation and remaining platform limits.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. Version 0.2.1 (2026-09-25) adds Windows startup-setting reconciliation and reliable desktop-suite waits to 0.2.0, the first natively validated Windows release with installer/portable packaging. Unsigned 0.2.1 Windows builds are attached to a draft GitHub release. Pads and preferences are local-only. See the latest dated entry for validation and remaining platform limits.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
@@ -12,8 +12,8 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Storage scope | Local-only; synchronization removed | Engine, IPC, UI, polling, conflict handling and runtime overrides deleted; full recovery copy before converting legacy destinations; former external folders untouched |
 | Destination repair | Implemented and exercised on macOS and Windows | Explicit metadata/access checks, local-only replacements, bounded slow probes, cancellation and stale-write protection; network filesystem behavior unverified |
 | Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, keyboard focus, and stale pointer-hover reset covered |
-| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, fourteen ADRs, generated reference, seven sample-data screenshots (Windows 11 captures of 0.2.0), and local checks |
-| Distribution | Development only | Windows NSIS installer and portable exe build locally (unsigned). Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
+| Documentation | Audited against current source | Same-change completion/handoff rules, current guides, fourteen ADRs, generated reference, seven sample-data screenshots (Windows 11 captures; version footer from 0.2.1), and local checks |
+| Distribution | Development only; draft GitHub release | Unsigned Windows 0.2.1 installer and portable exe in an unpublished draft release (collaborators only). Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
 ## Completed milestones
@@ -230,6 +230,20 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Starting revision `3786fb3`. Replaced every saved-state `waitForFunction(async …)` with the shared Node-side `waitForSaved` helper ([saved-state.mjs](../tests/saved-state.mjs)). That covers slot moves, drag placement and theme saves in [desktop.mjs](../tests/desktop.mjs), button counts and dropped-destination replacement in [button-interactions.mjs](../tests/button-interactions.mjs), and cancelled repair in [destinations-desktop.mjs](../tests/destinations-desktop.mjs). The shortcut-recorder wait and the [login-item check](../tests/login-item-windows.mjs) now use the same helper. The remaining `waitForFunction` calls are synchronous DOM conditions.
 - Before this change those waits were single evaluations: `async () => false` resolved after about 39 ms. An Electron check showed that the helper times out on a never-true condition (after 1.5 s) and waits for a save made 700 ms later (observed after 708 ms).
 - Validation on Windows 11 x64: build, 26 unit tests, formatting, the full `npm run test:desktop`, and the packaged login-item check passed with real waits. No application behavior changed; tests and documentation only.
+
+### 2026-09-25 — Version 0.2.1 and draft GitHub release
+
+- Starting revision `7aa664b`. Bumped 0.2.0 → 0.2.1 as a patch release for the startup-setting fix ([ADR 0014](adr/0014-windows-startup-setting-follows-os.md)) and the test-wait fix. There is no schema change. Updated `package.json`, `package-lock.json`, the browser-preview literal in `src/api.ts`, and the generated reference. Recaptured the two screenshots that show the Settings footer; the other five are byte-identical.
+- Built on Windows 11 x64 with `npm run package:win`. Both artifacts have version resources 0.2.1.0 and report `NotSigned`. SHA-256:
+  - `KeePad-Setup-0.2.1.exe` `F7B289B06AE1F4406F74C82893672E26F851A22CAA8ACDEDE5624CC35046197C`
+  - `KeePad-Portable-0.2.1.exe` `99C5E68519FBB2DC2D105DB50B64824B62F227ED37BC29F5D5136332A7F4ADEE`
+- Checks on these packages:
+  - the packaged login-item check passed;
+  - smoke tests with throwaway profiles: `win-unpacked` and the silently upgraded installed copy reported 0.2.1, packaged, shortcut registered, no application menu, and footer "Version 0.2.1"; the portable exe ran as 0.2.1.0 from `%TEMP%` with its own `--user-data-dir`;
+  - the real, freshly reset profile and the Run key were untouched.
+  Application source matches `7aa664b`, where the build, 26 unit tests, and the full desktop suite passed.
+- Added [draft-release instructions](releasing.md) and a README pointer. After the release commit was pushed, created the **draft** GitHub release `v0.2.1` targeting it, with both executables and `SHA256SUMS.txt`. It is unpublished, so GitHub has created no tag yet and only collaborators can see it. Publishing, signing, and licensing remain owner decisions.
+- macOS was not built or rerun for 0.2.1, and the draft contains no Mac artifacts. The open items in next work still apply.
 
 ## Next work / unresolved decisions
 

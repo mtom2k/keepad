@@ -36,6 +36,19 @@ For a Mac-hosted Windows packaging smoke check, after `npm run build` use `CSC_I
 5. Build installers, validate them on a clean machine, check signatures, verify startup behavior and uninstall, and test a backup restore.
 6. Decide licensing and public/private distribution with the owner. No license has been selected automatically.
 7. Tag the reviewed commit, attach verified installers/checksums to a GitHub release, and describe known limitations. Do not publish from an unreviewed working tree.
+8. Recapture the screenshots after a version bump: the Settings footer shows the version (see [testing](testing.md)).
+
+## Draft GitHub releases
+
+Unsigned development builds can be shared with repository collaborators as a **draft** GitHub release. Only accounts with write access to the private repository can see a draft, and nothing is announced. Build from the pushed release commit, verify, then from the repository folder run:
+
+```sh
+gh release create v<version> --draft --target <release commit SHA> --title "KeePad <version> (unsigned development build)" --notes-file <notes.md> release/KeePad-Setup-<version>.exe release/KeePad-Portable-<version>.exe release/SHA256SUMS.txt
+```
+
+`--target` pins the release to the reviewed commit. GitHub creates the `v<version>` tag only when the draft is published. The release notes should state that the builds are unsigned (SmartScreen will warn), which platforms were validated, the checksums, and the known limitations from [progress](progress.md). Only macOS-built artifacts may be attached for macOS; do not attach a Mac-hosted Windows smoke build.
+
+Publishing a draft, making the repository public, or choosing a license are owner decisions (checklist step 6). Keep a draft unpublished until the owner asks. Record each draft in progress with its artifacts and checksums.
 
 ## Installation and local testing
 
