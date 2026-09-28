@@ -4,7 +4,7 @@
 
 KeePad gives your everyday actions a button: open a website, file, folder, or app, or copy a text snippet. It waits in your Mac's menu bar or Windows notification area until you need it.
 
-> 🚧 **Development version:** automated and hands-on checks have passed on macOS Apple Silicon and Windows 11 x64. Signed, ready-to-install releases are not available yet; locally built Windows installers are unsigned. See [development status](docs/progress.md).
+> 🚧 **Development version:** Windows 11 x64 has native automated and installed-build checks. macOS Apple Silicon was last validated on September 24; the newer platform changes still need a Mac rerun. Signed releases are not available; Windows draft builds are unsigned. See [development status](docs/progress.md).
 
 ## 👀 A look inside
 
@@ -99,13 +99,19 @@ Repairs update the button’s saved destination on this computer. Checks never o
 
 ## 💾 Local storage and backups
 
-KeePad keeps pads and preferences on this computer. Use **Settings → Backup → Export backup** to save a copy, and **Import pads** to restore or transfer pads manually. Imports add pads without replacing existing ones. Files and applications are not included; use **Check destinations** after transferring a backup.
+KeePad keeps pads and preferences on this computer. To carry pads to another Mac or Windows device:
+
+1. On Device 1, open **Settings → Backup → Export backup**.
+2. Transfer the exported JSON file to Device 2.
+3. On Device 2, open **Settings → Backup → Import pads** and choose that file.
+
+Export includes **all pads**, button settings, images, and text snippets. Import adds copies without replacing existing pads or changing Device 2's preferences and active pad. Importing the same backup again creates more copies; it does not update previously imported pads. Actual files and applications are not included, so use **Check destinations → Repair…** for paths that differ. Later edits do not transfer automatically.
 
 Upgrading from a build with synchronization? KeePad preserves the locally stored pads and their device-specific destinations, saves a recovery copy, and leaves former shared folders untouched. [Upgrade and recovery details](docs/synchronization.md).
 
 ## 🚀 Try the development build
 
-There is no one-click installer release yet. If you are comfortable running a few terminal commands:
+Signed releases are not available yet. Repository collaborators can use the unsigned Windows draft builds described below. To run from source on Mac or Windows:
 
 1. Install **Node.js 24**, which includes npm, and Git.
 2. Open Terminal (Mac) or PowerShell (Windows).

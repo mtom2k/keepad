@@ -6,6 +6,7 @@ Use this procedure at the start and end of development work. Keep current produc
 
 1. Read [AGENTS.md](../AGENTS.md), [the documentation index](README.md), current progress, architecture, and the relevant ADRs.
 2. Inspect `git status --short`, the current branch, and `git log -5 --oneline`. Record the starting revision for the documentation-impact comparison. Distinguish committed code, local changes, generated builds, and the running app; a running bundle may predate the checkout.
+   Fetch the configured remote before a whole-project audit and compare local and remote history. If a clean checkout is behind its upstream, fast-forward before auditing and record the updated source revision. Preserve local edits/divergent commits; never reset them to make the histories agree. A stale checkout cannot establish the current GitHub documentation status.
 3. Read the source and tests for the intended change. Check the user's current instructions against recorded decisions. Investigate contradictory claims; correct stale prose without treating it as an instruction to change working behavior.
 4. Find outstanding limitations in progress/troubleshooting. Treat historical test results as evidence for the tested revision/platform, not certification of later changes.
 5. Use the local commands in [CONTRIBUTING.md](../CONTRIBUTING.md). Test with disposable profiles and sample data. GitHub remains private source storage without CI/CD.

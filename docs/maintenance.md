@@ -12,6 +12,8 @@ Documentation is maintained in the same change as implementation, not in a later
 4. Run the relevant local checks, review changed screenshots, and record evidence in progress. If work is incomplete, use the explicit in-progress handoff format instead of making a completion claim.
 5. Complete [handoff](handoff.md). Never leave essential rationale or a known limitation only in conversation history.
 
+For a removed feature, check README instructions, current architecture/data/UX guides, troubleshooting, reference inputs, screenshots, and the roadmap for obsolete availability claims. Remove obsolete setup instructions and code links. Retain necessary recovery guidance and historical milestones, and mark superseded ADRs both in their own status lines and in the index. Feature removal belongs in the same commit as these documentation updates, just like adding a feature.
+
 ## Change map
 
 | When this changes | Review/update |

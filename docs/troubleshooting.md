@@ -37,6 +37,7 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 | A protected folder cannot be opened on macOS | Use the normal OS prompt and Files and Folders privacy settings for that folder. Broad Accessibility or Full Disk Access is not part of this app's design. |
 | Last-used Settings/X appears focused on summon | Regressed launcher focus reset. Check `launcher:shown` events, search-field focus scheduling, and the desktop regression test. Keep Tab focus styling intact. |
 | Changes rejected after another window saved | Optimistic revision conflict. The UI refreshes; reapply the edit. Do not bypass revision validation. |
+| “KeePad now stores everything locally” appears | Successful legacy conversion, not an error. Pads and effective destinations were retained and the message identifies a recovery copy. It clears after Quit KeePad and reopening; fresh profiles do not show it. See [upgrade details](synchronization.md). |
 | Legacy conversion failed at startup | The original file is retained. Keep the recovery copy and follow [local conversion recovery](synchronization.md); do not delete your profile. |
 | Settings reset with a recovery warning | Inspect the timestamped recovery copy next to `keepad.json`. Failed backup creation must stop startup rather than overwrite the original. |
 | An older build cannot load icon-free pads | Older validators do not recognize `none`. Use a pre-change backup to downgrade; keep the recovery copy. Missing app-theme settings alone are supported by the current build and default to System. |

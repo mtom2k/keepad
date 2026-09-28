@@ -23,7 +23,7 @@ Shortcuts are Electron accelerators. The recorder stores the platform's primary 
 
 Labels/names are trimmed by validation. Allowed choices and startup defaults are listed in [generated reference](reference.md).
 
-Pad icons additionally accept `none`; button icons do not. Version-1 data missing `settings.theme` parses with `system` without resetting existing data. For files without legacy device metadata, loading does not rewrite the file; the default is persisted by the next ordinary save. Imports retain the receiving device's theme. Builds predating icon-free pads cannot read `none`; retain a pre-change backup for downgrades. See [ADR 0007](adr/0007-application-appearance-and-optional-pad-icons.md) for compatibility and recovery.
+Pad icons additionally accept `none`; button icons do not. Version-1 data missing `settings.theme` parses with `system` without resetting existing data. For files without legacy device metadata, `Store.load()` does not rewrite the file; the default is persisted by the next save, including any subsequent Windows startup-setting reconciliation. Imports retain the receiving device's theme. Builds predating icon-free pads cannot read `none`; retain a pre-change backup for downgrades. See [ADR 0007](adr/0007-application-appearance-and-optional-pad-icons.md) for compatibility and recovery.
 
 Website targets require a full HTTP(S) URL with a hostname. File/folder/app targets require an absolute Unix, Windows drive, or UNC path and cannot contain a NUL character. Existence and access are checked at execution time. Shortcuts are validated by native registration as well as basic string constraints.
 
@@ -59,6 +59,6 @@ Main-process save/import mutations use a promise queue. Saves must match the cur
 
 The native picker accepts PNG/JPEG/WebP files up to 10 MiB. Electron normalizes selected images to a 256×256 PNG data URL. This currently resizes to a square rather than preserving the source aspect ratio. Images travel with the state and backup; no remote image URL is loaded.
 
-Export writes the full state, including paths and copied text, to the chosen JSON file. Import rejects files over 40 MiB, validates the complete state, appends pads with fresh pad/button IDs and imported names, preserves current device settings and active selection, then validates the combined pad limit. It never executes imported actions automatically. Imported absolute paths may need editing on another computer.
+Export writes the full state, including paths and copied text, to the chosen JSON file. Import rejects files over 40 MiB, validates the complete state, appends pads with fresh pad/button IDs and imported names, preserves current device settings and active selection, then validates the combined pad limit. It never executes imported actions automatically. Exports include all pads; there is no single-pad export selection. Reimporting a backup creates additional copies rather than updating previously imported pads. Imported absolute paths may need editing on another computer.
 
 Treat snippets and backups as plaintext personal data. Tests/screenshots must use harmless fixtures, never a contributor's real settings file.

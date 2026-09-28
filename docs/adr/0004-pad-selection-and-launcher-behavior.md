@@ -1,6 +1,6 @@
 # 0004: Separate pad selection, activation, and preview
 
-- Status: Accepted
+- Status: Accepted for selection, activation, preview, and centering; root-focus/show/focus reset superseded by [ADR 0009](0009-global-launcher-search.md)
 - Recorded: 2026-09-22 (retrospective, following user feedback)
 - Supersedes: None
 

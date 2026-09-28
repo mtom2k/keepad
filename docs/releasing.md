@@ -27,6 +27,10 @@ Build Windows packages on Windows when possible. A native build stamps the execu
 
 For a Mac-hosted Windows packaging smoke check, after `npm run build` use `CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win --x64 --dir -c.win.signAndEditExecutable=false`. This produces `release/win-unpacked` and intentionally skips executable resource editing/signing. It proves packaging only; run native tests and normal installer packaging on Windows before release.
 
+## Windows installer and portable profiles
+
+The installer supports choosing its installation folder. The portable executable can run without installation, but it still stores pads in `%APPDATA%\KeePad`, the same profile used by the installed copy. It does not keep data beside the executable; carrying the executable to another computer does not carry pads. Use the [export/import steps](../README.md) for that. The shared profile and single-instance lock prevent simultaneous installed/portable instances. See [ADR 0013](adr/0013-windows-platform-integration.md).
+
 ## Release checklist
 
 1. Confirm completed work and open issues in progress; select a version in `package.json` and update the lockfile. Also align the browser preview's current literal version in `src/api.ts`. Data schema version is separate from app version.

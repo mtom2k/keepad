@@ -14,7 +14,7 @@ These instructions apply to the entire repository, including work performed by c
 ## Product rules
 
 - Keep the interface a compact, traditional desktop utility. Use system fonts, familiar icons, brief labels, and useful tooltips. No promotional slogans, decorative cards, bloom, or unnecessary copy. README emojis are welcome; this does not prescribe app styling.
-- KeePad lives in the macOS menu bar / Windows notification area. Closing a window hides it; Quit exits the process.
+- KeePad lives in the macOS menu bar / Windows notification area. The visible Windows editor also has a taskbar button; the launcher never does, and macOS has no Dock icon. Closing a window hides it; Quit exits the process. See ADR 0013.
 - Single-click selects a pad for editing. Double-click or Make Active activates it. Creating, duplicating, and previewing pads do not activate them.
 - All launcher entry points center on the pointer's display work area. Preview selection is temporary.
 - Launcher search spans all pads and matches button names/descriptions only. Each summon clears/focuses search; running a result preserves activation and uses stored source IDs. Do not index destinations or file contents without a product decision.
