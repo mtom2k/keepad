@@ -4,7 +4,7 @@
 
 KeePad gives your everyday actions a button: open a website, file, folder, or app, copy a text snippet, or put your computer to sleep. It waits in your Mac's menu bar or Windows notification area until you need it.
 
-> 🚧 **Development version:** Windows 11 x64 has native automated and installed-build checks. macOS Apple Silicon was last validated on September 24; the newer platform changes still need a Mac rerun. Signed releases are not available; Windows draft builds are unsigned. See [development status](docs/progress.md).
+> 🚧 **Development version:** KeePad 0.3.0 is available to repository collaborators for Windows x64 and Apple Silicon Mac. Native automated checks pass on both platforms. The builds are unsigned for distribution, and the Mac build is not notarized; OS security controls may block them. Intel Mac builds are not included. See [development status](docs/progress.md).
 
 ## 👀 A look inside
 
@@ -121,7 +121,14 @@ Upgrading from a build with synchronization? KeePad preserves the locally stored
 
 ## 🚀 Try the development build
 
-Signed releases are not available yet. Repository collaborators can use the unsigned Windows draft builds described below. To run from source on Mac or Windows:
+Repository collaborators can download [KeePad 0.3.0](https://github.com/mtom2k/keepad/releases/tag/v0.3.0):
+
+- **Apple Silicon Mac:** download `KeePad-0.3.0-arm64.dmg`, open it, and drag KeePad to Applications. This build does not support Intel Macs.
+- **Windows x64:** download `KeePad-Setup-0.3.0.exe` to install, or `KeePad-Portable-0.3.0.exe` to run without installing.
+
+These are development builds without distribution signing; the Mac build is also not notarized. macOS may block it, and Windows SmartScreen may warn. Clean-machine installation remains unverified. The repository and release remain private.
+
+To run from source on Mac or Windows:
 
 1. Install **Node.js 24**, which includes npm, and Git.
 2. Open Terminal (Mac) or PowerShell (Windows).
@@ -136,7 +143,7 @@ npm run dev
 
 The first two commands download KeePad and enter its folder. `npm ci` downloads the project's dependencies. `npm run dev` starts KeePad and opens its editor on first use. Keep the terminal open while using this development mode.
 
-To create an application bundle or installer locally, see [packaging instructions](docs/releasing.md). On Windows, `npm run package:win` produces an installer (`KeePad-Setup-<version>.exe`) and a single-file portable app (`KeePad-Portable-<version>.exe`) in `release/`. Both are unsigned, so Windows SmartScreen may warn before running them. Repository collaborators can also download these Windows files from the latest **draft** [GitHub release](https://github.com/mtom2k/keepad/releases). Developers can find all commands in the [generated reference](docs/reference.md).
+To create an application bundle or installer locally, see [packaging instructions](docs/releasing.md). On Windows, `npm run package:win` produces an installer (`KeePad-Setup-<version>.exe`) and a single-file portable app (`KeePad-Portable-<version>.exe`) in `release/`. Both are unsigned, so Windows SmartScreen may warn before running them. Developers can find all commands in the [generated reference](docs/reference.md).
 
 ## 🔒 Your data and permissions
 

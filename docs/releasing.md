@@ -33,7 +33,7 @@ The installer supports choosing its installation folder. The portable executable
 
 ## Release checklist
 
-For 0.3.0, include the Sleep action's platform limits in release notes: automated checks stub the power operation, the Windows probe only resolves its .NET method, and real sleep/wake and native macOS execution remain manual checks. Lock is excluded on both platforms. Windows policy may block PowerShell/.NET. Explain Sleep/moon downgrade incompatibility and the `before-system-actions` recovery copy; see [ADR 0015](adr/0015-sleep-action.md). Do not advertise hardware sleep/wake as validated until performed deliberately and recorded.
+For 0.3.0, include the Sleep action's platform limits in release notes: automated checks stub the power operation, the Windows probe only resolves its .NET method, and real hardware sleep/wake and post-wake behavior remain manual checks. Lock is excluded on both platforms. Windows policy may block PowerShell/.NET. Explain Sleep/moon downgrade incompatibility and the `before-system-actions` recovery copy; see [ADR 0015](adr/0015-sleep-action.md). Do not advertise hardware sleep/wake as validated until performed deliberately and recorded.
 
 1. Confirm completed work and open issues in progress; select a version in `package.json` and update the lockfile. Also align the browser preview's current literal version in `src/api.ts`. Data schema version is separate from app version.
 2. Run build, model, desktop, formatting, and documentation checks on each target platform. Complete the manual release checks.
@@ -44,7 +44,7 @@ For 0.3.0, include the Sleep action's platform limits in release notes: automate
 7. Tag the reviewed commit, attach verified installers/checksums to a GitHub release, and describe known limitations. Do not publish from an unreviewed working tree.
 8. Recapture the screenshots after a version bump: the Settings footer shows the version (see [testing](testing.md)).
 
-## Draft GitHub releases
+## GitHub development releases
 
 Unsigned development builds can be shared with repository collaborators as a **draft** GitHub release. Only accounts with write access to the private repository can see a draft, and nothing is announced. Build from the pushed release commit, verify, then from the repository folder run:
 
@@ -54,7 +54,13 @@ gh release create v<version> --draft --target <release commit SHA> --title "KeeP
 
 `--target` pins the release to the reviewed commit. GitHub creates the `v<version>` tag only when the draft is published. The release notes should state that the builds are unsigned (SmartScreen will warn), which platforms were validated, the checksums, and the known limitations from [progress](progress.md). Only macOS-built artifacts may be attached for macOS; do not attach a Mac-hosted Windows smoke build.
 
-Publishing a draft, making the repository public, or choosing a license are owner decisions (checklist step 6). Keep a draft unpublished until the owner asks. Record each draft in progress with its artifacts and checksums.
+Publishing a draft, making the repository public, or choosing a license are owner decisions (checklist step 6). Keep a draft unpublished until the owner asks. With explicit owner authorization, a development draft may be published with signing and validation gaps clearly stated; this does not change repository visibility or imply public-release readiness. Record release state, artifacts, checksums, and actual validation in progress.
+
+On 2026-09-30 the owner requested publication of 0.3.0 after adding its Mac DMG. The [published private release](https://github.com/mtom2k/keepad/releases/tag/v0.3.0) contains the existing Windows x64 Setup/Portable files and an Apple Silicon ARM64 DMG. Its target remains `887189a`; the Mac build used `161a0ad`, which differs only in documentation. No Intel Mac build, signing, notarization, or clean-machine certification is implied.
+
+For a DMG-only unsigned development build after `npm run build`, use `CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dmg --arm64 --publish never`. Verify the resulting image with `hdiutil verify`, mount it read-only, inspect its bundle identity/version/architecture, and smoke-test the contained app using a temporary `--user-data-dir`. Unmount when finished. macOS temporary paths may resolve from `/var` to `/private/var`; compare canonical paths when checking isolation. Never invoke hardware Sleep in an unattended package test.
+
+When extending a draft, preserve its existing artifacts and target. Append the new artifact hash to its existing SHA256SUMS, verify GitHub asset digests against local values, and update release notes before publishing. A documentation-only follow-up does not require rebuilding unchanged application bytes.
 
 ## Installation and local testing
 
