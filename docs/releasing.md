@@ -60,6 +60,8 @@ Publishing a draft, making the repository public, or choosing a license are owne
 
 On 2026-09-30 the owner requested publication of 0.3.0 after adding its Mac DMG. The [published private release](https://github.com/mtom2k/keepad/releases/tag/v0.3.0) contains the existing Windows x64 Setup/Portable files and an Apple Silicon ARM64 DMG. Its target remains `887189a`; the Mac build used `161a0ad`, which differs only in documentation. No Intel Mac build, signing, notarization, or clean-machine certification is implied.
 
+The subsequent [0.4.0 draft](https://github.com/mtom2k/keepad/releases/tag/untagged-8399ffd75fc943c0db8d) targets `fc5618b` and contains only a verified Mac ARM64 DMG plus checksums. It remains unpublished, with Windows validation pending. Publishing 0.3.0 did not authorize automatic publication of later drafts.
+
 For a DMG-only unsigned development build after `npm run build`, use `CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dmg --arm64 --publish never`. Verify the resulting image with `hdiutil verify`, mount it read-only, inspect its bundle identity/version/architecture, and smoke-test the contained app using a temporary `--user-data-dir`. Unmount when finished. macOS temporary paths may resolve from `/var` to `/private/var`; compare canonical paths when checking isolation. Never invoke hardware Sleep in an unattended package test.
 
 When extending a draft, preserve its existing artifacts and target. Append the new artifact hash to its existing SHA256SUMS, verify GitHub asset digests against local values, and update release notes before publishing. A documentation-only follow-up does not require rebuilding unchanged application bytes.

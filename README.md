@@ -4,9 +4,9 @@
 
 KeePad gives your everyday actions a button: open a website, file, folder, or app, copy a text snippet, or put your computer to sleep. It waits in your Mac's menu bar or Windows notification area until you need it.
 
-> 🚧 **Development version:** KeePad 0.3.0 is available to repository collaborators for Windows x64 and Apple Silicon Mac. Native automated checks pass on both platforms. The builds are unsigned for distribution, and the Mac build is not notarized; OS security controls may block them. Intel Mac builds are not included. See [development status](docs/progress.md).
+> 🚧 **Development version:** [KeePad 0.4.0 draft](https://github.com/mtom2k/keepad/releases/tag/untagged-8399ffd75fc943c0db8d) is available for Apple Silicon Mac, with Undo and destination menu commands. Native Mac automated/package checks passed; Windows 0.4.0 validation is pending. Builds are unsigned for distribution and the Mac build is not notarized. See [development status](docs/progress.md).
 
-**Version 0.4.0:** adds Undo saved pad edits and destination menu commands. The published 0.3.0 downloads predate these additions; development drafts are listed on the [releases page](https://github.com/mtom2k/keepad/releases).
+The published 0.3.0 downloads remain available for Windows x64 and Apple Silicon Mac; they predate the 0.4.0 additions. Draft downloads require write access to this private repository.
 
 ## 👀 A look inside
 
@@ -127,7 +127,9 @@ Upgrading from a build with synchronization? KeePad preserves the locally stored
 
 ## 🚀 Try the development build
 
-Repository collaborators can download [KeePad 0.3.0](https://github.com/mtom2k/keepad/releases/tag/v0.3.0):
+**Latest draft:** [KeePad 0.4.0](https://github.com/mtom2k/keepad/releases/tag/untagged-8399ffd75fc943c0db8d) includes `KeePad-0.4.0-arm64.dmg` and `SHA256SUMS.txt`. Open the DMG and drag KeePad to Applications. This is Apple Silicon only; there are no Windows 0.4.0 downloads yet. The release remains unpublished.
+
+Repository collaborators can also download the previously published [KeePad 0.3.0](https://github.com/mtom2k/keepad/releases/tag/v0.3.0):
 
 - **Apple Silicon Mac:** download `KeePad-0.3.0-arm64.dmg`, open it, and drag KeePad to Applications. This build does not support Intel Macs.
 - **Windows x64:** download `KeePad-Setup-0.3.0.exe` to install, or `KeePad-Portable-0.3.0.exe` to run without installing.
