@@ -30,7 +30,7 @@ export async function checkButtonInteractions(app, editor, profile) {
   });
   try {
     await rightClick('Edit Gmail');
-    assert.equal(await editor.getByRole('menuitem').count(), 4);
+    assert.equal(await editor.getByRole('menuitem').count(), 5);
     await editor.screenshot({ path: 'test-results/button-menu.png' });
     await editor.keyboard.press('Escape');
     assert.equal(await editor.getByRole('menu').count(), 0);

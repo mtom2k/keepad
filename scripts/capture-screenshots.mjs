@@ -43,7 +43,9 @@ try {
       'The default shortcut is in use. Quit competing KeePad copies, then regenerate screenshots.',
     );
   await capture(editor, 'editor');
-  await editor.getByRole('button', { name: 'Edit Gmail', exact: true }).click({ button: 'right' });
+  await editor
+    .getByRole('button', { name: 'Edit Downloads', exact: true })
+    .click({ button: 'right' });
   await editor.getByRole('menu', { name: 'Button actions' }).waitFor();
   await capture(editor, 'button-menu');
   await editor.keyboard.press('Escape');

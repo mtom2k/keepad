@@ -64,6 +64,33 @@ export async function checkLauncherSearch(app, editor, launcher) {
     );
     await launcher.keyboard.press('Escape');
     assert.equal(await field.inputValue(), '');
+    // Destination menus resolve the result's source IDs across pads, not the active pad.
+    await editor.evaluate(async () => {
+      const state = (await window.keepad.load()).value.state;
+      Object.assign(state.pads[1].buttons[0], {
+        type: 'url',
+        target: 'https://example.com/second',
+      });
+      const saved = await window.keepad.save(state);
+      if (!saved.ok) throw Error(saved.error);
+    });
+    await field.fill('second');
+    await launcher.getByRole('option').click({ button: 'right' });
+    await launcher.getByRole('menuitem', { name: 'Copy destination' }).click();
+    await launcher.getByRole('status').filter({ hasText: 'Destination copied' }).waitFor();
+    assert.equal(
+      await app.evaluate(({ clipboard }) => clipboard.readText()),
+      'https://example.com/second',
+    );
+    // Undo from the other window restores the latest saved edit and leaves the query intact.
+    await launcher.getByRole('button', { name: 'Undo pad edit' }).click();
+    await launcher.getByRole('status').filter({ hasText: 'Pad edit undone' }).waitFor();
+    const undone = await editor.evaluate(async () => (await window.keepad.load()).value.state);
+    assert.equal(undone.pads[1].buttons[0].type, 'text');
+    assert.equal(undone.activePadId, initial.activePadId);
+    assert.equal(await field.inputValue(), 'second');
+    await field.fill('');
+    await app.evaluate(({ clipboard }) => clipboard.writeText('second-secret'));
     assert.equal(await launcher.getByRole('listbox').count(), 0);
     await launcher.keyboard.press('Escape');
     await app.evaluate(async ({ BrowserWindow }) => {

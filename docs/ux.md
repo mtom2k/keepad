@@ -56,7 +56,15 @@ Creating, saving, duplicating, importing, or opening a preview never executes Sl
 
 Right-click an occupied button in the editor or launcher for Edit…, Duplicate, Move to another pad…, and Delete…. Edit from the launcher opens that button in the editor. Duplicate uses the first empty position in the same pad; Move lets the user choose another pad and uses its first empty position. Full destinations are unavailable; both operations preserve the action/image and active pad. Delete requires confirmation.
 
+Website/file/folder/app buttons also offer **Copy destination**. File/folder/app buttons offer **Show in Finder** on Mac or **Show in File Explorer** on Windows; it selects the item in its containing folder without running it. Missing/foreign paths can still be copied; reveal failures point to destination checking/repair. Text and Sleep have no destination commands. The commands are also available on search results. They do not explicitly hide the launcher; switching to the file manager may trigger ordinary hide-on-blur behavior.
+
 Shift+F10 or the context-menu key opens the menu for a focused key. Up/Down, Home/End, and Enter operate it; Escape or Tab dismisses it and restores focus to the originating key. Outside clicks, window blur/resize, or state changes dismiss it. Menus stay within the window and suppress underlying tooltips. Right-click does not run the action. A stale move/delete confirmation or file replacement is rejected instead of overwriting newer changes.
+
+## Undo saved edits
+
+Undo appears at the bottom of the editor sidebar and in the launcher footer. It reverses the latest saved pad edit across either window, including imports and repairs. Cmd+Z / Ctrl+Z works outside editable fields and open dialogs/menus; text fields retain their own native Undo. Tooltips explain the shortcut, session lifetime, and empty-history state. The control is disabled when no history exists or a save is pending.
+
+Up to 20 edits are retained within a 32 MiB serialized-data budget; large libraries may retain fewer or no entries. Hiding windows keeps history; Quit clears it. Current preferences and valid active-pad selection are preserved. Undoing creation of the currently active pad restores the prior valid active pad. Running a macro, copying/revealing a destination, previewing, changing activation, and settings-only changes are not pad edits. There is no Redo. Undo does not launch actions, close external apps, or restore clipboard contents.
 
 ## Local storage
 

@@ -23,6 +23,7 @@ These instructions apply to the entire repository, including work performed by c
 - Keep Settings Theme (Light/Dark/System) independent from Pad Theme. Preserve the default for legacy files and document compatibility before extending stored data.
 - Keep pads and preferences local. Do not reintroduce synchronization without an explicit owner request and a new ADR. Preserve the one-time legacy conversion, effective destinations, and recovery copies; never read, write, or delete former shared folders. See docs/synchronization.md and ADR 0012.
 - Destination checks are explicit metadata/access checks of saved actions, never execution or replacement searches. Repairs use revision-guarded native selection and ordinary local button targets; preserve all other action fields. See ADRs 0011 and 0012.
+- Keep Undo main-owned, session-only, and revision-guarded. Record successful pad edits only; preserve preferences and valid current activation. Keep native text Undo separate. Destination menu commands resolve saved IDs, never run actions, and recheck revisions after metadata awaits. See ADR 0016.
 - Respect existing user data. Use temporary profiles for tests and documentation screenshots. Do not modify another installed KeePad copy just because its name matches; verify its bundle identity and path.
 
 ## Engineering rules

@@ -3,6 +3,9 @@ const invoke = (channel: string, ...args: unknown[]) => ipcRenderer.invoke(chann
 contextBridge.exposeInMainWorld('keepad', {
   load: () => invoke('state:load'),
   save: (s: unknown) => invoke('state:save', s),
+  undo: (revision: number) => invoke('state:undo', revision),
+  buttonDestination: (padId: string, buttonId: string, revision: number, operation: string) =>
+    invoke('button:destination', { padId, buttonId, revision, operation }),
   run: (p: string, b: string) => invoke('action:run', p, b),
   pickPath: (t: string) => invoke('dialog:path', t),
   checkDestinations: () => invoke('destinations:check'),

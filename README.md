@@ -6,6 +6,8 @@ KeePad gives your everyday actions a button: open a website, file, folder, or ap
 
 > 🚧 **Development version:** KeePad 0.3.0 is available to repository collaborators for Windows x64 and Apple Silicon Mac. Native automated checks pass on both platforms. The builds are unsigned for distribution, and the Mac build is not notarized; OS security controls may block them. Intel Mac builds are not included. See [development status](docs/progress.md).
 
+**Latest source additions:** Undo saved pad edits and destination menu commands are available when running/building the current source. The published 0.3.0 downloads predate these additions.
+
 ## 👀 A look inside
 
 Create pads, change their size, and choose which one opens by default.
@@ -40,11 +42,11 @@ Open your compact pad from the menu bar, notification area, or keyboard shortcut
 <details>
 <summary>Right-click a button</summary>
 
-![KeePad button menu with Edit, Duplicate, Move to another pad, and Delete](docs/screenshots/button-menu.png)
+![KeePad button menu with destination commands, Edit, Duplicate, Move to another pad, and Delete](docs/screenshots/button-menu.png)
 
 </details>
 
-Screenshots use sample data from the actual app, captured on Windows 11; on a Mac, shortcuts read **⌘ ⇧ Space** instead of **Ctrl Shift Space**. [How they are made](docs/screenshots/README.md).
+Screenshots use sample data from the actual app, captured on macOS; Windows uses **Ctrl Shift Space** instead of **⌘ ⇧ Space**. [How they are made](docs/screenshots/README.md).
 
 ## ✨ What you can do
 
@@ -56,6 +58,8 @@ Screenshots use sample data from the actual app, captured on Windows 11; on a Ma
 - **Adjust Columns and Rows** with simple −/+ controls. KeePad prevents shrinking a pad if it would hide saved buttons.
 - **Arrange buttons visually:** drag them around the editor, or choose a spot on the mini pad in the button dialog. Dropping onto another button swaps their positions.
 - **Right-click a button** to edit, duplicate, move it to another pad, or delete it. This works in the editor and the compact pad.
+- **Inspect destinations:** right-click a website/file/folder/app button to **Copy destination**. File/folder/app buttons also offer **Show in Finder** or **Show in File Explorer**.
+- **Undo saved pad edits:** use **Undo** in either window, or **Cmd+Z / Ctrl+Z** outside text fields and dialogs. History lasts until you quit KeePad; preferences and ordinary active-pad changes are preserved.
 - **Drop a file onto the editor grid** to make an open-file button. Folders and applications work too. Drop one item at a time; replacing an existing action asks for confirmation.
 - **Preview before activating.** The eye button shows a pad without changing your active choice.
 - **Find broken destinations:** Settings → Destinations → Check destinations checks file, folder, and app buttons across all pads. Repair updates the button’s local destination.
@@ -83,6 +87,8 @@ Search ignores case and accents and matches all the words you type in button nam
 To bind a file quickly, drag it from Finder or File Explorer onto an empty **+** position in the editor. Dropping onto an existing button replaces only its action after confirmation; its name and image stay the same. Files stay in their original location.
 
 Single-clicking a pad selects it for editing. The **eye**, **pencil**, **copy**, and **trash** toolbar buttons preview, edit, duplicate, and delete it. Hover over an icon for help. Settings lets you choose Light/Dark/System appearance, change the shortcut, choose whether the pad hides after an action, and manage backups.
+
+Undo covers saved button/pad edits, deletion, rearrangement, imports, and destination repairs. It keeps up to 20 edits within a memory budget, so very large libraries may retain fewer or no edits. Text fields keep their usual Undo. There is no Redo, and Undo cannot reverse an action already performed in another application.
 
 ## 🌙 Put your computer to sleep
 

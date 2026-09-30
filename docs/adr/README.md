@@ -19,5 +19,6 @@ Accepted records describe the current implementation. Initial records were writt
 | [0013](0013-windows-platform-integration.md) | Windows sender validation, tray toggle, menu/taskbar, shortcut recording, portable packaging, and locked-file saves | Accepted |
 | [0014](0014-windows-startup-setting-follows-os.md) | Windows "Start with your computer" reconciles with Task Manager/Run state | Accepted |
 | [0015](0015-sleep-action.md) | Fixed Sleep operation, no destination, and pre-feature recovery copies | Accepted |
+| [0016](0016-edit-history-and-destination-utilities.md) | Main-owned session Undo and validated destination menu utilities | Accepted |
 
 Use [the template](template.md) for the next consequential decision. Update this index and the affected guides. Supersede an accepted decision with a new record rather than erasing its rationale.

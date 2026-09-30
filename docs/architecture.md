@@ -21,6 +21,7 @@ flowchart LR
 | --- | --- | --- |
 | Main process | [electron/main.ts](../electron/main.ts) | Lifecycle, tray menus, windows, shortcuts, native actions, serialized mutations |
 | Bridge | [electron/preload.cts](../electron/preload.cts) | Explicit API methods and event subscriptions; compiled to CommonJS for sandbox compatibility |
+| Edit history | [electron/edit-history.ts](../electron/edit-history.ts) | Bounded session pad snapshots, independent of settings and ordinary activation |
 | Store | [electron/store.ts](../electron/store.ts) | Validation, temporary-file replacement (with bounded retry of transient Windows sharing errors), corruption recovery, one-time legacy destination conversion |
 | Paths | [electron/paths.ts](../electron/paths.ts) | Host-native absolute path check and packaged-page sender matching |
 | Shared contract | [shared/model.ts](../shared/model.ts) | Zod schemas, types, starter state, import merge |
@@ -76,6 +77,12 @@ Editor drag-and-drop uses native HTML drag events and an in-memory source identi
 Right-click menus are renderer portals in either window. Duplicate/move/delete use the same revision-checked save path; menu dialogs retain the initiating revision. Edit from the launcher uses `window:edit-button`: main validates stored pad/button IDs before routing the editor through an encoded local hash. Escape handling lives in the renderer so a menu/dialog dismisses before the launcher hides.
 
 External file drops are separate from internal rearrangement. The editor passes the actual `File` object to preload, which resolves its native path with Electron `webUtils.getPathForFile`. `file:describe` validates the trusted sender and the host-native absolute path, then stats the destination without reading contents or opening it. It returns a name, type, generic icon, and path. The renderer creates a button or asks before replacing an occupied action, then saves through ordinary revision validation. State changes while metadata is being resolved or replacement is pending reject the draft. Global drop prevention blocks browser navigation; only editor cells bind files. See [ADR 0008](adr/0008-button-menus-and-native-file-drops.md).
+
+## Undo and destination utilities
+
+Main owns a shared `EditHistory`. After successful pad-changing commits, it records the prior pad array (up to 20 entries / 32 MiB serialized data). `state:undo` validates the expected revision inside the mutation queue, restores pads while retaining current settings and valid activation, and uses the ordinary commit/write path. History is consumed only after persistence succeeds; the resulting snapshot broadcasts `canUndo` to both windows. Settings/activation-only writes do not record history. Oversized newest entries clear history to avoid skipping edits; restart starts empty. There is no Redo. Native text-field undo remains separate; see [ADR 0016](adr/0016-edit-history-and-destination-utilities.md).
+
+`button:destination` accepts a strict saved-identity/revision/operation object, never an arbitrary target. Copy resolves URL/path from saved state and awaits clipboard completion. Reveal uses the bounded destination inspector and rechecks the revision before `shell.showItemInFolder`. Missing, foreign, denied, and wrong-type targets return actionable errors; copy remains possible for missing/foreign paths. Neither command calls the action runner, mutates pads, or adds history. Reveal has no native completion signal. Renderer menus expose only applicable commands and retain search result source IDs.
 
 ## Search execution and scope
 

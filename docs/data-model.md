@@ -65,6 +65,12 @@ Destination repair now updates the ordinary button target. It is included in exp
 
 Main-process save/import mutations use a promise queue. Saves must match the current revision, which increments after a successful commit. Stale writers receive an error and a refresh; unsaved drafts are not merged. Shortcut changes reserve the replacement before removing the old shortcut, and roll back that registration on write failure.
 
+## Session edit history
+
+Pad-array changes keep up to 20 prior snapshots in main-process memory, capped at 32 MiB of serialized UTF-8 pad data. This includes imports and destination repairs. Oldest entries are evicted; an oversized latest edit clears the history so Undo cannot skip it. History is not in `keepad.json` or exports and disappears on Quit, but survives hiding windows. No schema/default changes were needed.
+
+Undo requires the current revision and persists restored pads as a new revision through the normal atomic/recovery path. Current preferences are preserved. Current activation is preserved if its pad exists after restoration; otherwise the prior snapshot's active pad is used. Settings/activation changes alone do not add entries. Failures preserve state and retry history. Redo and reversing external actions are not implemented. Existing migration recovery files are not a general edit history. See [ADR 0016](adr/0016-edit-history-and-destination-utilities.md).
+
 ## Images and backups
 
 The native picker accepts PNG/JPEG/WebP files up to 10 MiB. Electron normalizes selected images to a 256×256 PNG data URL. This currently resizes to a square rather than preserving the source aspect ratio. Images travel with the state and backup; no remote image URL is loaded.

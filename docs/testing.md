@@ -44,6 +44,12 @@ The desktop suite checks that the preload exposes no synchronization API, repair
 
 [Native repair checks](../tests/destinations-desktop.mjs) run in the desktop suite with stubbed pickers and openers. They check reporting, picker cancel, rejected wrong-type replacements, local-only repair, unchanged activation and saved replacement targets, stale revisions before/during the native picker, refreshing reports, and repair-tooltip bounds at minimum window size. Native Windows permission behavior, network/provider timeouts/hydration, and real application/shortcut validity remain manual release checks.
 
+## Edit history and destination commands
+
+[History unit tests](../tests/edit-history.test.ts) cover ordered restoration, settings/activation preservation, activation fallback, ignored non-pad changes, snapshot isolation, count/byte eviction, oversized edits, and retry semantics. [Native edit checks](../tests/edit-tools-desktop.mjs) exercise editor Undo and Cmd+Z/Ctrl+Z, native text-field Undo, stale requests, failed writes and retry, imports/repairs, menu applicability, real temporary file/app/folder metadata, clipboard copies, and rejection of foreign/missing/unsupported destinations. Reveal/open operations are stubbed; these tests never launch the selected item or open Finder/Explorer.
+
+The search suite checks copying the destination of a result on another pad and undoing an editor save from the launcher without changing activation/query. Restart checks verify that persisted edits survive but Undo history is empty. These platform-neutral assertions must also be run on Windows; a Mac run is not Windows native verification. See progress for the actual latest results.
+
 ## Native suite coverage
 
 [System-action unit checks](../tests/system-actions.test.ts) verify fixed Windows/macOS dispatch, rejection of unsupported operations, overlap protection and recovery after failures. On Windows a read-only probe parses the bundled PowerShell script and resolves the .NET sleep method without invoking it. [Storage tests](../tests/system-actions-store.test.ts) cover legacy loading without rewrites, empty Sleep targets, import, destination-check exclusion, exact pre-feature recovery copies (Sleep/button moon/pad moon), restart, and backup/write failures.

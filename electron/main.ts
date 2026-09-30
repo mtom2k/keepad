@@ -35,6 +35,18 @@ import { Store } from './store.js';
 import { describeFile } from './file-binding.js';
 import { isAppPage, nativePath } from './paths.js';
 import { systemActions } from './system-actions.js';
+import { EditHistory } from './edit-history.js';
+import { z } from 'zod';
+const editHistory = new EditHistory();
+const revisionSchema = z.number().int().nonnegative();
+const destinationRequest = z
+  .object({
+    padId: z.string().min(1).max(80),
+    buttonId: z.string().min(1).max(80),
+    revision: revisionSchema,
+    operation: z.enum(['copy', 'reveal']),
+  })
+  .strict();
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const devUrl = app.isPackaged ? undefined : process.env.KEEPAD_DEV_URL;
 if (devUrl && devUrl !== 'http://127.0.0.1:5173') throw Error('Unexpected development server.');
@@ -58,6 +70,7 @@ function serial<T>(fn: () => Promise<T>): Promise<T> {
 }
 const snapshot = (): Snapshot => ({
   state: store.state,
+  canUndo: editHistory.canUndo,
   launcherPadId: previewPadId ?? store.state.activePadId,
   info: {
     platform: process.platform,
@@ -204,7 +217,7 @@ function registerShortcut(value: string) {
     return false;
   }
 }
-async function commit(raw: unknown) {
+async function commit(raw: unknown, undo = false) {
   const next = StateSchema.parse(raw),
     previous = store.state;
   if (next.revision !== previous.revision)
@@ -241,6 +254,8 @@ async function commit(raw: unknown) {
     shortcutRegistered = true;
   }
   nativeTheme.themeSource = store.state.settings.theme;
+  if (undo) editHistory.consume();
+  else editHistory.record(previous, store.state);
   if (next.activePadId !== previous.activePadId || !next.pads.some((p) => p.id === previewPadId))
     previewPadId = undefined;
   broadcast();
@@ -303,6 +318,41 @@ function handle(channel: string, fn: (event: IpcMainInvokeEvent, ...args: any[])
 function setupIPC() {
   handle('state:load', () => snapshot());
   handle('state:save', (_e, raw) => serial(() => commit(raw)));
+  handle('state:undo', (_e, raw) => {
+    const revision = revisionSchema.parse(raw);
+    return serial(() => {
+      if (revision !== store.state.revision)
+        throw Error('Your pads changed. Review the latest changes before undoing.');
+      return commit(editHistory.restore(store.state), true);
+    });
+  });
+  handle('button:destination', async (_e, raw) => {
+    const request = destinationRequest.parse(raw);
+    const current = () => {
+      if (request.revision !== store.state.revision)
+        throw Error('Your pads changed. Open the button menu again.');
+      const button = store.state.pads
+        .find((p) => p.id === request.padId)
+        ?.buttons.find((b) => b.id === request.buttonId);
+      if (!button || !['url', 'file', 'folder', 'app'].includes(button.type))
+        throw Error('This button has no destination.');
+      return button;
+    };
+    const button = current();
+    if (request.operation === 'copy') {
+      await clipboard.writeText(button.target);
+      return 'Destination copied';
+    }
+    if (button.type === 'url') throw Error('A website cannot be shown in the file manager.');
+    const status = await inspectDestination(button.target, button.type as PathAction);
+    current();
+    if (status !== 'available')
+      throw Error(
+        `${destinationMessages[status]}. Use Settings → Destinations to check or repair it.`,
+      );
+    shell.showItemInFolder(button.target);
+    return process.platform === 'darwin' ? 'Shown in Finder' : 'Shown in File Explorer';
+  });
   let checking: ReturnType<typeof checkDestinations> | undefined;
   handle('destinations:check', () => {
     checking ??= checkDestinations(structuredClone(store.state)).finally(() => {

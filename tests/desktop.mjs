@@ -5,6 +5,7 @@ import { checkLauncherHover } from './launcher-hover.mjs';
 import { checkLauncherSearch } from './launcher-search.mjs';
 import { checkSystemActions } from './system-actions-desktop.mjs';
 import { checkButtonInteractions } from './button-interactions.mjs';
+import { checkEditTools } from './edit-tools-desktop.mjs';
 import { waitForSaved } from './saved-state.mjs';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import os from 'node:os';
@@ -40,6 +41,7 @@ try {
     await window.evaluate(() => Object.keys(window.keepad).filter((k) => /sync/i.test(k))),
     [],
   );
+  await checkEditTools(app, window, userData);
   await checkDestinationRepair(app, window, userData);
   assert.equal(
     JSON.parse(await readFile(path.join(userData, 'keepad.json'), 'utf8')).device,
@@ -505,6 +507,10 @@ try {
     env: { ...process.env, KEEPAD_TEST_DATA: userData },
   });
   const reopened = await app.firstWindow();
+  assert.equal(
+    await reopened.evaluate(async () => (await window.keepad.load()).value.canUndo),
+    false,
+  );
   await reopened.getByRole('heading', { name: 'Test workspace' }).waitFor();
   await reopened.getByRole('button', { name: 'Edit Test snippet' }).waitFor();
   assert.equal(

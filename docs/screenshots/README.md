@@ -5,7 +5,7 @@ These images are generated from the actual Electron renderer using starter/sampl
 | File | View |
 | --- | --- |
 | [editor.png](editor.png) | Pad list, ACTIVE badge, toolbar, theme, and Columns/Rows steppers |
-| [button-menu.png](button-menu.png) | Right-click actions on a sample button |
+| [button-menu.png](button-menu.png) | Right-click actions on Downloads, including Copy destination and Show in Finder |
 | [launcher.png](launcher.png) | Centered compact pad in the Graphite theme |
 | [launcher-search.png](launcher-search.png) | Cross-pad results for a sample description query |
 | [button-editor.png](button-editor.png) | Editing a sample text-copy action |
@@ -17,6 +17,6 @@ The sample profile explicitly uses Light for the first six views and Dark for Se
 
 Regenerate on a graphical desktop with `npm run docs:screenshots`. The script builds the current code, creates a temporary profile, captures these views, and cleans up. It does not execute macros or read/alter the real user's pads. Images show the application content, not OS window decorations. The script sets the editor's content area to 980×700 so captures are the same size on every host, but platform fonts, scrollbars, shortcut labels, and destination statuses still differ.
 
-The current set is regenerated for 0.3.0 on Windows 11 (2026-09-30), including the new Sleep draft and moon icon. All eight images were visually reviewed. It shows `Ctrl Shift Space`, Segoe UI, and the fictional Windows sample path as **Not found** next to a Mac path for **another operating system**. The Settings footer shows the app version, so recapture after each version bump. Sleep is never saved or executed by the capture script.
+The current set was regenerated and all eight images visually reviewed on macOS Apple Silicon (2026-09-30) for the source additions after the 0.3.0 release: Undo in both windows and destination menu commands. These screenshots depict current source, not the previously published 0.3.0 artifacts. They show Mac shortcuts and the fictional Mac sample path as **Not found** next to a Windows path for **another operating system**. The Settings footer remains 0.3.0 because this feature change does not bump the package version. Recapture after a version bump. Sleep is never saved or executed by the capture script.
 
 Review every image for readable labels, stale controls, clipping, unexpected warnings, and personal data before committing. Refresh affected screenshots in the same change as the interface they show. Avoid adding dates directly to image filenames, so README links remain stable.

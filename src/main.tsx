@@ -19,6 +19,7 @@ import {
   X,
   CheckCircle2,
   Info,
+  Undo2,
 } from 'lucide-react';
 import { api, unwrap, type Snapshot } from './api';
 import {
@@ -225,6 +226,52 @@ function App() {
       setBusy(false);
     }
   }
+  const undoPending = useRef(false);
+  async function undoEdit() {
+    if (!snapshot?.canUndo || busy || undoPending.current) return;
+    undoPending.current = true;
+    setBusy(true);
+    await perform(async () => {
+      try {
+        setSnapshot(await unwrap(api.undo(snapshot.state.revision)));
+        notify('Pad edit undone');
+      } catch (e) {
+        const fresh = await api.load();
+        if (fresh.ok) setSnapshot(fresh.value);
+        throw e;
+      }
+    });
+    undoPending.current = false;
+    setBusy(false);
+  }
+  useEffect(() => {
+    const onUndo = (event: KeyboardEvent) => {
+      const primary =
+        snapshot?.info.platform === 'darwin'
+          ? event.metaKey && !event.ctrlKey
+          : event.ctrlKey && !event.metaKey;
+      if (
+        !primary ||
+        event.key.toLowerCase() !== 'z' ||
+        event.shiftKey ||
+        event.altKey ||
+        event.isComposing ||
+        event.defaultPrevented
+      )
+        return;
+      if (
+        document.querySelector('dialog[open], [role="menu"]') ||
+        (document.activeElement instanceof HTMLElement &&
+          (document.activeElement.isContentEditable ||
+            document.activeElement.matches('input, textarea, select')))
+      )
+        return;
+      event.preventDefault();
+      if (!event.repeat) void undoEdit();
+    };
+    window.addEventListener('keydown', onUndo);
+    return () => window.removeEventListener('keydown', onUndo);
+  }, [snapshot, busy]);
   if (!snapshot)
     return (
       <div className="loading">
@@ -239,6 +286,25 @@ function App() {
       state.pads.find((p) => p.id === (isLauncher ? snapshot.launcherPadId : selectedPadId)) ??
       activePad;
   const mac = info.platform === 'darwin';
+  const undoControl = (
+    <Tip
+      text={
+        snapshot.canUndo
+          ? `Undo the last saved pad edit (${mac ? '⌘Z' : 'Ctrl+Z'}). History lasts until KeePad quits.`
+          : 'No saved pad edits to undo in this session.'
+      }
+    >
+      <button
+        className={isLauncher ? 'undo-button' : 'nav-item'}
+        aria-label="Undo pad edit"
+        disabled={busy || !snapshot.canUndo}
+        onClick={() => void undoEdit()}
+      >
+        <Undo2 size={isLauncher ? 15 : 18} />
+        <span>Undo</span>
+      </button>
+    </Tip>
+  );
   const updatePad = async (next: Pad) =>
     save({ ...state, pads: state.pads.map((p) => (p.id === next.id ? next : p)) });
   const select = async (id: string) => {
@@ -479,6 +545,7 @@ function App() {
             <span>
               <Shortcut value={state.settings.shortcut} mac={mac} />
             </span>
+            {undoControl}
             <span>Esc to clear / close</span>
           </footer>
         </>
@@ -514,6 +581,7 @@ function App() {
               </button>
             </div>
             <div className="sidebar-bottom">
+              {undoControl}
               <button
                 className={`nav-item ${page === 'settings' ? 'active' : ''}`}
                 onClick={() => navigate('settings')}
@@ -745,6 +813,46 @@ function App() {
                 else setEditSlot(menuButton.slot);
               },
             },
+            ...(['url', 'file', 'folder', 'app'].includes(menuButton.type)
+              ? [
+                  {
+                    label: 'Copy destination',
+                    onSelect: () =>
+                      void perform(async () =>
+                        notify(
+                          await unwrap(
+                            api.buttonDestination(
+                              menuPad.id,
+                              menuButton.id,
+                              buttonMenu.revision,
+                              'copy',
+                            ),
+                          ),
+                        ),
+                      ),
+                  },
+                ]
+              : []),
+            ...(['file', 'folder', 'app'].includes(menuButton.type)
+              ? [
+                  {
+                    label: mac ? 'Show in Finder' : 'Show in File Explorer',
+                    onSelect: () =>
+                      void perform(async () =>
+                        notify(
+                          await unwrap(
+                            api.buttonDestination(
+                              menuPad.id,
+                              menuButton.id,
+                              buttonMenu.revision,
+                              'reveal',
+                            ),
+                          ),
+                        ),
+                      ),
+                  },
+                ]
+              : []),
             {
               label: 'Duplicate',
               disabled: emptySlot(menuPad) === undefined,
@@ -900,8 +1008,7 @@ function App() {
       {confirmDelete && (
         <Modal title={`Delete ${confirmDelete.name}?`} onClose={() => setConfirmDelete(null)}>
           <p className="modal-description">
-            This removes the pad and its {confirmDelete.count} buttons from this device. This cannot
-            be undone.
+            This removes the pad and its {confirmDelete.count} buttons from this device.
           </p>
           <div className="modal-actions">
             <button className="secondary" onClick={() => setConfirmDelete(null)}>
@@ -958,7 +1065,7 @@ function ButtonActionDialog({
       <p className="modal-description">
         {target.kind === 'move'
           ? `Move “${button?.label ?? 'Button'}” to the first empty position on another pad.`
-          : `Delete “${button?.label ?? 'Button'}”? This cannot be undone.`}
+          : `Delete “${button?.label ?? 'Button'}”?`}
       </p>
       {target.kind === 'move' && (
         <>

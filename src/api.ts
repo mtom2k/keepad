@@ -32,7 +32,9 @@ const unavailable = async (): Promise<Result<never>> => ({
 });
 const launcherPadId = new URLSearchParams(location.search).get('pad') ?? undefined;
 const preview: KeePadAPI = {
-  load: async () => ok({ state: read(), info, launcherPadId }),
+  load: async () => ok({ state: read(), info, launcherPadId, canUndo: false }),
+  undo: unavailable,
+  buttonDestination: unavailable,
   save: async (state) => {
     try {
       const current = read();
@@ -40,7 +42,7 @@ const preview: KeePadAPI = {
         throw Error('Your pads changed. Reload and try again.');
       const next = StateSchema.parse({ ...state, revision: state.revision + 1 });
       localStorage.setItem(key, JSON.stringify(next));
-      return ok({ state: next, info, launcherPadId });
+      return ok({ state: next, info, launcherPadId, canUndo: false });
     } catch (e) {
       return { ok: false, error: String(e) };
     }
@@ -80,7 +82,7 @@ const preview: KeePadAPI = {
     return () => window.removeEventListener('focus', callback);
   },
   onChange: (callback) => {
-    const listener = () => callback({ state: read(), info, launcherPadId });
+    const listener = () => callback({ state: read(), info, launcherPadId, canUndo: false });
     window.addEventListener('storage', listener);
     return () => window.removeEventListener('storage', listener);
   },
