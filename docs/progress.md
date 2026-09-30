@@ -271,6 +271,14 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Regenerated the reference and all eight sample screenshots on 2026-09-30 and visually reviewed every image; also reviewed the packaged Sleep editor in Dark mode at the minimum window size. Rechecked both package smoke tests, version resources and unsigned signatures. The packaged archive's renderer, main-process and asset bytes match the current build. Restored the existing installed 0.2.1 copy; it was not upgraded.
 - Delivery handoff: source changes are based on `c381a31`; both `npm run docs:check` and the staged documentation-impact comparison against that baseline passed for 34 Markdown files, as did staged diff whitespace checks. Committed and pushed the implementation, tests and documentation as [`887189a`](https://github.com/mtom2k/keepad/commit/887189acf45a29d8d08e5a40ad8c4b9afc833d28). Created the [unpublished `v0.3.0` draft](https://github.com/mtom2k/keepad/releases/tag/untagged-c6b86a318f274f66ae4e) pinned to that full revision, with Setup, Portable and SHA256SUMS. Verified the draft flag, target revision, uploaded asset sizes and matching GitHub executable digests. GitHub still reports zero workflows. This documentation-only follow-up records delivery; no application code or packaged bytes changed. Requested development delivery is complete; hardware/manual platform checks remain disclosed limitations, not completed tests.
 
+### 2026-09-30 — Requested local Windows rebuild
+
+- Rebuilt Setup and Portable 0.3.0 from `3ba8b19` with `npm run package:win`; no application source or dependency changes. Production TypeScript/renderer/main builds passed, both executables report 0.3.0 and `NotSigned`, and the unpacked/portable isolated-profile smoke tests passed again. Sleep was stubbed or not executed; no installation/upgrade or hardware sleep/wake test was performed. The verified installed copy was restored after testing.
+- Refreshed local `release/SHA256SUMS.txt`. The rebuilt executables have new bytes and hashes; the existing unpublished GitHub draft retains its previously verified assets and checksums above. This request rebuilt local packages only.
+  - `KeePad-Setup-0.3.0.exe` (114,953,885 bytes): `0B7CDA1C49676FE7781042BCF08FE2916225C0599413557F416F89C84E4B08A3`
+  - `KeePad-Portable-0.3.0.exe` (114,726,772 bytes): `DD5168EDC8468776769D8B9264499A3934D370508C5125FAD57415B822C61552`
+- Guides/reference/screenshots remain applicable because source, version, and UI did not change. The existing manual platform and signing gaps remain open. Documentation and source-impact checks against `3ba8b19` accompany this evidence-only follow-up.
+
 ## Next work / unresolved decisions
 
 1. Rerun `npm run test:desktop` on macOS for the recorder and application-menu assertions from 2026-09-25, and review macOS tray-click behavior with the new blur-toggle rule.
