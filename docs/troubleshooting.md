@@ -48,6 +48,11 @@ Use [progress](progress.md) for current validation gaps. The following notes cap
 
 ## Known boundaries to preserve in handoffs
 
+- **Sleep fails on Windows:** Windows must support sleep and permit its bundled Windows PowerShell and .NET. KeePad does not elevate or bypass organization policy; try Sleep from the Windows power menu and resolve OS restrictions normally. No terminal window should appear.
+- **Sleep fails on Mac:** try Sleep from the Apple menu and check power/device policy. KeePad calls only `pmset sleepnow`; it does not need Accessibility or Automation permission.
+- **Sleep request already in progress:** wait for the existing request; on Windows it may return only after wake. The guard clears after success or failure. Sleep is not a lock guarantee, and no Lock action is included.
+- **Downgrading after Sleep/moon use:** older versions cannot parse the new values. Keep a current export and use the pre-feature `keepad.json.before-system-actions-…` copy, or remove Sleep buttons and moon icons in 0.3.0 first. See [compatibility](data-model.md#sleep-action-compatibility).
+
 - Windows 11 x64 has native automated and installed-build evidence (see progress, 2026-09-25). Signing, multi-monitor/mixed-DPI, IME, real Explorer drag gestures, the tray right-click menu under automation, real sign-in startup, and Windows on ARM remain open. Hosted automation is not configured.
 - Desktop automation tools may reserve Escape and cannot always drive Explorer-owned UI (taskbar right-click, drags out of File Explorer). Record such gaps as unverified rather than working around the tool.
 - Native file errors now use platform-specific permission guidance and local destination instructions. Windows native permission behavior still needs manual validation.

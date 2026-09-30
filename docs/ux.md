@@ -46,6 +46,12 @@ The first result is selected. Up/Down changes selection and scrolls it into view
 
 Right-click results, or use Shift+F10/the context-menu key from the search field, for the existing button menu. The source pad/button IDs identify the action, even with duplicate labels. Menu dismissal preserves the query and returns focus to search. Visible Tab focus remains available for other controls.
 
+## Sleep buttons
+
+The Action selector includes **Sleep computer**, with a default moon icon. It shows a short explanation instead of Destination/Browse. Names, optional hints, icons/images, colors, positioning, and Save/Cancel work as for other buttons. Changing back to an action with a destination presents an empty required field. Sleep tooltips omit the empty target and trailing colon.
+
+Creating, saving, duplicating, importing, or opening a preview never executes Sleep. Clicking the saved button in a launcher (including a preview) or running its search result requests sleep immediately; there is no additional confirmation. Activation is preserved. Wake using the OS normally. Sleep does not promise a lock or alter password-on-wake settings. Lock is not offered. Overlapping requests show an in-progress error; failures appear through ordinary action feedback. A successful native return reports "Sleep requested" and follows hide-after-action. On Windows the request can remain pending until wake. Browser preview can edit a Sleep button but cannot execute it.
+
 ## Button menu
 
 Right-click an occupied button in the editor or launcher for Edit…, Duplicate, Move to another pad…, and Delete…. Edit from the launcher opens that button in the editor. Duplicate uses the first empty position in the same pad; Move lets the user choose another pad and uses its first empty position. Full destinations are unavailable; both operations preserve the action/image and active pad. Delete requires confirmation.
@@ -68,6 +74,6 @@ Review [screenshots](screenshots/README.md) after visible changes, including edg
 
 ## Checking destinations
 
-Settings → Destinations offers an explicit Check destinations action. The dialog reports an available count and issues across all pads, with button name, pad, action type, effective path, and reason. Check saved local paths; skip text/URL buttons. Repair opens the native picker and saves immediately after a valid choice, updating the button’s ordinary target. Cancel changes nothing. Explain local repair scope, transient availability, and the limits of app/shortcut validation.
+Settings → Destinations offers an explicit Check destinations action. The dialog reports an available count and issues across all pads, with button name, pad, action type, effective path, and reason. Check saved local paths; skip text/URL/Sleep buttons. Repair opens the native picker and saves immediately after a valid choice, updating the button’s ordinary target. Cancel changes nothing. Explain local repair scope, transient availability, and the limits of app/shortcut validation.
 
 A changed library revision marks the report stale and disables repairs until Check again. Keep long paths wrapped/selectable, results scrollable, footer controls reachable at minimum size, and repair tooltips within the modal. Checking never runs actions or searches for replacement files automatically.

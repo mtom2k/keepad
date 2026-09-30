@@ -23,16 +23,22 @@ export const icons = [
   'message',
   'grid',
   'search',
+  'moon',
 ] as const;
 export const padIcons = ['none', ...icons] as const;
 export const colors = ['green', 'blue', 'orange', 'purple', 'rose', 'neutral'] as const;
-export const actionTypes = ['url', 'file', 'folder', 'app', 'text'] as const;
+export const actionTypes = ['url', 'file', 'folder', 'app', 'text', 'sleep'] as const;
+export type SystemAction = 'sleep';
+export function isSystemAction(type: unknown): type is SystemAction {
+  return type === 'sleep';
+}
 export const actionNames = {
   url: 'Open website',
   file: 'Open file',
   folder: 'Open folder',
   app: 'Open application',
   text: 'Copy text',
+  sleep: 'Sleep computer',
 };
 const id = z.string().min(1).max(80);
 export const ButtonSchema = z
@@ -41,7 +47,7 @@ export const ButtonSchema = z
     label: z.string().trim().min(1, 'Give this button a name.').max(40),
     description: z.string().max(180).default(''),
     type: z.enum(actionTypes),
-    target: z.string().min(1, 'Choose a destination for this action.').max(20000),
+    target: z.string().max(20000),
     icon: z.enum(icons),
     color: z.enum(colors),
     image: z
@@ -52,6 +58,14 @@ export const ButtonSchema = z
     slot: z.number().int().min(0).max(19),
   })
   .superRefine((b, ctx) => {
+    if (isSystemAction(b.type) ? b.target !== '' : b.target.length === 0)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['target'],
+        message: isSystemAction(b.type)
+          ? 'Sleep does not accept a destination.'
+          : 'Choose a destination for this action.',
+      });
     if (b.type === 'url') {
       try {
         const u = new URL(b.target);
@@ -120,6 +134,14 @@ export const StateSchema = z
 export type MacroButton = z.infer<typeof ButtonSchema>;
 export type Pad = z.infer<typeof PadSchema>;
 export type State = z.infer<typeof StateSchema>;
+// Older builds reject these new enum values. Preserve a pre-feature copy before saving them.
+export function requiresSystemActionsVersion(state: State): boolean {
+  const newIcon = (icon: string) => icon === 'moon';
+  return state.pads.some(
+    (pad) =>
+      newIcon(pad.icon) || pad.buttons.some((b) => isSystemAction(b.type) || newIcon(b.icon)),
+  );
+}
 export type Info = {
   platform: string;
   version: string;

@@ -8,7 +8,7 @@ Run `npm run docs:generate` after changing package metadata, commands, dependenc
 
 | Property | Value |
 | --- | --- |
-| Version | 0.2.1 |
+| Version | 0.3.0 |
 | Product | KeePad |
 | Bundle / application ID | app.keepad.desktop |
 | State schema version | 1 |
@@ -53,6 +53,7 @@ See [releasing](releasing.md) for install, uninstall, portable profile, and sign
 | folder | Open folder |
 | app | Open application |
 | text | Copy text |
+| sleep | Sleep computer |
 
 ## Defaults and choices
 
@@ -68,9 +69,9 @@ See [releasing](releasing.md) for install, uninstall, portable profile, and sign
 | Pad themes | paper, graphite, sage, sand, midnight, contrast |
 | App themes | light, dark, system |
 | Default app theme | system |
-| Pad icon keys | none, globe, folder, file, app, copy, mail, music, code, calendar, camera, pen, coffee, book, terminal, heart, video, download, message, grid, search |
+| Pad icon keys | none, globe, folder, file, app, copy, mail, music, code, calendar, camera, pen, coffee, book, terminal, heart, video, download, message, grid, search, moon |
 | Button colors | green, blue, orange, purple, rose, neutral |
-| Icon keys | globe, folder, file, app, copy, mail, music, code, calendar, camera, pen, coffee, book, terminal, heart, video, download, message, grid, search |
+| Icon keys | globe, folder, file, app, copy, mail, music, code, calendar, camera, pen, coffee, book, terminal, heart, video, download, message, grid, search, moon |
 
 The stored `pen` icon key renders a conventional pencil. It remains stable for existing settings files. See [data model](data-model.md) for validation and backup rules.
 

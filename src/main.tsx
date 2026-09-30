@@ -36,6 +36,7 @@ import {
   ButtonSchema,
   actionNames,
   actionTypes,
+  isSystemAction,
   icons,
   colors,
   themes,
@@ -1185,6 +1186,7 @@ function ButtonEditor({
                       folder: 'folder',
                       app: 'app',
                       text: 'copy',
+                      sleep: 'moon',
                     } as const
                   )[type],
                 });
@@ -1196,42 +1198,50 @@ function ButtonEditor({
                 </option>
               ))}
             </select>
-            <label className="field-label" htmlFor="action-target">
-              {button.type === 'url'
-                ? 'Website address'
-                : button.type === 'text'
-                  ? 'Text to copy'
-                  : 'Destination'}
-            </label>
-            {button.type === 'text' ? (
-              <textarea
-                id="action-target"
-                rows={4}
-                value={button.target}
-                onChange={(e) => change({ target: e.target.value })}
-                maxLength={20000}
-                required
-                placeholder="Text to copy"
-              />
+            {isSystemAction(button.type) ? (
+              <p className="field-hint">
+                Puts this computer to sleep when you run the button. Wake it normally to resume.
+              </p>
             ) : (
-              <div className="input-with-button">
-                <input
-                  id="action-target"
-                  value={button.target}
-                  onChange={(e) => change({ target: e.target.value })}
-                  placeholder={
-                    button.type === 'url'
-                      ? 'https://example.com'
-                      : 'Choose a file, folder, or application'
-                  }
-                  required
-                />
-                {button.type !== 'url' && (
-                  <button type="button" className="secondary" onClick={() => void pick()}>
-                    Browse…
-                  </button>
+              <>
+                <label className="field-label" htmlFor="action-target">
+                  {button.type === 'url'
+                    ? 'Website address'
+                    : button.type === 'text'
+                      ? 'Text to copy'
+                      : 'Destination'}
+                </label>
+                {button.type === 'text' ? (
+                  <textarea
+                    id="action-target"
+                    rows={4}
+                    value={button.target}
+                    onChange={(e) => change({ target: e.target.value })}
+                    maxLength={20000}
+                    required
+                    placeholder="Text to copy"
+                  />
+                ) : (
+                  <div className="input-with-button">
+                    <input
+                      id="action-target"
+                      value={button.target}
+                      onChange={(e) => change({ target: e.target.value })}
+                      placeholder={
+                        button.type === 'url'
+                          ? 'https://example.com'
+                          : 'Choose a file, folder, or application'
+                      }
+                      required
+                    />
+                    {button.type !== 'url' && (
+                      <button type="button" className="secondary" onClick={() => void pick()}>
+                        Browse…
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
             )}
             <label className="field-label" htmlFor="button-tip">
               Hover hint <span>optional</span>

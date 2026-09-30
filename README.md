@@ -2,7 +2,7 @@
 
 **Your own on-screen shortcut pad for Mac and Windows.**
 
-KeePad gives your everyday actions a button: open a website, file, folder, or app, or copy a text snippet. It waits in your Mac's menu bar or Windows notification area until you need it.
+KeePad gives your everyday actions a button: open a website, file, folder, or app, copy a text snippet, or put your computer to sleep. It waits in your Mac's menu bar or Windows notification area until you need it.
 
 > 🚧 **Development version:** Windows 11 x64 has native automated and installed-build checks. macOS Apple Silicon was last validated on September 24; the newer platform changes still need a Mac rerun. Signed releases are not available; Windows draft builds are unsigned. See [development status](docs/progress.md).
 
@@ -50,7 +50,7 @@ Screenshots use sample data from the actual app, captured on Windows 11; on a Ma
 
 - **Find any button quickly:** summon KeePad and type. Search covers button names and descriptions across every pad, with name matches first.
 - **Make several pads** for work, projects, or personal shortcuts.
-- **Give each button an action:** website, file, folder, app, or text to copy.
+- **Give each button an action:** website, file, folder, app, text to copy, or Sleep computer.
 - **Choose icons or your own images**, button colors, and six pad themes.
 - **Choose Light, Dark, or System** in Settings → Theme. Each pad keeps its own **Pad Theme**, and its pad icon can be **None**.
 - **Adjust Columns and Rows** with simple −/+ controls. KeePad prevents shrinking a pad if it would hide saved buttons.
@@ -64,7 +64,7 @@ Screenshots use sample data from the actual app, captured on Windows 11; on a Ma
 ## 🧭 Using KeePad
 
 1. Click **New pad**, give it a name, and create it.
-2. Click an empty **+** button. Choose an action, enter its destination, then save.
+2. Click an empty **+** button. Choose an action, enter its destination if needed, then save. **Sleep computer** needs only a button name.
 3. Adjust **Pad Theme**, **Columns**, and **Rows** as needed.
 4. Click **Make Active**, or double-click the pad's name in the sidebar. Its **ACTIVE** badge tells you it is selected for everyday use.
 5. Open the pad whenever you need it:
@@ -83,6 +83,16 @@ Search ignores case and accents and matches all the words you type in button nam
 To bind a file quickly, drag it from Finder or File Explorer onto an empty **+** position in the editor. Dropping onto an existing button replaces only its action after confirmation; its name and image stay the same. Files stay in their original location.
 
 Single-clicking a pad selects it for editing. The **eye**, **pencil**, **copy**, and **trash** toolbar buttons preview, edit, duplicate, and delete it. Hover over an icon for help. Settings lets you choose Light/Dark/System appearance, change the shortcut, choose whether the pad hides after an action, and manage backups.
+
+## 🌙 Put your computer to sleep
+
+Create a button with **Action → Sleep computer**, name it, and save. Click it in the launcher or run its search result to request sleep immediately, without another confirmation. Wake the computer normally to return. Creating, editing, or opening a pad preview does not run the action; clicking the Sleep button inside that preview does.
+
+Sleep uses the current computer's OS operation on Windows and macOS. It does not change power settings, request hibernation, or guarantee that waking requires a password; your OS settings and hardware determine that behavior. **Lock is not included.** Windows uses its bundled Windows PowerShell and .NET; system policy can block the request. macOS uses its built-in `pmset` tool and needs no Accessibility permission. Actual sleep/wake on hardware remains a manual validation item for this development release.
+
+![Sleep button editor with no destination field](docs/screenshots/sleep-button.png)
+
+Sleep buttons and the moon icon require KeePad **0.3.0 or later**, including when importing backups. Before the first save introducing either, KeePad preserves the previous local file beside it as `keepad.json.before-system-actions-…`. Export a backup before downgrading and use the pre-feature copy with older versions; older versions cannot read these new values. [Compatibility details](docs/data-model.md#sleep-action-compatibility).
 
 ## 🔧 Repair a missing file or app
 

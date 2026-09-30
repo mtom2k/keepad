@@ -33,6 +33,8 @@ The installer supports choosing its installation folder. The portable executable
 
 ## Release checklist
 
+For 0.3.0, include the Sleep action's platform limits in release notes: automated checks stub the power operation, the Windows probe only resolves its .NET method, and real sleep/wake and native macOS execution remain manual checks. Lock is excluded on both platforms. Windows policy may block PowerShell/.NET. Explain Sleep/moon downgrade incompatibility and the `before-system-actions` recovery copy; see [ADR 0015](adr/0015-sleep-action.md). Do not advertise hardware sleep/wake as validated until performed deliberately and recorded.
+
 1. Confirm completed work and open issues in progress; select a version in `package.json` and update the lockfile. Also align the browser preview's current literal version in `src/api.ts`. Data schema version is separate from app version.
 2. Run build, model, desktop, formatting, and documentation checks on each target platform. Complete the manual release checks.
 3. Update README availability, progress, relevant ADRs, generated reference, and screenshots to match the release. Keep signing/OS limitations visible until actually resolved.

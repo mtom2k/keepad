@@ -1,6 +1,6 @@
 # 0001: Electron and explicit process boundaries
 
-- Status: Accepted
+- Status: Accepted; OS-operation scope extended by [0015](0015-sleep-action.md), with the narrow privileged boundary retained
 - Recorded: 2026-09-22 (retrospective)
 - Supersedes: None
 

@@ -4,7 +4,7 @@ Accepted records describe the current implementation. Initial records were writt
 
 | ADR | Decision | Status |
 | --- | --- | --- |
-| [0001](0001-electron-and-process-boundaries.md) | Electron, React, and a narrow privileged boundary | Accepted |
+| [0001](0001-electron-and-process-boundaries.md) | Electron, React, and a narrow privileged boundary | OS-operation scope extended by 0015; boundary remains accepted |
 | [0002](0002-local-state-and-backups.md) | Validated local JSON, revisions, and additive backups | Accepted |
 | [0003](0003-traditional-utility-interface.md) | Traditional utility UI with progressive guidance | Accepted |
 | [0004](0004-pad-selection-and-launcher-behavior.md) | Separate selection/activation/preview; shared centering and focus reset | Focus portion superseded by 0009 |
@@ -18,5 +18,6 @@ Accepted records describe the current implementation. Initial records were writt
 | [0012](0012-local-only-storage.md) | Local-only storage with safe legacy destination conversion | Accepted |
 | [0013](0013-windows-platform-integration.md) | Windows sender validation, tray toggle, menu/taskbar, shortcut recording, portable packaging, and locked-file saves | Accepted |
 | [0014](0014-windows-startup-setting-follows-os.md) | Windows "Start with your computer" reconciles with Task Manager/Run state | Accepted |
+| [0015](0015-sleep-action.md) | Fixed Sleep operation, no destination, and pre-feature recovery copies | Accepted |
 
 Use [the template](template.md) for the next consequential decision. Update this index and the affected guides. Supersede an accepted decision with a new record rather than erasing its rationale.

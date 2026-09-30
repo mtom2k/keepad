@@ -62,6 +62,10 @@ try {
   await editor.getByRole('button', { name: 'Edit Quick reply', exact: true }).click();
   await editor.getByRole('heading', { name: 'Edit button', exact: true }).waitFor();
   await capture(editor, 'button-editor');
+  await editor.getByLabel('Action', { exact: true }).selectOption('sleep');
+  await editor.getByLabel('Button name', { exact: true }).fill('Sleep');
+  await editor.getByLabel('Hover hint optional').fill('Put this computer to sleep');
+  await capture(editor, 'sleep-button');
   await editor.getByRole('button', { name: 'Cancel', exact: true }).click();
   await editor.getByRole('button', { name: 'Settings', exact: true }).click();
   await editor.getByLabel('Theme', { exact: true }).selectOption('dark');
@@ -94,7 +98,7 @@ try {
   await editor.screenshot({ path: 'test-results/destination-check-minimum.png', scale: 'css' });
 
   console.log(
-    'Captured sample-data editor, button menu, launcher, search, button editor, Dark settings, the destination checker in docs/screenshots. Review them before committing.',
+    'Captured sample-data editor, button menu, launcher, search, text and Sleep button editors, Dark settings, and destination checker in docs/screenshots. Review them before committing.',
   );
 } finally {
   if (app) await app.close();

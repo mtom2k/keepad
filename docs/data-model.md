@@ -11,7 +11,7 @@ Canonical schema: [shared/model.ts](../shared/model.ts). Store implementation: [
 | State | 1–30 pads; unique pad IDs; active ID must refer to a stored pad |
 | Pad | ID, name (1–32 characters), description (≤100), icon, theme, columns, rows, buttons |
 | Layout | 3–5 columns; 2–4 rows; at most 20 buttons |
-| Button | ID, label (1–40), description/tooltip (≤180), action type, target (1–20,000), icon, color, optional image, zero-based slot |
+| Button | ID, label (1–40), description/tooltip (≤180), action type, target (empty for Sleep, otherwise 1–20,000), icon, color, optional image, zero-based slot |
 | Slot | Integer 0–19, unique within the pad, less than columns × rows |
 | IDs | Nonempty, ≤80 characters; button IDs unique within each pad |
 | Image | PNG/JPEG/WebP base64 data URL, ≤1,500,000 characters in persisted state |
@@ -34,6 +34,16 @@ Drag-and-drop and the dialog's visual position picker share `src/pad-layout.ts`.
 Button duplication copies all action/appearance fields with a fresh ID into the first empty slot. Cross-pad moves preserve the ID unless it collides with a destination button, then allocate a fresh one. A full destination rejects insertion; neither operation changes the active pad. File drops use existing button fields, so schema version remains 1 with no migration. Empty drops generate a filename label (up to 40 characters) and generic file/folder/app icon; confirmed replacements change only `type` and `target`. Files are referenced by absolute path, never copied into KeePad or embedded in backups. Main checks existence/type when describing the drop and checks access again when the action runs. See [ADR 0008](adr/0008-button-menus-and-native-file-drops.md).
 
 ## Storage and recovery
+
+### Sleep action compatibility
+
+Version 0.3.0 adds stored action type `sleep` and icon `moon` within schema version 1. Sleep requires an exactly empty `target`; paths, commands, whitespace, and other payloads are rejected. The other five action types still require a nonempty target and retain URL/path validation. The moon icon is available for pads and buttons. Existing files need no rewrite or migration on load. Sleep executes on the receiving computer after a manual import, without path mapping. Destination checks skip it; import, duplication, moves, and previews never execute it.
+
+Before a save changes a library without Sleep/moon values into one containing either, the store copies the complete existing file to `keepad.json.before-system-actions-<timestamp>-<UUID>`. This covers editor saves and additive imports, and moon icons used independently of Sleep. A failed backup aborts the save; a failed replacement retains the old file and recovery copy. A first-ever file has no previous bytes to preserve. Ordinary subsequent saves and restarts do not repeat the backup while the feature remains present. Removing all new values and later reintroducing them creates a new pre-feature copy.
+
+Older KeePad versions reject Sleep and moon enum values, even though the schema number is unchanged; opening such a profile in an older version may invoke that version's corrupt-data recovery and load starter pads. Use 0.3.0+ for these profiles/exports. Before downgrading, export the current state, quit KeePad, keep that file, and restore a pre-feature recovery copy (or remove all Sleep buttons and moon icons in 0.3.0 first). Do not restore legacy synchronization metadata casually; [legacy recovery](synchronization.md) still applies. There is still no general schema-migration framework. See [ADR 0015](adr/0015-sleep-action.md).
+
+### Local file writes
 
 The file is `keepad.json` under Electron's `app.getPath('userData')`, normally `~/Library/Application Support/KeePad/` on macOS and `%APPDATA%/KeePad/` on Windows. Do not assume paths for tests; use a temporary profile.
 

@@ -44,6 +44,7 @@ import {
   X,
   Plus,
   Minus,
+  Moon,
 } from 'lucide-react';
 import { actionNames, type MacroButton, type Pad } from '../shared/model';
 import { placeButton } from './pad-layout';
@@ -68,6 +69,7 @@ export const iconMap = {
   message: MessageSquare,
   grid: Grid2X2,
   search: Search,
+  moon: Moon,
 };
 export function Glyph({
   name,
@@ -206,7 +208,8 @@ export function MacroKey({
         button
           ? editing
             ? `${actionNames[button.type]} · Click to edit ${button.label}${dragProps ? ' · Drag to move; drop on a button to swap' : ''}`
-            : button.description || `${actionNames[button.type]}: ${button.target}`
+            : button.description ||
+              `${actionNames[button.type]}${button.target ? `: ${button.target}` : ''}`
           : editing
             ? 'Add an action, or drop a file here'
             : 'An empty button. Add an action in the editor.'

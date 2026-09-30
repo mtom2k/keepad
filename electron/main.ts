@@ -27,12 +27,14 @@ import {
   StateSchema,
   makeDefaultState,
   mergeImported,
+  isSystemAction,
   type State,
   type Snapshot,
 } from '../shared/model.js';
 import { Store } from './store.js';
 import { describeFile } from './file-binding.js';
 import { isAppPage, nativePath } from './paths.js';
+import { systemActions } from './system-actions.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const devUrl = app.isPackaged ? undefined : process.env.KEEPAD_DEV_URL;
 if (devUrl && devUrl !== 'http://127.0.0.1:5173') throw Error('Unexpected development server.');
@@ -368,11 +370,14 @@ function setupIPC() {
   });
   handle('window:hide', (e) => BrowserWindow.fromWebContents(e.sender)?.hide());
   handle('action:run', async (_e, padId, buttonId) => {
+    if (typeof padId !== 'string' || typeof buttonId !== 'string')
+      throw Error('Invalid button identity.');
     const button = store.state.pads
       .find((p) => p.id === padId)
       ?.buttons.find((b) => b.id === buttonId);
     if (!button) throw Error('This button no longer exists.');
-    if (button.type === 'text') await clipboard.writeText(button.target);
+    if (isSystemAction(button.type)) await systemActions.run(button.type);
+    else if (button.type === 'text') await clipboard.writeText(button.target);
     else if (button.type === 'url') await shell.openExternal(button.target);
     else {
       const target = button.target;
@@ -397,7 +402,11 @@ function setupIPC() {
         );
     }
     if (store.state.settings.hideAfterAction) launcher?.hide();
-    return button.type === 'text' ? 'Copied to clipboard' : `Opened ${button.label}`;
+    return isSystemAction(button.type)
+      ? 'Sleep requested'
+      : button.type === 'text'
+        ? 'Copied to clipboard'
+        : `Opened ${button.label}`;
   });
   handle('dialog:path', async (e, type) => {
     if (!['file', 'folder', 'app'].includes(type)) throw Error('Unsupported picker.');

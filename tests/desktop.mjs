@@ -3,6 +3,7 @@ import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { checkLauncherHover } from './launcher-hover.mjs';
 import { checkLauncherSearch } from './launcher-search.mjs';
+import { checkSystemActions } from './system-actions-desktop.mjs';
 import { checkButtonInteractions } from './button-interactions.mjs';
 import { waitForSaved } from './saved-state.mjs';
 import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
@@ -291,6 +292,7 @@ try {
   }
   await checkLauncherHover(app, window, launcher);
   await checkLauncherSearch(app, window, launcher);
+  await checkSystemActions(app, window, launcher);
   await window.evaluate(() => window.keepad.showEditor());
   await window.getByRole('button', { name: 'Make Active', exact: true }).click();
   await window.waitForFunction(

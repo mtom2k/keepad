@@ -3,7 +3,7 @@ import { constants } from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { StateSchema, type State } from '../shared/model.js';
+import { StateSchema, requiresSystemActionsVersion, type State } from '../shared/model.js';
 
 // Read-only compatibility with the retired device envelope. No external folder is accessed.
 const LegacyDestinations = z.object({
@@ -100,6 +100,14 @@ export class Store {
   }
   async write(next: State) {
     const valid = StateSchema.parse(next);
+    if (!requiresSystemActionsVersion(this.state) && requiresSystemActionsVersion(valid)) {
+      try {
+        await this.backup('before-system-actions');
+      } catch (error) {
+        // A first save has no previous file. All other backup failures must abort the save.
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      }
+    }
     const temp = `${this.file}.tmp`;
     await writeFile(temp, JSON.stringify(valid, null, 2), { mode: 0o600 });
     await replaceFile(temp, this.file);

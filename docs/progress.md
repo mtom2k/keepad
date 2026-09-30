@@ -2,7 +2,7 @@
 
 ## Current status
 
-App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. Version 0.2.1 (2026-09-25) adds Windows startup-setting reconciliation and reliable desktop-suite waits to 0.2.0, the first natively validated Windows release with installer/portable packaging. Unsigned 0.2.1 Windows builds are attached to a draft GitHub release. Pads and preferences are local-only. See the latest dated entry for validation and remaining platform limits.
+App version and dependency versions are in [generated reference](reference.md). KeePad is a functioning development app, not a signed public release. Version 0.3.0 adds a destination-free Sleep computer action; Lock is excluded on both platforms at the owner's request. Windows automated validation, unsigned packaging, package smoke checks, and documentation review completed on 2026-09-30. Commit/push and the new draft release are the remaining delivery steps. Pads and preferences are local-only. See the latest dated entry for validation and remaining platform limits.
 
 | Area | State | Evidence / remaining work |
 | --- | --- | --- |
@@ -12,8 +12,9 @@ App version and dependency versions are in [generated reference](reference.md). 
 | Storage scope | Local-only; synchronization removed | Engine, IPC, UI, polling, conflict handling and runtime overrides deleted; full recovery copy before converting legacy destinations; former external folders untouched |
 | Destination repair | Implemented and exercised on macOS and Windows | Explicit metadata/access checks, local-only replacements, bounded slow probes, cancellation and stale-write protection; network filesystem behavior unverified |
 | Editing / launcher | Implemented | Cross-pad name/description search, immediate typing on summon, button menus, file-drop creation/confirmed replacement, independent appearance, visual positioning, drag/swaps, activation, preview, centering, keyboard focus, and stale pointer-hover reset covered |
-| Documentation | Audited 2026-09-28 against `5db8d54` (0.2.1) | 33 Markdown files, fourteen ADRs, current local-only/transfer guidance, generated reference, seven reviewed Windows screenshots, and local documentation checks; see audit entry |
-| Distribution | Development only; draft GitHub release | Unsigned Windows 0.2.1 installer and portable exe in an unpublished draft release (collaborators only). Signing, notarization, clean-machine validation, license choice, and update strategy remain open |
+| Sleep action | Implemented; Windows automated checks pass | Fixed Windows PowerShell/.NET and macOS pmset dispatch, no destination or keyboard injection; unit, full Windows desktop, and package smoke tests pass. Physical sleep/wake and native Mac execution remain unverified. Lock excluded |
+| Documentation | Updated for 0.3.0 on 2026-09-30 | Current guides reconciled with Sleep, recovery/downgrade behavior, package testing and platform limits; fifteen ADRs, generated reference, and eight regenerated/reviewed Windows screenshots. Local documentation checks are required before each push |
+| Distribution | Development only; unsigned local 0.3.0 packages | Fresh Windows x64 Setup and Portable 0.3.0 executables passed isolated-profile package smoke checks on 2026-09-30. GitHub still has only the unpublished 0.2.1 draft; signing, notarization, clean-machine validation, license choice, and update strategy remain open |
 | GitHub | Private source repository | [mtom2k/keepad](https://github.com/mtom2k/keepad), branch `main`; no CI/CD per owner preference |
 
 ## Completed milestones
@@ -245,7 +246,6 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Added [draft-release instructions](releasing.md) and a README pointer. After the release commit was pushed, created the **draft** GitHub release `v0.2.1` targeting it, with both executables and `SHA256SUMS.txt`. It is unpublished, so GitHub has created no tag yet and only collaborators can see it. Publishing, signing, and licensing remain owner decisions.
 - macOS was not built or rerun for 0.2.1, and the draft contains no Mac artifacts. The open items in next work still apply.
 
-
 ### 2026-09-28 — Documentation and GitHub audit
 
 - The local checkout began clean at `8474c36`. Fetched GitHub, found five newer commits, and fast-forwarded to `5db8d54` (0.2.1) before auditing. Reviewed all 33 Markdown files, the fourteen ADRs and template, contributor/PR instructions, current implementation and relevant test coverage, package/lockfile/reference inputs, screenshot tooling, and recorded validation. No application or test code changed.
@@ -257,6 +257,20 @@ App version and dependency versions are in [generated reference](reference.md). 
 - Validation: `npm run docs:generate` produced no reference diff, `npm run docs:check` passed for 33 Markdown files, and `git diff --check` passed. Reviewed all seven existing Windows sample screenshots, including the 0.2.1 footers and absence of sync controls; no recapture needed because the UI is unchanged. The staged source-impact comparison against the audited baseline `5db8d54` also passed.
 - Handoff: documentation-only follow-up to private `main`. No native suites, builds, packaging, or application restarts were performed; September 24/25 native results remain evidence for their recorded revisions. The pending Mac rerun and manual platform/distribution gaps below remain open, rather than being marked verified by this audit.
 
+### 2026-09-27 to 2026-09-30 — Sleep action and version 0.3.0
+
+- Started from revision `5db8d54` on private `main`. On 2026-09-30 the local work was preserved, `main` was fast-forwarded to the documentation audit at `c381a31`, and the Sleep changes were reapplied. Unrelated `.claude/` files remain excluded from this change. The owner narrowed Sleep + Lock to Sleep only; Lock is absent on both platforms.
+- Added validated, destination-free Sleep, the moon icon, fixed per-platform dispatch, repeated-request rejection, and native failure feedback. No user command field, keyboard injection, Accessibility/Automation request, dependency, sync change, or schema-number change. [ADR 0015](adr/0015-sleep-action.md) records the boundary and downgrade plan.
+- The first save introducing Sleep or moon values into an existing old-compatible library preserves exact prior bytes in a unique `before-system-actions` recovery copy. Backup/write failures preserve prior pads; old files load unchanged; imports remain additive. Older builds cannot parse these new enum values.
+- Updated README, architecture, data model, UX, testing, release/troubleshooting guidance, ADR index, screenshot provenance, and version literals to 0.3.0. Audited current Markdown guides and historical ADRs; corrected the manual checklist's stale Windows editor taskbar rule. Historical validation entries remain history.
+- Validation on Windows 11 x64, rerun 2026-09-30: production build, complete `npm run test:desktop`, all 32 applicable unit tests (one POSIX-only case skipped), and formatting passed. The Windows sleep script parsed and its .NET method resolved without invoking sleep. Sleep desktop coverage includes save without execution, preview mouse dispatch, cross-pad keyboard search, unchanged activation, rejected target payloads, and error feedback. Earlier attempts exposed an installed-copy shortcut conflict and Playwright's dynamic-import restriction; the test loader was corrected and the verified installed process released the shortcut during tests.
+- On 2026-09-30, `npm run package:win` produced fresh unsigned x64 artifacts with version resources 0.3.0. The unpacked package and portable wrapper passed their isolated-profile smoke tests, covering packaged identity, shortcut registration, Sleep save, recovery copy/persistence, version footer, and stubbed dispatch where applicable. No hardware Sleep ran, the ordinary profile/startup setting was not used, and the installed 0.2.1 copy was restarted afterward. SHA-256:
+  - `KeePad-Setup-0.3.0.exe` `27842F23A196B5AE6768083F398234FC443D25B7869A8DE753DA199392B60321`
+  - `KeePad-Portable-0.3.0.exe` `3B6627AD56BA788A405B5D7369766DE321B8EBBA763EF2BFBD12D11B9B049F94`
+- Not verified: actual hardware sleep/wake, native macOS execution, policy-denied Windows execution, or post-wake launcher behavior. Automated tests stub Sleep and never suspend the host. Existing signing, clean-machine, tray, input, network, and architecture limits still apply.
+- Regenerated the reference and all eight sample screenshots on 2026-09-30 and visually reviewed every image; also reviewed the packaged Sleep editor in Dark mode at the minimum window size. Rechecked both package smoke tests, version resources and unsigned signatures. The packaged archive's renderer, main-process and asset bytes match the current build. Restored the existing installed 0.2.1 copy; it was not upgraded.
+- Delivery handoff: source changes are based on `c381a31`; both `npm run docs:check` and the staged documentation-impact comparison against that baseline passed for 34 Markdown files, as did staged diff whitespace checks. The next steps are commit/push and an unpublished `v0.3.0` draft containing Setup, Portable and SHA256SUMS. Record the actual source revision and draft result here after upload; hardware/manual platform checks remain disclosed limitations, not completed tests.
+
 ## Next work / unresolved decisions
 
 1. Rerun `npm run test:desktop` on macOS for the recorder and application-menu assertions from 2026-09-25, and review macOS tray-click behavior with the new blur-toggle rule.
@@ -265,6 +279,7 @@ App version and dependency versions are in [generated reference](reference.md). 
 4. Complete manual macOS multi-monitor, scaling, non-QWERTY shortcut, permission, login, and clean-machine checks.
 5. Choose licensing, signing/notarization credentials, supported architecture release matrix, and distribution/update strategy with the owner.
 6. Design migrations before changing persisted schema version. Per-field merging, automatic path mapping, a data-in-folder portable profile, image aspect-ratio editing, shell commands, key injection, and plugins are not implemented commitments.
+7. Manually exercise Sleep and wake on supported Windows/macOS hardware, including failed requests and post-wake launcher behavior; rerun the full desktop suite on macOS. Lock is excluded from the current scope.
 
 ## Handoff rule
 
