@@ -110,3 +110,5 @@ Run `npm run docs:screenshots` on a graphical desktop. It creates a temporary pr
 Review all generated files in [screenshots](screenshots/README.md) before committing. UI changes require refreshed relevant images; documentation-only changes do not.
 
 For a documentation-only audit, run documentation/reference checks and review assertions against source and prior test evidence. Do not report old native results as a fresh run. For impact comparisons, follow [base-selection and staging guidance](maintenance.md); the current checker excludes untracked files and does not validate heading anchors or external URLs.
+
+Rearrangement checks wait for both the saved slot and its rendered grid position before clicking the moved key. Main-process persistence can finish before the renderer receives its snapshot; backend-only waits can click an old position and accidentally open the neighboring button.

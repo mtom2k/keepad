@@ -6,7 +6,7 @@ KeePad gives your everyday actions a button: open a website, file, folder, or ap
 
 > 🚧 **Development version:** KeePad 0.3.0 is available to repository collaborators for Windows x64 and Apple Silicon Mac. Native automated checks pass on both platforms. The builds are unsigned for distribution, and the Mac build is not notarized; OS security controls may block them. Intel Mac builds are not included. See [development status](docs/progress.md).
 
-**Latest source additions:** Undo saved pad edits and destination menu commands are available when running/building the current source. The published 0.3.0 downloads predate these additions.
+**Version 0.4.0:** adds Undo saved pad edits and destination menu commands. The published 0.3.0 downloads predate these additions; development drafts are listed on the [releases page](https://github.com/mtom2k/keepad/releases).
 
 ## 👀 A look inside
 

@@ -33,7 +33,7 @@ The installer supports choosing its installation folder. The portable executable
 
 ## Release checklist
 
-For 0.3.0, include the Sleep action's platform limits in release notes: automated checks stub the power operation, the Windows probe only resolves its .NET method, and real hardware sleep/wake and post-wake behavior remain manual checks. Lock is excluded on both platforms. Windows policy may block PowerShell/.NET. Explain Sleep/moon downgrade incompatibility and the `before-system-actions` recovery copy; see [ADR 0015](adr/0015-sleep-action.md). Do not advertise hardware sleep/wake as validated until performed deliberately and recorded.
+For 0.3.0 and later, include the Sleep action's platform limits in release notes: automated checks stub the power operation, the Windows probe only resolves its .NET method, and real hardware sleep/wake and post-wake behavior remain manual checks. Lock is excluded on both platforms. Windows policy may block PowerShell/.NET. Explain Sleep/moon downgrade incompatibility and the `before-system-actions` recovery copy; see [ADR 0015](adr/0015-sleep-action.md). Do not advertise hardware sleep/wake as validated until performed deliberately and recorded.
 
 1. Confirm completed work and open issues in progress; select a version in `package.json` and update the lockfile. Also align the browser preview's current literal version in `src/api.ts`. Data schema version is separate from app version.
 2. Run build, model, desktop, formatting, and documentation checks on each target platform. Complete the manual release checks.
@@ -43,6 +43,8 @@ For 0.3.0, include the Sleep action's platform limits in release notes: automate
 6. Decide licensing and public/private distribution with the owner. No license has been selected automatically.
 7. Tag the reviewed commit, attach verified installers/checksums to a GitHub release, and describe known limitations. Do not publish from an unreviewed working tree.
 8. Recapture the screenshots after a version bump: the Settings footer shows the version (see [testing](testing.md)).
+
+Version 0.4.0 packages the session Undo and destination-menu features from [ADR 0016](adr/0016-edit-history-and-destination-utilities.md). Its release notes must distinguish session-only history (up to 20 edits / 32 MiB serialized data), preserved preferences/activation, and native text Undo from external-action reversal. There is no persisted schema change from 0.3.0. Mac validation does not imply the new Windows behavior has been natively verified; attach only artifacts built/checked for the stated platform.
 
 ## GitHub development releases
 

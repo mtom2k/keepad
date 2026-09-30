@@ -13,7 +13,7 @@ declare global {
 const key = 'keepad-browser-preview-v1';
 const info = {
   platform: navigator.platform.includes('Mac') ? 'darwin' : 'win32',
-  version: '0.3.0',
+  version: '0.4.0',
   shortcutRegistered: false,
   desktop: false,
   packaged: false,

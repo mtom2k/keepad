@@ -95,12 +95,20 @@ try {
       const state = (await window.keepad.load()).value.state;
       return Object.fromEntries(state.pads[0].buttons.map((button) => [button.label, button.slot]));
     });
-  const waitSlot = (label, slot) =>
-    waitForSaved(
+  const waitSlot = async (label, slot) => {
+    await waitForSaved(
       window,
       (state) => state.pads[0].buttons.find((b) => b.label === label)?.slot === slot,
       `${label} at slot ${slot}`,
     );
+    // A persisted save can precede its renderer broadcast. Wait for the moved key's
+    // DOM position before the next click, or its old coordinates can hit its neighbor.
+    await window
+      .locator('.pad-grid > .tip-anchor')
+      .nth(slot)
+      .getByRole('button', { name: `Edit ${label}`, exact: true })
+      .waitFor();
+  };
   await window
     .getByRole('button', { name: 'Edit Gmail', exact: true })
     .dragTo(window.getByRole('button', { name: 'Add button 12', exact: true }));
