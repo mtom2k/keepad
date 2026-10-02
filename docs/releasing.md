@@ -44,7 +44,7 @@ For 0.3.0 and later, include the Sleep action's platform limits in release notes
 7. Tag the reviewed commit, attach verified installers/checksums to a GitHub release, and describe known limitations. Do not publish from an unreviewed working tree.
 8. Recapture the screenshots after a version bump: the Settings footer shows the version (see [testing](testing.md)).
 
-Version 0.4.0 packages the session Undo and destination-menu features from [ADR 0016](adr/0016-edit-history-and-destination-utilities.md). Its release notes must distinguish session-only history (up to 20 edits / 32 MiB serialized data), preserved preferences/activation, and native text Undo from external-action reversal. There is no persisted schema change from 0.3.0. Mac validation does not imply the new Windows behavior has been natively verified; attach only artifacts built/checked for the stated platform.
+Version 0.4.0 packages the session Undo and destination-menu features from [ADR 0016](adr/0016-edit-history-and-destination-utilities.md). Its release notes distinguish session-only history (up to 20 edits / 32 MiB serialized data), preserved preferences/activation, and native text Undo from external-action reversal. There is no persisted schema change from 0.3.0. Mac and Windows artifacts were built and checked on their stated target platforms; evidence for one platform never substitutes for the other.
 
 ## GitHub development releases
 
@@ -60,7 +60,7 @@ Publishing a draft, making the repository public, or choosing a license are owne
 
 On 2026-09-30 the owner requested publication of 0.3.0 after adding its Mac DMG. The [published private release](https://github.com/mtom2k/keepad/releases/tag/v0.3.0) contains the existing Windows x64 Setup/Portable files and an Apple Silicon ARM64 DMG. Its target remains `887189a`; the Mac build used `161a0ad`, which differs only in documentation. No Intel Mac build, signing, notarization, or clean-machine certification is implied.
 
-The subsequent [0.4.0 draft](https://github.com/mtom2k/keepad/releases/tag/untagged-8399ffd75fc943c0db8d) targets `fc5618b` and contains only a verified Mac ARM64 DMG plus checksums. It remains unpublished, with Windows validation pending. Publishing 0.3.0 did not authorize automatic publication of later drafts.
+The [published private 0.4.0 release](https://github.com/mtom2k/keepad/releases/tag/v0.4.0) targets `fc5618b` and contains the verified Mac ARM64 DMG, native Windows x64 Setup and Portable executables, and combined checksums. It was published on 2026-10-01 after explicit owner authorization; all GitHub asset digests were checked against the platform builds. This does not imply signing, notarization, clean-machine installation, Intel Mac, or Windows ARM validation.
 
 For a DMG-only unsigned development build after `npm run build`, use `CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dmg --arm64 --publish never`. Verify the resulting image with `hdiutil verify`, mount it read-only, inspect its bundle identity/version/architecture, and smoke-test the contained app using a temporary `--user-data-dir`. Unmount when finished. macOS temporary paths may resolve from `/var` to `/private/var`; compare canonical paths when checking isolation. Never invoke hardware Sleep in an unattended package test.
 
